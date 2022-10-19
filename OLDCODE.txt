@@ -1,0 +1,642 @@
+Время расчета : 22922 миллисек.
+
+
+
+соритощка
+int Col = Section->Index;
+	CompareString = (Col==CHEADER||Col==CDATA);
+	//String  t;
+	List->ScrollBars = ssNone;
+	int tim = 100;
+	for (int i=0; i < List->RowCount; i++)       //тут можно -4
+	{
+		//printf("i=%d\n",i);
+		if (i>tim)
+		{
+			tim += 100;
+			Out->Lines->Add(float((float)i/List->RowCount));
+      }
+		for (int j=List->RowCount-1; j >= i+1; j--)
+			if (ListCompare(List->Cells[Col][i], List->Cells[Col][j]))   //.Compare(List->Cells[Col][j]))медленней
+			{
+				List->Cols[CHEADER]->Exchange(i,j);
+				List->Cols[CSTART]->Exchange(i,j);
+				List->Cols[CSIZE]->Exchange(i,j);
+				List->Cols[CDATA]->Exchange(i,j);
+				//print (M[i], M[j]);
+				//t = List->Cells[Section->Index][i];
+				//List->Cells[Col][i] = List->Cells[Col][j];
+				//List->Cells[Col][j] = t;
+			}
+	}
+	List->ScrollBars = ssVertical; //List->Items->EndUpdate();
+	//List->Refresh();
+
+
+
+
+
+void __fastcall TForm1::TestPClick(TObject *Sender)
+{
+	//Out->Lines->Add(sizeof(RECORD3INT));
+	//Out->Lines->Add(sizeof(RECORD1INT1STR));
+	//Out->Lines->Add(sizeof(RECORD4INT1STR));
+	//Out->Lines->Add(sizeof(ff));
+	const int size = 13;
+	char flu[size];
+	flu[0] = 27;
+	flu[1] = 0;
+	flu[2] = 8;
+	flu[3] = 16;
+	flu[4] = 2;
+	flu[5] = 4;
+	flu[6] = 1;
+	flu[7] = 0;
+	flu[8] = 0;	flu[9] = 0; flu[10] = 0; flu[11] = 0;
+	int *i = (int*)flu;
+	ToLog(i[0]);
+	ToLog(i[1]);
+	i[1] = 333;
+	unsigned int hh = 0;
+	for (int *i = (int*)flu; hh < size/sizeof(int); ++i, hh++)
+		ToLog(*i);
+	ToLog("neu");
+	//int *s = i + size;
+	for (int *i = (int*)flu; i < (int*)(flu + size); ++i)
+		ToLog(*i);
+}
+
+
+void __fastcall TForm1::NextTagClick(TObject *Sender)
+{
+	if (ftell(file) >= EoF)
+	{
+		NextS->Caption = "End";
+		return;
+	}
+	char 	Name[5];	Name[4] = '\0';
+	int 	Len;
+	char 	sName[5]; sName[4] = '\0';
+	long 	Tell = ftell(file);
+	int tmp;
+
+	fread(&Name, 4, 1, file);
+	fread(&Len, LENSIZE, 1, file);
+	List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+	if (TextTags->Find(Name,tmp)||(Name[1]=='N'&&Name[2]=='A'&&Name[3]=='M'))
+		fseek(file, Len, SEEK_CUR);
+	else
+	{
+		if (Sost->Checked)
+			fseek(file, LENTODEF, SEEK_CUR);
+		fread(&sName, 4, 1, file); //Чтение проверочное тега
+		if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
+		{ //Если криво значит НЕ дефолтный тег,
+			//ToLog(ftell(file),"ftell(K)");
+			//if (Len % 4 != 0)		Out->Lines->Add(Name);
+			fseek(file, Len - DEFAULTLENLEN, SEEK_CUR);
+			fread(&sName, 4, 1, file); //Чтение проверочное тега
+			if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
+			{
+				if (!feof(file))
+				{
+					ToLog(ftell(file),"ftell(EnF).");
+					EoF = 1; return;
+				}
+			}
+			else
+				fseek(file, -4, SEEK_CUR);
+		}
+		else
+		{
+			fseek(file, -4, SEEK_CUR);
+		}
+	}
+
+		//Out->Lines->Add(sName + IntToStr((int)sTell)); 																					 //List->Items->Count-1
+
+	//uni->Add(Name);
+}
+
+
+if (ftell(file) >= EoF)
+	{
+		NextS->Caption = "End";
+		return;
+	}
+	char 	Name[5];	Name[4] = '\0';
+	int 	Len;
+	char 	sName[5]; sName[4] = '\0';
+	long 	Tell = ftell(file);
+
+	fread(&Name, 4, 1, file);
+	fread(&Len, LENSIZE, 1, file);
+	List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+	if ( !(Name[0]=='D'&&Name[1]=='A'&&Name[2]=='T'&&Name[3]=='A'))
+	{
+		if (Sost->Checked)
+			fseek(file, LENTODEF, SEEK_CUR);
+		fread(&sName, 4, 1, file); //Чтение проверочное тега
+		if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
+		{ //Если криво значит НЕ дефолтный тег,
+			//ToLog(ftell(file),"ftell(K)");
+			fseek(file, Len - DEFAULTLENLEN, SEEK_CUR);
+			fread(&sName, 4, 1, file); //Чтение проверочное тега
+			if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
+			{
+				if (!feof(file))
+				{
+					ToLog(ftell(file),"ftell(EnF).");
+					EoF = 1; return;
+				}
+			}
+			else
+				fseek(file, -4, SEEK_CUR);
+		}
+		else
+		{
+			fseek(file, -4, SEEK_CUR);
+		}
+	}
+	else
+		fseek(file, Len, SEEK_CUR);
+		//Out->Lines->Add(sName + IntToStr((int)sTell)); 																					 //List->Items->Count-1
+
+	//uni->Add(Name);
+
+
+
+void __fastcall TForm1::NextTagClick(TObject *Sender)
+{
+	if (ftell(file) >= EoF)
+	{
+		NextS->Caption = "End";
+		return;
+	}
+	char 	Name[5];
+	int 	Len;
+	bool 	OneBody = true;
+	static long sTell = 0;
+	static Char sName[4];
+	long 	Tell = ftell(file);
+	Name[4] = '\0';
+	fread(&Name, 4, 1, file);
+	if ( !(TagSymb.Contains(Name[0])&&TagSymb.Contains(Name[1])&&TagSymb.Contains(Name[2])&&TagSymb.Contains(Name[3])))
+	{
+		Out->Lines->Add(sName + IntToStr((int)sTell));																						 //List->Items->Count-1
+		switch (Application->MessageBoxA(L"Its default?", sName,MB_YESNOCANCEL))
+		{
+			case	ID_YES:
+				fseek(file, sTell+4, SEEK_SET);
+				fread(&Len, LENSIZE, 1, file);
+				 fseek(file, tab.LenLen[tab.TagCount] - LENSIZE, SEEK_CUR);
+				fseek(file, Len, SEEK_CUR);
+				sTell = Tell;
+				sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
+				List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+				return;
+			case  ID_NO:
+         	fseek(file, sTell+4, SEEK_SET);
+				fread(&Len, LENSIZE, 1, file);
+				fseek(file, Len, SEEK_CUR);
+            sTell = Tell;
+				sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
+				List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+				return;
+			default: EoF = 1; return;
+		}
+	}
+	sTell = Tell;
+	sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
+
+	fread(&Len, LENSIZE, 1, file);
+	//uni->Add(Name);
+	int Tag = 0;
+	for (; Tag < tab.TagCount; ++Tag)
+		if (tab.Name[Tag] == Name)
+			break;
+	if (tab.LenLen[Tag] != LENSIZE)
+	{
+   	if (Sost->Checked)
+				OneBody = false;
+		fseek(file, tab.LenLen[Tag] - LENSIZE, SEEK_CUR);
+	}
+
+	if (OneBody)
+		fseek(file, Len, SEEK_CUR);
+	List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+}
+
+
+
+
+
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#include <stdio.h>
+#pragma hdrstop
+
+#include "Parser_code.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm1 *Form1;
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+	: TForm(Owner)
+{
+	file = NULL;
+	Cell.Cell_Name = NULL;
+	DataCell.Region_Name_Varies = NULL;
+
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::OpenBtnClick(TObject *Sender)
+{
+	file = fopen (espname->Text.c_str(), "rb");
+	if (!file)
+		return ShowMessage( "Cannot open binary file");
+	HEDRRead->Enabled = true;
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
+{
+	fclose(file);
+	delete [] Cell.Cell_Name;
+	delete [] DataCell.Region_Name_Varies;
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::HEDRReadClick(TObject *Sender)
+{
+	fread(&Tes3, HS->Text.ToInt(), 1, file);
+	char4ToLog(Tes3.Name);
+	ToLog(Tes3.Header_Size,"Header_Size");
+	//ToLog(Tes3.Reserved);
+	char4ToLog(Tes3.Header);
+	ToLog(Tes3.HeaderSize, "Tes3 size");
+	ToLog(Tes3.Version_Number,"Version number");
+	ToLog(Tes3.Unknown,"Uncknown");
+	ToLog(Tes3.Author_Name);
+	ToLog(Tes3.Description);  //*/
+	ToLog(Tes3.NumRecords,"NumRecords");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::MASTreadClick(TObject *Sender)
+{
+	fread(&Mast, 8, 1, file);
+	char4ToLog(Mast.Name); //MAST
+	ToLog(Mast.Master_Filename_Length,"HMF length");  //*/
+	if (Mast.Master_Filename_Length > 100)		return;
+	Mast.Master_Filename = new char [Mast.Master_Filename_Length];
+	fread(Mast.Master_Filename, Mast.Master_Filename_Length, 1, file);
+	ToLog(Mast.Master_Filename);  //*/
+	fread(&Mast.Data, 4, 1, file);
+	char4ToLog(Mast.Data);
+	fread(&Mast.Data_Length, 4, 1, file);
+	ToLog(Mast.Data_Length, "Length");  //*/
+	fread(&Mast.FileSize, 4, 2, file);
+	ToLog(Mast.FileSize[0],"FileSize");  //*/
+	ToLog(Mast.FileSize[1]);  //*/
+
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CellReadClick(TObject *Sender)
+{
+	fread(&Cell, 24, 1, file);
+	char4ToLog(Cell.Name);
+	ToLog(Cell.Cell_Length[0],"Length?");
+	ToLog(Cell.Cell_Length[1]);
+	ToLog(Cell.Cell_Length[2]);
+	char4ToLog(Cell.Header); //NAME
+	ToLog(Cell.Cell_Name_Length,"Length");
+	Cell.Cell_Name = new char[Cell.Cell_Name_Length];
+	fread(Cell.Cell_Name, Cell.Cell_Name_Length, 1, file);
+   ToLog(Cell.Cell_Name);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::DataCellReadClick(TObject *Sender)
+{
+	fread(&DataCell, 28, 1, file);
+	char4ToLog(DataCell.Data);
+	ToLog(DataCell.Data_Length[0],"Length");
+	ToLog(DataCell.Data_Length[1]);
+	ToLog(DataCell.GridX,"GridX");
+	ToLog(DataCell.GridY,"GridY");
+	char4ToLog(DataCell.RGNN); //RGNN
+	ToLog(DataCell.RGNN_Length,"Length");
+	DataCell.Region_Name_Varies = new char [DataCell.RGNN_Length];
+	fread(DataCell.Region_Name_Varies, DataCell.RGNN_Length, 1, file);
+	ToLog(DataCell.Region_Name_Varies);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Nam5ReadClick(TObject *Sender)
+{
+	fread(&Nam5, 12, 1, file);
+	char4ToLog(Nam5.NAM5);
+	ToLog(Nam5.NAM5_Length,"Length");
+	//Nam5.NAM5_Varies = new char[Nam5.NAM5_Length];
+	//fread(Nam5.NAM5_Varies, Nam5.NAM5_Length, 1, file);
+	ToLog(Nam5.Red,"Colors");
+	ToLog(Nam5.Green);	ToLog(Nam5.Blue);	ToLog(Nam5.Null);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Nam0ReadClick(TObject *Sender)
+{
+	fread(&Nam0, 12, 1, file);
+	char4ToLog(Nam0.NAM0); //NAM0
+	ToLog(Nam0.Lengths[0],"Lengths");
+	ToLog(Nam0.Lengths[1]);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FRMRReadClick(TObject *Sender)
+{
+	fread(&FRMR, 20, 1, file);
+	char4ToLog(FRMR.FRMR); //FRMR
+	ToLog(FRMR.Field_Length,"Length?");
+	ToLog(FRMR.Index);
+	char4ToLog(FRMR.Name); //NAME
+	ToLog(FRMR.Name_Field_Length,"Length");
+	FRMR.ObjId = new char[FRMR.Name_Field_Length];
+	fread(FRMR.ObjId, FRMR.Name_Field_Length, 1, file);
+	ToLog(FRMR.ObjId);
+	/////OPTIONAL
+	fread(&FRMRData, 32, 1, file);
+	char4ToLog(FRMRData.DATA); //FRMR
+	ToLog(FRMRData.FloatsLength,"Length");
+	ToLog(FRMRData.X,"X"); ToLog(FRMRData.Y,"Y"); ToLog(FRMRData.Z,"Z");
+	ToLog(FRMRData.RotX,"RotX"); ToLog(FRMRData.RotY,"RotY"); ToLog(FRMRData.RotZ,"RotZ");
+}
+//---------------------------------------------------------------------------
+union HUI
+{
+	float f;
+	int i;
+	char c[4];
+} ti;
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::ReinterpretClick(TObject *Sender)
+{
+	ti.c[0] = 185;//'f';//Edit1->Text[1];
+	ti.c[1] = 188;//'f';//Edit1->Text[2];
+	ti.c[2] = 1;//'¦';//Edit1->Text[3];
+	ti.c[3] = 0;//'?';//Edit1->Text[4];
+	//ti.i = Edit1->Text.ToIntDef(0);
+	Out->Lines->Add(ti.i);	Out->Lines->Add(ti.f);	Out->Lines->Add(ti.c);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::LTEXreadClick(TObject *Sender)
+{
+	fread(&Ltex, 6*4, 1, file);
+	char4ToLog(Ltex.Name);
+	ToLog(Ltex.Unc[0],"Unc"); ToLog(Ltex.Unc[1]); ToLog(Ltex.Unc[2]);
+	char4ToLog(Ltex.NAME);
+	ToLog(Ltex.Length,"Length");
+	Ltex.Create();
+	fread(Ltex.Texture, Ltex.Length, 1, file);
+	ToLog(Ltex.Texture);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::INTVreadClick(TObject *Sender)
+{
+	fread(&Intv, 5*4, 1, file);
+	char4ToLog(Intv.INTV);
+	ToLog(Intv.INTV_Length,"INTV_Length");
+	ToLog(Intv.INTV_Data,"INTV_Data");
+	char4ToLog(Intv.DATA);
+	ToLog(Intv.Length,"Len");
+	Intv.Create();
+	fread(Intv.Texture, Intv.Length, 1, file);
+	ToLog(Intv.Texture);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button1Click(TObject *Sender)
+{
+	Out->Lines->Add(sizeof(RECORD3INT));
+	Out->Lines->Add(sizeof(RECORD1INT1STR));
+	Out->Lines->Add(sizeof(RECORD4INT1STR));
+	Out->Lines->Add(sizeof(ff));
+}
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
+#ifndef Parser_codeH
+#define Parser_codeH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include <ExtCtrls.hpp>
+#include <ComCtrls.hpp>
+#include "ESPFile.h"
+//---------------------------------------------------------------------------
+
+struct RECORD3INT
+{
+	char	Name[4];//CELL
+	int	i[3];
+};
+
+struct RECORD1INT1STR
+{
+	char	NAME	[4];
+	int	Length;//	4
+	char*	Data;//	4
+	void Create() { if (Length < 1024) Data = new char[Length]; }
+	RECORD1INT1STR() { Data = NULL; }
+	~RECORD1INT1STR() { delete [] Data; }
+};
+
+struct RECORD4INT1STR : public RECORD3INT, public RECORD1INT1STR
+{
+	const static int SIZE = 6*4;
+} Cell;
+
+struct RECORD1INT1STR3INT : public RECORD1INT1STR
+{
+	const static int SIZE1 = 2*4;
+	const static int SIZE2 = 4*4;
+	RECORD3INT Fields;
+} Mast;
+
+
+struct Tes3Header
+{
+char	Name	[4]; //TES3
+int	Header_Size;//[4];
+Byte	Reserved	[8];
+char	Header	[4]; //HEDR
+int	HeaderSize;//	[4];
+float	Version_Number;//	[4];
+int	Unknown;	//[4];
+char	Author_Name	[32];
+char	Description	[256];
+int   NumRecords;
+} Tes3;
+
+struct MasterFile
+{
+char	Name 	[4]; //MAST
+int	Master_Filename_Length;//	4
+char*	Master_Filename;//	Varies
+char	Data[4]; //DATA
+int	Data_Length;//	4
+int	FileSize[2];//	8
+	MasterFile() { Master_Filename = NULL; }
+	~MasterFile() { delete [] Master_Filename; }
+} ;
+
+struct Exterior_Cell_Data
+{
+char	Name[4];//CELL
+int	Cell_Length[3];
+char	Header[4]; //NAME
+int	Cell_Name_Length;//	4
+char*	Cell_Name;//	Varies SEyda NEen
+} ;
+
+struct MData_Cell
+{
+char	Data[4]; //DATA
+int	Data_Length[2];//	16
+int	GridX, GridY;
+char	RGNN	[4];  //RGNN
+int	RGNN_Length;//	4
+char*	Region_Name_Varies; //Bitter Coast region
+} DataCell;
+
+struct NAM5
+{
+char	NAM5	[4]; //NAM5
+int	NAM5_Length;//	4
+//char*	NAM5_Varies;
+unsigned int	Red : 4;//битовые
+unsigned int	Green : 4;
+unsigned int	Blue : 4;
+unsigned int	Null : 4;
+	//NAM5() { NAM5_Varies = NULL; }
+	//~NAM5() { delete [] NAM5_Varies; }
+} Nam5;
+
+//List of FRMR records	Referenced Object List	Varies
+struct NAM0
+{
+char	NAM0	[4]; //NAM0
+int	Lengths[2];//	4
+} Nam0;
+
+struct Reference_to_an_Object
+{
+char	FRMR	[4]; //FRMR
+int	Field_Length;//	4
+int	Index;//Index	4  //MEE 3байта+флаг1байт
+char	Name	[4]; //NAME
+int	Name_Field_Length;//	4
+char*	ObjId;//	Varies
+	Reference_to_an_Object() { ObjId = NULL; }
+	~Reference_to_an_Object() { delete [] ObjId; }
+} FRMR;
+
+struct MFRMRData
+{
+char	DATA	[4]; //DATA
+int	FloatsLength;
+float X,Y,Z,RotX,RotY,RotZ; //28byte = 7ints
+} FRMRData;
+
+struct LandTextures
+{
+char	Name	[4]; //LTEX
+int	Unc[3];
+char	NAME	[4]; //NAME
+int	Length;
+char*	Texture;
+void Create() { if (Length < 1024) Texture = new char[Length]; }
+LandTextures() { Texture = NULL; }
+~LandTextures() { delete [] Texture; }
+} Ltex;
+
+struct INTV
+{
+char	INTV	[4]; //INTV
+int	INTV_Length;//	4
+int	INTV_Data;
+char	DATA	[4];
+int	Length;//	4
+char*	Texture;//	4
+void Create() { if (Length < 1024) Texture = new char[Length]; }
+INTV() { Texture = NULL; }
+~INTV() { delete [] Texture; }
+} Intv;
+
+class TForm1 : public TForm
+{
+__published:	// IDE-managed Components
+	TPanel *Panel1;
+	TEdit *espname;
+	TButton *OpenBtn;
+	TLabeledEdit *HS;
+	TUpDown *UpDown1;
+	TMemo *Out;
+	TButton *HEDRRead;
+	TButton *CellRead;
+	TButton *DataCellRead;
+	TButton *Nam5Read;
+	TButton *Nam0Read;
+	TButton *FRMRRead;
+	TEdit *Edit1;
+	TButton *Reinterpret;
+	TButton *MASTread;
+	TButton *LTEXread;
+	TButton *INTVread;
+	TButton *Button1;
+	void __fastcall OpenBtnClick(TObject *Sender);
+	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+	void __fastcall HEDRReadClick(TObject *Sender);
+	void __fastcall CellReadClick(TObject *Sender);
+	void __fastcall DataCellReadClick(TObject *Sender);
+	void __fastcall Nam5ReadClick(TObject *Sender);
+	void __fastcall Nam0ReadClick(TObject *Sender);
+	void __fastcall FRMRReadClick(TObject *Sender);
+	void __fastcall ReinterpretClick(TObject *Sender);
+	void __fastcall MASTreadClick(TObject *Sender);
+	void __fastcall LTEXreadClick(TObject *Sender);
+	void __fastcall INTVreadClick(TObject *Sender);
+	void __fastcall Button1Click(TObject *Sender);
+private:	// User declarations
+public:		// User declarations
+	ESPFile esp;
+	__fastcall TForm1(TComponent* Owner);
+	FILE *file;
+	void ToLog(String msg, const char *param = NULL)
+	{
+		if (param)
+		{
+      	msg = "="+msg;
+			Out->Lines->Add(param+msg);
+		}
+		else
+       	Out->Lines->Add(msg);
+	}
+	void char4ToLog(char* msg, const char *param = NULL)
+	{
+    	ToLog(String(msg).SetLength(4), param);
+	}
+
+
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TForm1 *Form1;
+//---------------------------------------------------------------------------
+#endif

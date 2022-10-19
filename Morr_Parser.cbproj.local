@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2018.01.12 16:26:33.296.cpp,C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Unit1.cpp=C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\Parser_code.cpp</Transaction>
+    <Transaction>2018.01.12 16:26:33.296.h,C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Unit1.h=C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\Parser_code.h</Transaction>
+    <Transaction>2018.01.12 16:26:33.296.dfm,C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Unit1.dfm=C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\Parser_code.dfm</Transaction>
+    <Transaction>2018.01.12 16:27:49.390.cbproj,C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Project1.cbproj=C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\Morr_Parser.cbproj</Transaction>
+    <Transaction>2018.01.14 22:51:31.718.cpp,C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\Unit1.cpp=C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\ESPFile.cpp</Transaction>
+    <Transaction>2018.01.14 22:51:31.718.h,C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\Unit1.h=C:\Documents and Settings\Алекс\Мои документы\RAD Studio\Projects\Парсер\ESPFile.h</Transaction>
+  </Transactions>
+</BorlandProject>
