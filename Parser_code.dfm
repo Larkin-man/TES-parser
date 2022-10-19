@@ -1,8 +1,8 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'TES file parseer'
-  ClientHeight = 525
+  Caption = 'TES parseer'
+  ClientHeight = 574
   ClientWidth = 792
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,7 +18,7 @@ object Form1: TForm1
   object Splitter1: TSplitter
     Left = 544
     Top = 27
-    Height = 498
+    Height = 547
     ExplicitLeft = 288
     ExplicitTop = 144
     ExplicitHeight = 100
@@ -26,9 +26,10 @@ object Form1: TForm1
   object Splitter2: TSplitter
     Left = 281
     Top = 27
-    Height = 498
+    Height = 547
     ExplicitLeft = 276
     ExplicitTop = -3
+    ExplicitHeight = 498
   end
   object PanelUp: TPanel
     Left = 0
@@ -40,14 +41,13 @@ object Form1: TForm1
     ShowCaption = False
     TabOrder = 0
     object LDele: TLabel
-      Left = 324
+      Left = 381
       Top = 1
       Width = 107
       Height = 25
       Align = alLeft
       Caption = 'Deleted Size=0'
       Visible = False
-      ExplicitLeft = 321
       ExplicitHeight = 19
     end
     object Bevel1: TBevel
@@ -57,6 +57,16 @@ object Form1: TForm1
       Height = 25
       Align = alLeft
       Shape = bsSpacer
+    end
+    object Bevel2: TBevel
+      Left = 488
+      Top = 1
+      Width = 3
+      Height = 25
+      Align = alLeft
+      Shape = bsSpacer
+      ExplicitLeft = 422
+      ExplicitTop = 0
     end
     object OpenBtn: TButton
       Left = 1
@@ -82,18 +92,17 @@ object Form1: TForm1
     object EFinds: TEdit
       Left = 133
       Top = 1
-      Width = 134
+      Width = 191
       Height = 25
       Hint = 'Search in data'
       Align = alLeft
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
-      ExplicitLeft = 130
       ExplicitHeight = 27
     end
     object FindStr: TButton
-      Left = 267
+      Left = 324
       Top = 1
       Width = 57
       Height = 25
@@ -104,14 +113,35 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 3
       OnClick = FindStrClick
-      ExplicitLeft = 264
+    end
+    object CheckBox1: TCheckBox
+      Left = 491
+      Top = 1
+      Width = 97
+      Height = 25
+      Align = alLeft
+      Caption = 'Pro mode'
+      Checked = True
+      State = cbChecked
+      TabOrder = 4
+      OnClick = CheckBox1Click
+    end
+    object Rewrite: TCheckBox
+      Left = 588
+      Top = 1
+      Width = 68
+      Height = 25
+      Align = alLeft
+      Caption = #1047#1072#1087#1080#1089#1100
+      TabOrder = 5
+      OnClick = RewriteClick
     end
   end
   object Out: TMemo
     Left = 547
     Top = 27
     Width = 30
-    Height = 498
+    Height = 547
     Align = alClient
     Lines.Strings = (
       'O'
@@ -124,7 +154,7 @@ object Form1: TForm1
     Left = 577
     Top = 27
     Width = 215
-    Height = 498
+    Height = 547
     Align = alRight
     ShowCaption = False
     TabOrder = 2
@@ -137,27 +167,27 @@ object Form1: TForm1
       Margins.Top = 0
       Margins.Bottom = 0
       Align = alTop
-      Caption = #1055#1088#1086#1095#1080#1090#1072#1090#1100' '#1089#1077#1082#1094#1080#1102': '
-      ExplicitWidth = 148
+      Caption = #1055#1088#1086#1095#1080#1090#1072#1090#1100' subheader: '
+      ExplicitWidth = 168
     end
     object Label2: TLabel
       AlignWithMargins = True
       Left = 4
-      Top = 268
+      Top = 240
       Width = 207
       Height = 19
       Margins.Top = 0
       Margins.Bottom = 0
       Align = alTop
-      Caption = #1055#1088#1086#1095#1080#1090#1072#1090#1100' '#1090#1077#1075':'
-      ExplicitWidth = 113
+      Caption = #1055#1088#1086#1095#1080#1090#1072#1090#1100' header:'
+      ExplicitWidth = 138
     end
     object ButtonGroup1: TButtonGroup
       AlignWithMargins = True
       Left = 4
-      Top = 101
+      Top = 84
       Width = 207
-      Height = 164
+      Height = 136
       Align = alTop
       BevelKind = bkTile
       BorderStyle = bsNone
@@ -178,9 +208,6 @@ object Form1: TForm1
         end
         item
           Caption = #1062#1077#1083#1086#1095#1080#1089#1083#1077#1085#1085#1099#1077' 1'#1073#1072#1081#1090
-        end
-        item
-          Caption = 'Length[12'#1073#1072#1081#1090'] '#1073#1077#1079' '#1088#1072#1079#1073#1086#1088#1072' '#1089#1090#1088#1091#1082#1090#1091#1088#1099
         end>
       TabOrder = 0
       OnButtonClicked = ButtonGroup1ButtonClicked
@@ -188,9 +215,9 @@ object Form1: TForm1
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 4
-      Top = 290
+      Top = 262
       Width = 207
-      Height = 204
+      Height = 281
       Align = alClient
       BevelKind = bkSoft
       BevelOuter = bvNone
@@ -409,6 +436,50 @@ object Form1: TForm1
         TabOrder = 22
         OnClick = ExportBtnClick
       end
+      object Go16: TButton
+        Left = 65
+        Top = 178
+        Width = 96
+        Height = 25
+        Hint = 'for Header'
+        Caption = 'Go+16'#1073#1072#1081#1090
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 23
+        OnClick = Go16Click
+      end
+      object SPLMread: TButton
+        Left = 0
+        Top = 203
+        Width = 49
+        Height = 25
+        Caption = 'SPLM'
+        TabOrder = 24
+        OnClick = SPLMreadClick
+      end
+      object PushCoord: TButton
+        Left = 49
+        Top = 203
+        Width = 128
+        Height = 25
+        Hint = #1044#1083#1103' CELL '#1080' PGRD '#1074#1080#1095#1080#1090#1072#1077#1090' '#1080#1079' '#1082#1086#1086#1088#1076#1080#1085#1072#1090#1099' '#1074#1089#1077#1093' '#1086#1073#1098#1077#1082#1090#1086#1074
+        Caption = #1057#1074#1072#1087' '#1082#1086#1086#1088#1076#1080#1085#1072#1090
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 25
+        OnClick = PushCoordClick
+      end
+      object Wordwap: TCheckBox
+        Left = 0
+        Top = 228
+        Width = 89
+        Height = 17
+        Caption = 'Wordwap'
+        Checked = True
+        State = cbChecked
+        TabOrder = 26
+        OnClick = WordwapClick
+      end
     end
     object NextS: TStaticText
       Left = 1
@@ -441,10 +512,11 @@ object Form1: TForm1
         '4 '#1073#1072#1081#1090#1072
         '12 '#1073#1072#1081#1090)
       TabOrder = 3
+      Visible = False
     end
     object Reinter: TCheckBox
       Left = 1
-      Top = 81
+      Top = 223
       Width = 213
       Height = 17
       Align = alTop
@@ -462,7 +534,7 @@ object Form1: TForm1
     Left = 0
     Top = 27
     Width = 281
-    Height = 498
+    Height = 547
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
@@ -503,7 +575,7 @@ object Form1: TForm1
         OnClick = GoClick
       end
       object Delete: TButton
-        Left = 197
+        Left = 198
         Top = 5
         Width = 62
         Height = 25
@@ -515,7 +587,7 @@ object Form1: TForm1
         OnClick = DeleteClick
       end
       object Refresh: TButton
-        Left = 132
+        Left = 133
         Top = 5
         Width = 62
         Height = 25
@@ -566,7 +638,7 @@ object Form1: TForm1
       Left = 1
       Top = 65
       Width = 279
-      Height = 432
+      Height = 481
       Align = alClient
       ColCount = 4
       DefaultColWidth = 60
@@ -591,7 +663,7 @@ object Form1: TForm1
     Left = 284
     Top = 27
     Width = 260
-    Height = 498
+    Height = 547
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
@@ -637,7 +709,7 @@ object Form1: TForm1
       Left = 1
       Top = 24
       Width = 258
-      Height = 473
+      Height = 496
       Align = alClient
       ColCount = 4
       DefaultColWidth = 60
@@ -655,6 +727,23 @@ object Form1: TForm1
       ScrollBars = ssVertical
       TabOrder = 1
       OnSelectCell = List2SelectCell
+    end
+    object SubDescript: TEdit
+      Left = 1
+      Top = 520
+      Width = 258
+      Height = 26
+      Align = alBottom
+      Color = cl3DLight
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 2
+      Text = 'SubDescript'
+      Visible = False
     end
   end
   object OpenDialog1: TOpenDialog

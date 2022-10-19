@@ -56,7 +56,7 @@ struct MHeader
 			fseek(file, -8, SEEK_CUR);
 			return;
       }
-		Data = (HeaderData*)realloc(Data, Length);
+		Data = (HeaderData*)realloc(Data, Length);//TODP:bug22
 		fread(Data, Length, 1, file);
 	}
 	void Write(FILE* &file)
@@ -283,6 +283,14 @@ __published:	// IDE-managed Components
 	TEdit *EFinds;
 	TButton *FindStr;
 	TBevel *Bevel1;
+	TCheckBox *CheckBox1;
+	TBevel *Bevel2;
+	TButton *Go16;
+	TEdit *SubDescript;
+	TButton *SPLMread;
+	TButton *PushCoord;
+	TCheckBox *Rewrite;
+	TCheckBox *Wordwap;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall HEDRReadClick(TObject *Sender);
@@ -323,6 +331,13 @@ __published:	// IDE-managed Components
 	void __fastcall FindStrClick(TObject *Sender);
 	void __fastcall NextSContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
 	void __fastcall List2SelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
+	void __fastcall CheckBox1Click(TObject *Sender);
+	void __fastcall Go16Click(TObject *Sender);
+	void __fastcall SPLMreadClick(TObject *Sender);
+	void __fastcall PushCoordClick(TObject *Sender);
+	void __fastcall CloseClick(TObject *Sender);
+	void __fastcall RewriteClick(TObject *Sender);
+	void __fastcall WordwapClick(TObject *Sender);
 
 
 
@@ -346,6 +361,17 @@ public:		// User declarations
 	{
    	if (LogUp)
 		if (param)
+		{
+      	msg = "="+msg;
+			Out->Lines->Add(param+msg);
+		}
+		else
+       	Out->Lines->Add(msg);
+	}
+	void ToLogS(String msg, String param)
+	{
+   	if (LogUp)
+		if (param.IsEmpty() == false)
 		{
       	msg = "="+msg;
 			Out->Lines->Add(param+msg);
@@ -379,6 +405,8 @@ public:		// User declarations
 	TStringList *TextTags;
 	std::set<int> Deleted;
 	int DeletedSize;
+	bool Tes4;
+	TableLoader types;
 
 	int 	row;
 	void AddRow(char *Header, int Length, long Start)
@@ -465,6 +493,23 @@ public:		// User declarations
 		nTypes++;
 	}
 	String PluginName;
+	String *THeader;
+	String *TSubHeader;
+	String *TType;
+	String *TDescr;
+	int *SubIndexes;
+	int cSubIndexes;
+	union Interpret
+	{
+		int i;
+		float f;
+		short w[2];
+		unsigned short uw[2];
+		Byte b[4];
+		char c;
+	};
+	int GetOkrugl(int x);
+	float Check999(float x);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
