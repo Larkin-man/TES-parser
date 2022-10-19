@@ -1,3 +1,353 @@
+//struct TRECORDINTMAS
+//{
+//	char	Name	[4]; //INTV
+//	int	Length;//	4
+//	int*	Data;
+//	void Create() { Data = new int[Length/sizeof(int)]; }
+//	TRECORDINTMAS() { Data = NULL; }
+//	~TRECORDINTMAS() { delete [] Data; }
+//};
+
+//List of FRMR records	Referenced Object List	Varies
+struct NAM0
+{
+char	NAM0	[4]; //NAM0   //Это INTV?
+int	Lengths[2];//	4
+} Nam0;
+
+struct Reference_to_an_Object
+{
+char	FRMR	[4]; //FRMR
+int	Field_Length;//	4
+int	LoadRef;//Index	4  //MEE 3байта+флаг1байт
+	RECORD1INT1STR Data;
+} FRMR;
+
+struct MFRMRData
+{
+char	DATA	[4]; //DATA
+int	FloatsLength;
+float X,Y,Z,RotX,RotY,RotZ; //28byte = 7ints
+} FRMRData;
+
+
+
+struct MovedFRMR
+{
+	char MVRF[4];
+	int Len1;
+	int MovedRef;
+	char CNDT[4];
+	int Len2;
+	int NewX;
+	int NewY;
+}; 	//MovedFRMR Moved;//Moved.MVRF[0]='M';Moved.MVRF[1]='V';Moved.MVRF[2]='R';Moved.MVRF[3]='F';// "MVRF";
+	//Moved.Len1 = 4;
+	//Moved.CNDT[0]='C'; Moved.CNDT[1]='N'; Moved.CNDT[2]='D'; Moved.CNDT[3]='T';//"CNDT";
+	//Moved.Len2 = 8;
+
+
+struct NAM5
+{
+char	NAM5	[4]; //NAM5
+int	NAM5_Length;//	4
+unsigned int	Red : 8;
+unsigned int	Green : 8;
+unsigned int	Blue : 8;
+unsigned int	Null : 8;
+} Nam5;
+void ReadNAM5()
+	{
+		fread(&Nam5, 12, 1, file);
+		char4ToLog(Nam5.NAM5);
+		ToLog(Nam5.NAM5_Length,"Length");
+		String dd = "Colors:";
+		dd += Nam5.Red; dd += ' ';
+		dd += Nam5.Green; dd += ' ';
+		dd += Nam5.Blue; dd += ' ';
+		dd += Nam5.Null;
+		ToLog(dd);
+		//NextSClick(Sender);
+	}
+	
+typedef struct TINTV
+{
+	char	INTV	[4]; //INTV
+	int	INTV_Length;//	4
+	int*	INTV_Data;
+	TRECORD1INT1STR Data;
+	void CreateINTV() { INTV_Data = new int[INTV_Length/sizeof(int)]; }
+	TINTV() { INTV_Data = NULL; }
+	~TINTV() { delete [] INTV_Data; }
+} INTV;
+
+	struct TRECORD3ByteMas
+{
+	char	Name	[4];
+	int	Length;
+	struct BYTE3
+	{
+		unsigned int X : 4;
+		unsigned int Y : 4;
+		unsigned int Z : 4;
+	} *Data;
+	void Create() { Data = new BYTE3[Length/sizeof(BYTE3)]; }
+	TRECORD3ByteMas() { Data = NULL; }
+	~TRECORD3ByteMas() { delete [] Data; }
+};
+	void Read3Byte()
+	{  //deleted
+  //		fread(&Bytes3, 2*4, 1, file);
+   //		char4ToLog(Bytes3.Name);
+  //		ToLog(Bytes3.Length,"Length");
+//		Bytes3.Create();
+//		fread(Bytes3.Data, Bytes3.Length, 1, file);
+		//for (size_t i = 0; i < Bytes3.Length/sizeof(int); ++i)
+		//	ToLog(Bytes3.Data[i].X+" "+Bytes3.Data[i].Y+" "+Bytes3.Data[i].Z);
+		//NextSClick(Sender);
+	}
+
+
+//		if (ShowData1->Checked)
+//		{
+//			//List->RowCount++;
+//			//fseek(file, MLENTOSLEN-8, SEEK_CUR);
+//			//fseek(file, 304, SEEK_CUR);
+//			//fread(&Len, 4, 1, file);
+//			//List->Cells[CDATA][0] = "Number of records: "+IntToStr(Len);
+//		}
+
+
+
+
+
+
+
+
+	if (Deleted.empty())
+		return;
+	Save2->Enabled = false;
+	String Nam = Form1->Caption;
+	Nam = Nam.SubString(1, Nam.Pos(" - TES"));
+	Nam = "DEL_" + Nam;
+	save = fopen (Nam.c_str(), "wb");
+	if (!save)
+		return ShowMessage( "Cannot open binary file");
+   fseek(file, 0, SEEK_END);
+	EoF = ftell(file);
+	Deleted.insert(EoF);
+	fseek(file, 0, SEEK_SET);
+
+	byte *mem;
+	std::set<int>::iterator el = Deleted.begin();
+	int cap = *el;
+	mem = new byte[cap];
+	fseek(file, 0, SEEK_SET);
+	fread (mem, cap, 1, file);
+	fwrite(mem, cap, 1, save);
+	for (el++; el != Deleted.end(); ++el)
+	{
+		//Out->Lines->Add(*el);
+		int Len;
+		fseek(file, 4, SEEK_CUR);
+		fread (&Len, LENSIZE, 1, file);
+		fseek(file, Len, SEEK_CUR);
+		Len = *el - ftell(file);
+		if (Len > cap)
+		{
+			mem = new byte[Len];
+			cap = Len;
+		}
+		fread (mem, Len, 1, file);
+		fwrite(mem, Len, 1, save);
+	}
+	//Перепишем новые размеры Header
+	int DelSize = 0;
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+		int newlen = List->Cells[CHEADER][i].ToIntDef(-1);
+		if (newlen > -1)
+		{
+			int Offset = List->Cells[CSTART][i].ToInt();
+			fseek(save, Offset + LENSIZE - DelSize, SEEK_SET);
+			//fread (mem, cap, 1, save);
+			fwrite(&newlen, LENSIZE, 1, save);
+			DelSize += (List->Cells[CSIZE][i].ToInt() - newlen);
+		}
+	}
+
+	delete [] mem;
+	fclose (save);
+	ToLog("Сохранено: "+Nam);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if (SubDelete.empty())
+		return;
+	String Nam = "DONE_"+PluginName;
+	save = fopen (Nam.c_str(), "wb");
+	if (!save) return ShowMessage( "Cannot open binary file.");
+	fseek(file, 0, SEEK_END);
+	EoF = ftell(file);
+	std::sort(SubDelete.begin(),SubDelete.end(), Compa);
+	SubDelete.push_back(DeleteItem(EoF, 0, EoF, 0));
+	std::vector<DeleteItem>::iterator el;
+	//удаление дубликатов
+	el = SubDelete.begin();
+	int Offset = el->Offset;
+	for (el++; el != SubDelete.end(); ++el)
+		if (el->Offset == Offset)
+		{
+			SubDelete.erase(el);
+			el = SubDelete.begin();
+			Offset = el->Offset;
+		}
+		else
+			Offset = el->Offset;
+	//
+		for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
+			Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
+	fseek(file, 0, SEEK_SET);
+	int MainLen;
+	int MainOffset;
+	int DeletedSize = 0;
+	int AllDeletedSize = 0;
+	int squeeze;
+	byte *mem;
+	int Len;
+	int cap;
+	el = SubDelete.begin();
+	//читаем маинлен чтоб его уменьшить потом
+	MainOffset = el->MainLenOffset;
+	cap = el->Offset;
+	mem = new byte[cap];
+	fseek(file, 0, SEEK_SET);
+	fread (mem, cap, 1, file);
+	fwrite(mem, cap, 1, save);
+
+			fseek(file, 4, SEEK_CUR); //промотал TES3 char
+			fread (&Len, LENSIZE, 1, file);
+		fseek(file, -4 - LENSIZE, SEEK_CUR);
+		DeletedSize = (4 + LENSIZE + Len);
+	for (el++; el != SubDelete.end(); ++el)
+	{
+	  //fseek(fi;e в начало кучи
+		fseek(file, 4, SEEK_CUR); //промотал MAIN NAME
+		fread (&Len, LENSIZE, 1, file);
+		fseek(file, Len, SEEK_CUR);
+		squeeze = el->Offset - ftell(file);
+		if (squeeze > cap)
+		{
+			mem = new byte[squeeze];
+			cap = squeeze;
+		}
+		if (squeeze > 0)
+		{
+			fread (mem, squeeze, 1, file);
+			fwrite(mem, squeeze, 1, save);
+		}
+			el->Offset = 4 + LENSIZE + Len; //?для уменьшения лен base
+		//if (DeletedSize != 0)
+		DeletedSize += (4 + LENSIZE + Len);
+		int mlo = el->MainLenOffset;
+		Offset = el->Offset;
+
+		if (el+1 != SubDelete.end() && (el+1)->MainLenOffset != el->MainLenOffset)
+		//if (MainOffset != el->MainLenOffset)
+		{
+			//Out->Lines->Add(IntToStr(MainOffset)+"<>"+IntToStr(el->MainLenOffset));
+			//Out->Lines->Add(DeletedSize);
+			//уменьшение размера
+			//int endsave = ftell(save);
+			fseek(save, MainOffset-AllDeletedSize, SEEK_SET);
+			AllDeletedSize += DeletedSize;
+			int idx = List->Cols[CSTART]->IndexOf(String(MainOffset-4));
+			if (idx == -1)				return;
+			Len = List->Cells[CSIZE][idx].ToInt();
+				  //fread (&Len, LENSIZE, 1, save); вместо предыдущей
+			Len -= DeletedSize;
+			ToLog(IntToStr(Len)+"=Lenзаписали DeleteSize="+IntToStr(DeletedSize));
+				  //fseek(save, -LENSIZE, SEEK_CUR);
+			fwrite(&Len, LENSIZE, 1, save);
+			fseek(save, 0, SEEK_END); //fseek(save, endsave, SEEK_SET);
+			MainOffset = el->MainLenOffset;
+			DeletedSize = 0; //da
+		}
+	}
+	delete [] mem;
+	fclose (save);
+	Out->Lines->Add("Сохранено: "+Nam);
+	Out->Lines->Add("AllDeletedSize="+IntToStr(AllDeletedSize));
+	//el = SubDelete.begin();
+
+void __fastcall TForm1::LoadListClick(TObject *Sender)
+{
+	FindList = new TStringList;
+	FindList->LoadFromFile("Find List.txt");
+	if (FindList == NULL)
+		return ShowMessage("Not found Find List.txt");
+	if (FindList->Count <= 0)
+		return ShowMessage("Find List.txt is Empty");
+	FindCurr = 0;
+	Out->Lines->Add(FindList->Count);
+	FindNAME->Enabled = true;
+
+
+Sost
+void __fastcall TForm1::NextTagClick(TObject *Sender)
+{
+	if (ftell(file) >= EoF)
+	{
+		NextS->Caption = "End";
+		return;
+	}
+	char 	Name[5];	Name[4] = '\0';
+	int 	Len, Len2;
+	char 	sName[5]; sName[4] = '\0';
+	long 	Tell = ftell(file), Tell2;
+
+
+	fread(&Name, 4, 1, file);
+	fread(&Len, LENSIZE, 1, file);
+	AddRow(Name, Len, Tell);
+	//List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+
+	fseek(file, LENTODEF, SEEK_CUR);
+	if (Name[0]=='G'&&Name[1]=='R'&&Name[2]=='U'&&Name[3]=='P')
+		return;
+	if (Sost->Checked)
+	{
+		Tell2 = ftell(file);
+		long Stop = ftell(file) + Len;
+		while (Tell2 < Stop)
+		{
+			fread(&Name, 4, 1, file);
+			Len2 = 0;
+			fread(&Len2, LENSIZE2, 1, file);
+			AddRow(Name, Len2, Tell2);
+			//List->Items->Add("-"+String(Name) +"[" + IntToStr(Len2)+"]"+IntToStr((int)Tell2) );
+			fseek(file, Len2, SEEK_CUR);
+			Tell2 = ftell(file);
+		}
+	} else
+		fseek(file, Len, SEEK_CUR);
+	//uni->Add(Name);
+}
+
+
+
+
 Время расчета : 22922 миллисек.
 
 

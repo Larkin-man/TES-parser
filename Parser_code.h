@@ -39,17 +39,18 @@ struct MHeader
 {
 	char Name[4];
 	unsigned int Length;
-	union HeaderData
-	{
-		int i;
-		float f;
-		short w[2];
-		unsigned short uw[2];
-		Byte b[4];
-		char c;
-		unsigned char u;
-		wchar_t t;
-	} *Data;
+//	union HeaderData
+//	{
+//		int i;
+//		float f;
+//		short w[2];
+//		unsigned short uw[2];
+//		Byte b[4];
+//		char c;
+//		unsigned char u;
+//		wchar_t t;
+//	}
+	void *Data;
 	unsigned int Capacity;
 	void Read(FILE* &file, int lensize)
 	{
@@ -65,7 +66,7 @@ struct MHeader
 		}
 		if (Length > Capacity)
 		{
-			Data = (HeaderData*)realloc(Data, Length);//TODO:bug22
+			Data = realloc(Data, Length);//TODO:bug22
 			Capacity = Length;
 		}
 		fread(Data, Length, 1, file);
@@ -178,7 +179,7 @@ __published:	// IDE-managed Components
 	TLabel *Label1;
 	TButtonGroup *ButtonGroup1;
 	TFlowPanel *FlowPanel1;
-	TButton *HEDRRead;
+	TButton *TES3Read;
 	TButton *CellRead;
 	TButton *GMDTRead;
 	TButton *DelDatas;
@@ -238,9 +239,11 @@ __published:	// IDE-managed Components
 	TButton *CheckConflicts;
 	TStaticText *NextS;
 	TMenuItem *BreakIf0Len;
+	TButton *PrepareE;
+	TButton *PrepareGame;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
-	void __fastcall HEDRReadClick(TObject *Sender);
+	void __fastcall TES3ReadClick(TObject *Sender);
 	void __fastcall CellReadClick(TObject *Sender);
 	void __fastcall ButtonGroup1ButtonClicked(TObject *Sender, int Index);
 	void __fastcall DelDatasClick(TObject *Sender);
@@ -296,6 +299,8 @@ __published:	// IDE-managed Components
 	void __fastcall RewritesClick(TObject *Sender);
 	void __fastcall CheckConflictsClick(TObject *Sender);
 	bool __fastcall FormHelp(WORD Command, int Data, bool &CallHelp);
+	void __fastcall PrepareEClick(TObject *Sender);
+	void __fastcall PrepareGameClick(TObject *Sender);
 
 
 private:	// User declarations
@@ -355,21 +360,31 @@ public:		// User declarations
 		FindIdx = -1;
 		SubDelete.clear();
 		DELEStarts.clear();
+		RefStarts.clear();
+		RefEnds.clear();
 	}
 	void tolog(String msg)
 	{
 		Out->Lines->Add(msg);
-    }
+	}
+	void ToLogLen(String msg, int Len=-1)
+	{
+		if (LogUp) {
+			if (msg.Length() > Len)
+				Out->Lines->Add(msg.SetLength(Univ.Length));
+			else
+				Out->Lines->Add(msg); }
+	}
 	void ToLog(String msg, const char *param = NULL)
 	{
-		if (LogUp)
+		if (LogUp) {
 		if (param)
 		{
 			msg = "="+msg;
 			Out->Lines->Add(param+msg);
 		}
 		else
-			Out->Lines->Add(msg);
+			Out->Lines->Add(msg); }
 	}
 	void ToLogS(String msg, String param)
 	{
@@ -380,7 +395,7 @@ public:		// User declarations
 			Out->Lines->Add(param+msg);
 		}
 		else
-       	Out->Lines->Add(msg);
+		Out->Lines->Add(msg);
 	}
 	void char4ToLog(char* msg, const char *param = NULL)
 	{
@@ -388,7 +403,7 @@ public:		// User declarations
 			ToLog(String(msg).SetLength(4), param);
 	}
 	Set <char, 0, 255> TagSymb;
-	std::set<int> Deleted;
+	std::set<long> Deleted;
 	int DeletedSize;
 	bool Tes3;
 	TableLoader types;
@@ -478,6 +493,7 @@ public:		// User declarations
 	int Indextt;
 	void Delete2(int Row2);
 	int FindIdx;
+	String OpenedFileName;
 	//TStringList *FindList;
 	struct DeleteItem
 	{    //DeleteItem ti(AI_W->Cells[1][0].ToInt(),AI_W->Cells[1][1].ToInt());
@@ -517,6 +533,10 @@ public:		// User declarations
 		if (Length > Max)
 			Length = Max;
 	}
+	std::vector<long> RefStarts;
+	std::vector<long> RefEnds;
+	void PrepareFor(char SYMBS[4]);
+	bool PrepareForEdit;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
