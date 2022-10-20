@@ -1,4 +1,4 @@
-File parseer of Bethesda games
+File parser of Bethesda games
 
 Can open game plugins/saves for games:
 1.	The elder scrolls Morrowind
