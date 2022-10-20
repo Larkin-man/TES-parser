@@ -1,5 +1,13 @@
 
+Debug/
+Release/
+*.local
+*.dsk
+*.obj
 ESPFile.obj
 Release/Arena_PreAlpha2.esp
 *.esp
 Release/Ярлык для Debug.lnk
+Icon_15.ico
+Icon_15g.ico
+OLDCODE.txt
