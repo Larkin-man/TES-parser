@@ -1,3 +1,5 @@
+File parseer of Bethesda games
+
 Can open game plugins/saves for games:
 1.	The elder scrolls Morrowind
 2.	The elder scrolls Oblivion
