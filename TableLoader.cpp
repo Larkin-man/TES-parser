@@ -1,5 +1,14 @@
+// Copyright 2022 Larkin
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//     http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //--------------------------------------------------------------------
-//#include <stdio.h> //для printf
+//#include <stdio.h> //Г¤Г«Гї printf
 //#include <stdarg.h>
 //#include <Dialogs.hpp>
 #include <Classes.hpp>
@@ -70,7 +79,7 @@ int TableLoader::RealGetSection(int SectionIdx, va_list &args)
 	return sSize;
 }
 //--------------------------------------------------------------------
-//[секция], ... это список ссылок, также как в LoadFromFile. Возвращает кол-во строк в секции
+//[Г±ГҐГЄГ¶ГЁГї], ... ГЅГІГ® Г±ГЇГЁГ±Г®ГЄ Г±Г±Г»Г«Г®ГЄ, ГІГ ГЄГ¦ГҐ ГЄГ ГЄ Гў LoadFromFile. Г‚Г®Г§ГўГ°Г Г№Г ГҐГІ ГЄГ®Г«-ГўГ® Г±ГІГ°Г®ГЄ Гў Г±ГҐГЄГ¶ГЁГЁ
 int TableLoader::GetSection(const String SectionName, ...)
 {
 	if (FFormat == NULL)		return 0;
@@ -169,25 +178,25 @@ void TableLoader::Load(TStringList *list, const char *format)
 		if (list->Count <= 1)
 			return;
 		else
-			list->Delete(0); //Первая лишняя
+			list->Delete(0); //ГЏГҐГ°ГўГ Гї Г«ГЁГёГ­ГїГї
 	else
 		if (list->Count < 1)
 			return; //delete list;
 	if (FRowCount > 0)
 		Clear();
-	//Нужно пробежаться по файлу и удалить лишние строки и посчитать FRowCount
+	//ГЌГіГ¦Г­Г® ГЇГ°Г®ГЎГҐГ¦Г ГІГјГ±Гї ГЇГ® ГґГ Г©Г«Гі ГЁ ГіГ¤Г Г«ГЁГІГј Г«ГЁГёГ­ГЁГҐ Г±ГІГ°Г®ГЄГЁ ГЁ ГЇГ®Г±Г·ГЁГІГ ГІГј FRowCount
 	FRowCount = -1;
 	String str; //String *pStr;
 	bool EndIsPossible = !EndMark.IsEmpty();
 	for (int i=0; i<list->Count; i++)
 	{
-		str = list->Strings[i]; //str = &(list->Strings[i]); //не пашет
-      if (str.IsEmpty())  //Пустую строку удалить, будто её нет
-      {  //ShowMessage("Удаляем пустую строку №"+IntToStr(i));
+		str = list->Strings[i]; //str = &(list->Strings[i]); //Г­ГҐ ГЇГ ГёГҐГІ
+      if (str.IsEmpty())  //ГЏГіГ±ГІГіГѕ Г±ГІГ°Г®ГЄГі ГіГ¤Г Г«ГЁГІГј, ГЎГіГ¤ГІГ® ГҐВё Г­ГҐГІ
+      {  //ShowMessage("Г“Г¤Г Г«ГїГҐГ¬ ГЇГіГ±ГІГіГѕ Г±ГІГ°Г®ГЄГі В№"+IntToStr(i));
 			list->Delete(i);
 			//FRowCount--;
 			i--;
-			continue;  //Это если пустые строки в конце документа
+			continue;  //ГќГІГ® ГҐГ±Г«ГЁ ГЇГіГ±ГІГ»ГҐ Г±ГІГ°Г®ГЄГЁ Гў ГЄГ®Г­Г¶ГҐ Г¤Г®ГЄГіГ¬ГҐГ­ГІГ 
 		}
 		if (EndIsPossible&&(str.Pos(EndMark) > 0))
       {
@@ -203,14 +212,14 @@ void TableLoader::Load(TStringList *list, const char *format)
 			FSectionCount++;
 			list->Delete(i); //str = "";
 			i--;
-			continue;  //Это если пустые строки в конце документа
+			continue;  //ГќГІГ® ГҐГ±Г«ГЁ ГЇГіГ±ГІГ»ГҐ Г±ГІГ°Г®ГЄГЁ Гў ГЄГ®Г­Г¶ГҐ Г¤Г®ГЄГіГ¬ГҐГ­ГІГ 
 		}
 	}
 	if (FRowCount < 0)
 		FRowCount = list->Count;
 	if (FRowCount == 0)
 		return;
-	//Установить размер секций
+	//Г“Г±ГІГ Г­Г®ГўГЁГІГј Г°Г Г§Г¬ГҐГ° Г±ГҐГЄГ¶ГЁГ©
 	if (FSectionCount > 0)
    {
 		for (int i=0; i<FSectionCount-1; ++i)
@@ -218,7 +227,7 @@ void TableLoader::Load(TStringList *list, const char *format)
       FSections[FSectionCount-1].Size = FRowCount - FSections[FSectionCount-1].Pos;
 	}
    StrCount=0; IntCount=0; CharCount=0; BoolCount=0;
-   //Разбор строки формата
+   //ГђГ Г§ГЎГ®Г° Г±ГІГ°Г®ГЄГЁ ГґГ®Г°Г¬Г ГІГ 
 	FFormat = strdup(format);
 	for (unsigned int i=0; i<strlen(FFormat); ++i)
 		switch (FFormat[i])
@@ -238,7 +247,7 @@ void TableLoader::Load(TStringList *list, const char *format)
 	if (FColCount == 0)
    	return;
 	//----------------------
-	//Создание массивов по кооличеству строк в файле
+	//Г‘Г®Г§Г¤Г Г­ГЁГҐ Г¬Г Г±Г±ГЁГўГ®Гў ГЇГ® ГЄГ®Г®Г«ГЁГ·ГҐГ±ГІГўГі Г±ГІГ°Г®ГЄ Гў ГґГ Г©Г«ГҐ
 	if (IntCount > 0)
    {
 		MemInt = new int*[IntCount];
@@ -264,17 +273,17 @@ void TableLoader::Load(TStringList *list, const char *format)
          MemBool[i] = new bool[FRowCount];
 	}
 	//-----------------------------------------------
-	//Началось считывание файл и разбор по словам
-   int p;   //Индекс разделителя
-	String word;   //Это отдельные слова
+	//ГЌГ Г·Г Г«Г®Г±Гј Г±Г·ГЁГІГ»ГўГ Г­ГЁГҐ ГґГ Г©Г« ГЁ Г°Г Г§ГЎГ®Г° ГЇГ® Г±Г«Г®ГўГ Г¬
+   int p;   //Г€Г­Г¤ГҐГЄГ± Г°Г Г§Г¤ГҐГ«ГЁГІГҐГ«Гї
+	String word;   //ГќГІГ® Г®ГІГ¤ГҐГ«ГјГ­Г»ГҐ Г±Г«Г®ГўГ 
 	int curr, currStr, currInt, currChar, currBool;
    for (int i=0; i<FRowCount; ++i)
 	{
       curr=0; currStr=0; currInt=0; currChar=0; currBool=0;
       str = list->Strings[i];
-		while (str.IsEmpty() == false)  //Вот цикл отделяющий слова
+		while (str.IsEmpty() == false)  //Г‚Г®ГІ Г¶ГЁГЄГ« Г®ГІГ¤ГҐГ«ГїГѕГ№ГЁГ© Г±Г«Г®ГўГ 
       {
-         if ( (IgnoreDelimitersPack)&&(str[1] == Delimiter) ) //Для отсеивания лишних разделителей
+         if ( (IgnoreDelimitersPack)&&(str[1] == Delimiter) ) //Г„Г«Гї Г®ГІГ±ГҐГЁГўГ Г­ГЁГї Г«ГЁГёГ­ГЁГµ Г°Г Г§Г¤ГҐГ«ГЁГІГҐГ«ГҐГ©
          {
             str.Delete(1,1);
             continue;
@@ -290,7 +299,7 @@ void TableLoader::Load(TStringList *list, const char *format)
             word = str.SubString(1,p-1);
             str.Delete(1,p);
          }
-			//Слово получено
+			//Г‘Г«Г®ГўГ® ГЇГ®Г«ГіГ·ГҐГ­Г®
 			try
 			{
 				REPEAT:
@@ -339,7 +348,7 @@ void TableLoader::Load(TStringList *list, const char *format)
 	}
 }
 //--------------------------------------------------------------------
-//Загрузка из файла, format: i-int c-Char s-Ansi b-bool, ... список ссылок на переменные
+//Г‡Г ГЈГ°ГіГ§ГЄГ  ГЁГ§ ГґГ Г©Г«Г , format: i-int c-Char s-Ansi b-bool, ... Г±ГЇГЁГ±Г®ГЄ Г±Г±Г»Г«Г®ГЄ Г­Г  ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ
 int TableLoader::LoadFromFile(String Filename, const char *format, ...)
 {
 	TStringList *file = NULL;
