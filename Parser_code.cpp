@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 #pragma hdrstop
-//#include "TableLoader.cpp"
+#include "TableLoader.cpp"
 int const  TAGSS = 18;
 #include "Parser_code.h"
 //---------------------------------------------------------------------------
@@ -18,6 +18,7 @@ TForm1 *Form1;
 //typedef Set<int, 0, 2147483647> TAGSET;
 __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 {
+	Tes4 = false;
 	file = NULL;
 	Moved.MVRF[0]='M';Moved.MVRF[1]='V';Moved.MVRF[2]='R';Moved.MVRF[3]='F';// "MVRF";
 	Moved.Len1 = 4;
@@ -70,6 +71,13 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	AddTagType("MAST",'t'); AddTagType("SCTX",'t');
 	AddTagType("RGNN",'t'); AddTagType("SCHD",'t');
 	AddTagType("AIDT",'t'); AddTagType("NPCS",'t');
+	types.IgnoreFirstString = false;
+	types.IgnoreDelimitersPack = false;
+	types.LoadFromFile("TYPES.txt","ssss",&THeader,&TSubHeader,&TType,&TDescr);
+	//for (int i = 0; i < types.RowCount; ++i)
+	//	Out->Lines->Add(THeader[i]);
+	SubIndexes = new int[4];
+	cSubIndexes = 4;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::OpenBtnClick(TObject *Sender)
@@ -78,7 +86,13 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		return;
 	if (file)
 		fclose(file);
-	file = fopen (OpenDialog1->FileName.c_str(), "rb");
+	if (Rewrite->Checked)
+	{
+		file = fopen (OpenDialog1->FileName.c_str(), "r+b");
+		Save->Enabled = true;
+	}
+	else
+		file = fopen (OpenDialog1->FileName.c_str(), "rb");
 	if (!file)
 		return;
 	Save->Enabled = false;
@@ -89,7 +103,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		if (OpenDialog1->FileName[i] == '\\')
 		{
 			PluginName = OpenDialog1->FileName.SubString(i+1, OpenDialog1->FileName.Length());
-			Form1->Caption = PluginName + " - TES file parseer";
+			Form1->Caption = PluginName + " - TES parseer";
 			break;
 		}
 	//Form1->Caption = FileName.SubString(1, FileName.Length()-4) + " - TES file parseer";
@@ -113,6 +127,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		LENTODEF = DEFAULTLENLEN - LENSIZE;
 		//tab.LenLen = tab.Tes4;
 		LENSIZE2 = 2;
+		Tes4 = true;
 	}
 	fseek(file, 0, SEEK_SET);
 	List->ScrollBars = ssNone; //List->Items->BeginUpdate();
@@ -168,6 +183,10 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	Deleted.clear();
 	RefreshData();
 	Ready(true);
+	if (Rewrite->Checked)
+		Rewrite->Enabled = false;
+	else
+   	Rewrite->Visible = false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
@@ -176,6 +195,7 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 	fclose(save);
 	//delete uni;
 	delete TextTags;
+	delete []SubIndexes;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::HEDRReadClick(TObject *Sender)
@@ -412,22 +432,12 @@ void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 		LENSmall = LenSize->Items->Strings[0].ToIntDef(4);
 		LENBig = LenSize->Items->Strings[1].ToIntDef(12);
    }
-
 	if (!Reinter->Checked)
 	{
-		if (Index == LENSIZE12)
-		{
-			fread(&Univ.Name, 4, 1, file);
-			fread(&Univ.Length, LENBig, 1, file);
-			char4ToLog(Univ.Name);
-			ToLog(Univ.Length,"Размер всех полей");
-			NextSClick(Sender);
-			return;
-		}
 		if (LenSize->ItemIndex == 1)
 			Univ.Read(file, LENBig);
 		else
-			Univ.Read(file, LENSmall);
+			Univ.Read(file, LENSmall); //TODO:bug2
 	}
 	char4ToLog(Univ.Name);
 	ToLog(Univ.Length,"Length");
@@ -728,6 +738,12 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 {
 	static int LENSmall = 4;
 	static int LENBig = 12;
+	SubDescript->Visible = false;
+	if (Tes4)
+	{
+      LENSmall = 2;
+		LENBig = 16;
+	}
 	char 	Name[5];	Name[4] = '\0';
 	//List2->Selection.
 	if (ARow >= 0)
@@ -735,7 +751,15 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		ToE->Text = List->Cells[CSTART][ARow];
 		GoClick(Sender);
 
-		long end = ARow + 1 >= List->RowCount ? EoF : List->Cells[CSTART][ARow+1].ToInt();
+		//long end = ARow + 1 >= List->RowCount ? EoF : List->Cells[CSTART][ARow+1].ToInt();
+		long end;
+		if (List->Cells[CSIZE][ARow] == "-X-")
+		{
+			if (ARow < List->RowCount -1)
+				end = List->Cells[CSTART][ARow+1].ToInt();
+		}
+		else
+			end = List->Cells[CSTART][ARow].ToInt()+List->Cells[CSIZE][ARow].ToInt() + LENSmall + LENBig;
 		//Out->Lines->Append(end);
 		//List2->Cols->BeginUpdate();
 		fseek(file,4+DEFAULTLENLEN,SEEK_CUR);
@@ -786,6 +810,74 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		List2->RowCount = Row;
       fseek(file,ToE->Text.ToIntDef(0) - ftell(file), SEEK_CUR);
 	}
+	//TYPES TABLES
+	if (cSubIndexes < List2->RowCount)
+	{
+		SubIndexes = new int[List2->RowCount];
+		cSubIndexes = List2->RowCount;
+	}
+	for (int i = 0; i < List2->RowCount; ++i)
+		SubIndexes[i] = -1;
+	String find;
+	find = List->Cells[CHEADER][ARow];
+	int m1=-1,m2=-1; //определим начало и конец для оптимизации
+	for (int t = 0; t < types.RowCount; ++t)
+		if (THeader[t].Compare(find) == 0)
+		{
+			if (m1 == -1)
+				m1 = t;
+			m2 = t;
+		} else if (m1 != -1)
+			break;
+	if (m2 == -1)
+		return;
+
+	String Interpret;
+	for (int sub = 0; sub < List2->RowCount; ++sub)
+	{
+		find = List2->Cells[CHEADER][sub];
+		for (int t = m1; t <= m2; ++t)
+			if (TSubHeader[t].Compare(find) == 0)
+			{
+				SubIndexes[sub] = t;
+				//////REINTERPRET
+				if (TType[t].Length() >= 1)
+				{
+					Interpret = "";
+					fseek(file,
+					(List2->Cells[CSTART][sub].ToInt() + 4), SEEK_SET);
+					unsigned int Len;
+					fread(&Len, LENSmall, 1, file);
+					//Interpret = Len;
+					//Len = List2->Cells[CSIZE][sub].ToInt();
+					char *st = file->curp;
+					switch (TType[t][1])
+					{
+						//case 't': List2->Cells[CDATA][Row] = st;  break;  //ToLog(&Name[8]);
+						case 'f': for (unsigned int i = 0; i < Len/sizeof(float); ++i)
+								Interpret = Interpret + FloatToStr(st[i*4])+".";
+								List2->Cells[CDATA][sub] = Interpret;
+							break;
+						case 'i':
+							for (unsigned int i = 0; i < Len/sizeof(int); ++i)
+								Interpret = Interpret + IntToStr(st[i*4])+",";
+								List2->Cells[CDATA][sub] = Interpret;
+							break;
+						case 'b':
+							for (unsigned int i = 0; i < Len; ++i)
+								Interpret = Interpret + IntToStr(st[i])+" ";
+								List2->Cells[CDATA][sub] = Interpret;
+							break;
+						case '1':
+							for (unsigned int i = 0; i < Len/2; ++i)
+								Interpret = Interpret + IntToStr(WORD(st[i*2]))+"!";
+								List2->Cells[CDATA][sub] = Interpret;
+							break;
+					}
+				}
+			}
+	}
+
 }
 //---------------------------------------------------------------------------
 
@@ -885,13 +977,13 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 
 void __fastcall TForm1::HeaderControl1Resize(TObject *Sender)
 {
-	List->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width;
-	List2->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width;
+	List->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width-22;
+	List2->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width-22;
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::UpDown1ChangingEx(TObject *Sender, bool &AllowChange, short NewValue,
-          TUpDownDirection Direction)
+			 TUpDownDirection Direction)
 {
 	if (Direction == updUp)
 	{
@@ -1086,6 +1178,12 @@ void __fastcall TForm1::FindStrClick(TObject *Sender)
 			List->Row = i;
 			return;
 		}
+	for (int i = row; i > 0; --i)
+		if (List->Cols[3]->Strings[i].Pos(find) == 1)
+		{
+			List->Row = i;
+			return;
+		}
 }
 //---------------------------------------------------------------------------
 
@@ -1101,8 +1199,299 @@ void __fastcall TForm1::List2SelectCell(TObject *Sender, int ACol, int ARow, boo
 	if (ARow >= 0)
 	{
 		ToE->Text = List2->Cells[CSTART][ARow];
+		if (SubIndexes[ARow] != -1)
+		{
+			SubDescript->Text = TDescr[SubIndexes[ARow]];
+			SubDescript->Visible = true;
+		} else
+			SubDescript->Visible = false;
+
 		GoClick(Sender);
 	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CheckBox1Click(TObject *Sender)
+{
+	PanelTags->Visible = CheckBox1->Checked;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Go16Click(TObject *Sender)
+{
+	char uName[4];
+	int uInt[3];
+	fread(&uName, 4, 1, file);
+	//fread(&uLength, LENBig, 1, file);//НЕльзя 12 а то сбивается uName
+	fread(&uInt[0], LENSIZE, 1, file);
+	fread(&uInt[1], LENSIZE, 1, file);
+	fread(&uInt[2], LENSIZE, 1, file);
+	char4ToLog(uName);
+	ToLog(uInt[0],"Размер всех полей");
+	Out->Lines->Add("??=("+IntToStr(uInt[1])+","+IntToStr(uInt[2])+")");
+	NextSClick(Sender);
+	ToE->Text = ftell(file);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::SPLMreadClick(TObject *Sender)
+{
+	Go16Click(Sender);
+	Byte NAM0, XNAM;
+	char NAME[4], Name[4];
+	int Length;
+	String Data;
+	Interpret Store;
+	Out->Lines->BeginUpdate();
+	int Coun[5];
+	for (int i = 0; i < 5; ++i)
+   	Coun[i] = 0;
+	for (int i = 0; i < List2->RowCount; ++i)
+	{
+		fread(&Name, 4, 1, file);
+		fread(&Length, 4, 1, file);
+		char *st = file->curp;
+		if (strncmp(Name, "NAME", 4) == 0)
+		{
+			Data = IntToStr(st[0]);
+			//int ddd = st[0];
+			//unsigned int nam2 = (unsigned int)st[0];
+			//if (ddd < 0)
+			// ToLogS(Data, IntToStr(i)+")NAME");
+			List2->Cells[CDATA][i] = Data;//)+" "+IntToStr(int(nam2));
+			Out->Lines->Add("");
+			ToLogS(Data, IntToStr(i)+")NAME");
+			Coun[0]++;
+		}
+		else if (strncmp(Name, "NAM0", 4) == 0)
+		{
+			Data = IntToStr(Byte(st[0]));
+			List2->Cells[CDATA][i] = Data;
+			ToLogS(Data, IntToStr(i)+")NAM0");
+			Coun[1]++;
+		}
+		else if (strncmp(Name, "XNAM", 4) == 0)
+		{
+			Data = IntToStr(Byte(st[0]));
+			List2->Cells[CDATA][i] = Data;
+			ToLogS(Data, IntToStr(i)+")XNAM");
+			Coun[2]++;
+		}
+		else if (strncmp(Name, "SPDT", 4) == 0)
+		{
+			int SPDT1 = (int)st[0];
+			String Sub1(&st[4]);
+			int SPDT2 = (int)st[44];
+			int SPDT3 = (int)st[48];
+
+			//void *flo = file->curp;
+			//float SPDT11 = ((float*)&file->curp[0])[0];
+			//float SPDT21 = ((float*)&file->curp[44])[0];
+			//float SPDT31 = ((float*)&file->curp[48])[0];
+			String Sub2(&st[52]);
+			List2->Cells[CDATA][i] = Sub1;
+			ToLogS(IntToStr(SPDT1), IntToStr(i)+")SPDT");
+			ToLog(IntToStr(SPDT2));
+			ToLog(IntToStr(SPDT3));
+			ToLog(Sub1);
+			ToLog(Sub2);
+			Coun[3]++;
+		}
+		else if (strncmp(Name, "NPDT", 4) == 0)
+		{
+			String Sub1(&st[0]);
+			int NPDT1 = st[44];
+			int NPDT2 = st[48];
+			int NPDT3 = st[52];
+			List2->Cells[CDATA][i] = Sub1;
+			ToLogS(NPDT1, IntToStr(i)+")NPDT");
+			ToLog(NPDT2);
+			ToLog(NPDT3);
+			ToLog(Sub1);
+			Coun[4]++;
+		}
+		fseek(file, Length, SEEK_CUR);
+	}
+	Out->Lines->Add("Count of NAME="+IntToStr(Coun[0])+" NAM0="
+		+IntToStr(Coun[1])+" XNAM="+IntToStr(Coun[2])+" SPDT="
+		+IntToStr(Coun[3])+" NPDT="+IntToStr(Coun[4]));
+	Out->Lines->EndUpdate();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::PushCoordClick(TObject *Sender)
+{
+	if (List->Row < 0)
+		return;
+	String Base(List->Cells[CHEADER][List->Row]);
+	int IsCell;
+	if (Base == "CELL")
+		IsCell = true;
+	else if (Base == "PGRD")
+		IsCell = false;
+	else
+		return ShowMessage("Нужно выделить ячейку CELL или PGRD");
+	Base = EFinds->Text;
+	if (Base.Length() < 2)
+		return ShowMessage("Поле ввода должно содержать координаты X Y Z через пробел из редактора");
+	int p;
+	Base = Base.Trim();
+	while ((p = Base.Pos('.')) > 0)
+		Base[p] = ',';
+	while ((p = Base.Pos("  ")) > 0)
+		Base.Delete(p,1);
+	EFinds->Text = Base;
+
+	p = Base.Pos(' ');
+	if (p <= 0)
+		return ShowMessage("Поле ввода должно содержать координаты X Y Z");
+	String Word = Base.SubString(1,p-1);
+	float x = Word.ToDouble();
+	Base.Delete(1,p);
+	p = Base.Pos(' ');
+	if (p <= 0)
+		return ShowMessage("Отсутствует координата Z");
+	Word = Base.SubString(1,p-1);
+	float y = Word.ToDouble();
+	Base.Delete(1,p);
+	float z = Base.ToDouble();
+
+	Out->Lines->Add(FloatToStr(x)+FloatToStr(y)+FloatToStr(z));
+	//Out->Lines->Add(IntToStr(GetOkrugl(x))+" "+IntToStr(int(x-GetOkrugl(x))));	
+	if (IsCell)
+	{
+		float xyz[3];
+		float xm1 = x-1; float xp1 = x+1;
+		float ym1 = y-1; float yp1 = y+1;
+		float zm1 = z-1; float zp1 = z+1;
+		for (int i = 0; i < List2->RowCount; ++i)
+			if (List2->Cells[CHEADER][i] == "DATA")
+				if (List2->Cells[CSIZE][i].ToInt() == 24)
+				{
+					int adr = List2->Cells[CSTART][i].ToInt();
+					fseek(file, adr + 8, SEEK_SET);
+					fread(xyz, sizeof(float), 3, file);
+					if (xyz[0] > xm1 && xyz[0] < xp1)
+						xyz[0] = 0;
+					else
+						xyz[0] = Check999(xyz[0] - x);
+
+					if (xyz[1] > ym1 && xyz[1] < yp1)
+						xyz[1] = 0;
+					else
+						xyz[1] = Check999(xyz[1] - y);
+
+					if (xyz[2] > zm1 && xyz[2] < zp1)
+						xyz[2] = 0;
+					else
+						xyz[2] = Check999(xyz[2] - z);
+					if (Wordwap->Checked)
+						Out->Lines->Add(IntToStr(adr)+":"+FloatToStr(xyz[0])+"*"+FloatToStr(xyz[1])+"*"+FloatToStr(xyz[2]));
+					fseek(file, -12, SEEK_CUR);
+					fwrite(xyz, sizeof(float), 3, file);
+				}
+	}
+	else
+	{
+		int xyzpop[3];
+		xyzpop[0] = x; xyzpop[1] = y; xyzpop[2] = z;  
+		int xyzh[4];
+		for (int i = 0; i < List2->RowCount; ++i)
+			if (List2->Cells[CHEADER][i] == "PGRP")
+			{
+				int adr = List2->Cells[CSTART][i].ToInt();
+				fseek(file, adr + 8, SEEK_SET);
+				int size = List2->Cells[CSIZE][i].ToInt();
+				int end = adr + 8 + size;
+				for (int p = adr + 8; p < end; p += 16)
+				{
+					fseek(file, p, SEEK_SET);
+					fread(xyzh, sizeof(int), 3, file);
+					//Out->Lines->Add(IntToStr(p)+":"+IntToStr(ddd)+"f"+IntToStr(xyzh[0])+"*"+IntToStr(xyzh[1])+"*"+IntToStr(xyzh[2]));
+					xyzh[0] -= xyzpop[0];
+					xyzh[1] -= xyzpop[1];
+					xyzh[2] -= xyzpop[2];
+					xyzh[0] = GetOkrugl(xyzh[0]);
+					xyzh[1] = GetOkrugl(xyzh[1]);
+					xyzh[2] = GetOkrugl(xyzh[2]);
+					if (Wordwap->Checked)
+						Out->Lines->Add(IntToStr(p)+" To "+IntToStr(xyzh[0])+"*"+IntToStr(xyzh[1])+"*"+IntToStr(xyzh[2]));
+					fseek(file, -12, SEEK_CUR); //БЕЗ ФСЕКА МЕЖДУ ЧТЕНИЕМ И ЗАПИСЬЮ НЕЛЬЗЯ
+					fwrite(xyzh, sizeof(int), 3, file);
+					//ddd = ftell(file); //Out->Lines->Add(IntToStr(p)+" : "+IntToStr(ddd));
+				}
+			}
+	}
+	EFinds->SelectAll();
+	EFinds->SetFocus();
+}
+//---------------------------------------------------------------------------
+int TForm1::GetOkrugl(int x)
+{
+ 	int pr, min;
+	bool otr = x < 0 ? true : false;
+	if (otr)
+		x = -x;
+	pr = x / 512;
+	min = pr * 512;
+	if ((x - min) < 32)
+		return otr ? -min : min;
+	else if ((min + 512 - x) < 32)
+		return otr ? -(min + 512) : (min + 512);
+
+	pr = x / 256;
+	min = pr * 256;
+	if ((x - min) < 28)
+		return otr ? -min : min;
+	else if ((min + 256 - x) < 28)
+		return otr ? -(min + 256) : (min + 256);
+
+	pr = x / 128;
+	min = pr * 128;
+	if ((x - min) < 20)
+		return otr ? -min : min;
+	else if ((min + 128 - x) < 20)
+		return otr ? -(min + 128) : (min + 128);
+
+	pr = x / 32;
+	min = pr * 32;
+	if ((x - min) <= 16)
+		return otr ? -min : min;   //макс расхожд 16
+	else
+		return otr ? -(min + 32) : (min + 32);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CloseClick(TObject *Sender)
+{
+	fclose (file);
+}
+//---------------------------------------------------------------------------
+float TForm1::Check999(float x)
+{
+	float d = x - int(x);
+	if (d > 0.98)
+		return int(x)+1;
+	if (d < -0.98)
+		return int(x)-1;
+	if (d < 0.02 && d > 0)
+		return int(x);
+	if (d > -0.02 && d < 0)
+		return int(x);
+	return x;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::RewriteClick(TObject *Sender)
+{
+	PushCoord->Visible = Rewrite->Checked;
+	EFinds->Width = 340;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::WordwapClick(TObject *Sender)
+{
+	Out->WordWrap = Wordwap->Checked;
 }
 //---------------------------------------------------------------------------
 

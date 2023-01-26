@@ -1,13 +1,39 @@
-
+# Diagram Portfolio file. Used by the diagram editor up to Delphi 7.
+*.ddp
+# C++ object files produced when C/C++ Output file generation is configured.
+*.obj
+# Delphi compiler-generated binaries (safe to delete)
+*.exe
+*.dll
+*.bpl
+*.bpi
+*.dcp
+*.so
+*.apk
+*.drc
+*.map
+*.dres
+*.rsm
+*.tds
+*.dcu
+*.lib
+*.a
+*.o
+*.ocx
+# Delphi local files (user-specific info)
+*.local
+*.identcache
+*.projdata
+*.tvsconfig
+*.dsk
+# Delphi history and backups
+__history/
+__recovery/
+*.~*
 Debug/
 Release/
-*.local
-*.dsk
-*.obj
-ESPFile.obj
-Release/Arena_PreAlpha2.esp
 *.esp
-Release/Ярлык для Debug.lnk
+*.lnk
 Icon_15.ico
 Icon_15g.ico
 OLDCODE.txt
