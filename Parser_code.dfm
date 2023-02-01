@@ -547,10 +547,10 @@ object Form1: TForm1
             Caption = 'Integer 4 bytes'
           end
           item
-            Caption = 'Text'
+            Caption = 'String'
           end
           item
-            Caption = 'Localized string'
+            Caption = 'Localized symbol'
           end
           item
             Caption = 'Float 4 bytes'
@@ -888,7 +888,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00700010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A00740010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

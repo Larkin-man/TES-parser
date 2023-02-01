@@ -300,6 +300,7 @@ __published:	// IDE-managed Components
 	void __fastcall CheckConflictsClick(TObject *Sender);
 	bool __fastcall FormHelp(WORD Command, int Data, bool &CallHelp);
 	void __fastcall PrepareEClick(TObject *Sender);
+	void __fastcall PrepareGameClick(TObject *Sender);
 
 
 private:	// User declarations
@@ -482,6 +483,7 @@ public:		// User declarations
 	int Indextt;
 	void Delete2(int Row2);
 	int FindIdx;
+	String OpenedFileName;
 	//TStringList *FindList;
 	struct DeleteItem
 	{    //DeleteItem ti(AI_W->Cells[1][0].ToInt(),AI_W->Cells[1][1].ToInt());
@@ -521,6 +523,7 @@ public:		// User declarations
 		if (Length > Max)
 			Length = Max;
 	}
+	void PrepareFor(char SIMBS[4]);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
