@@ -208,7 +208,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      object HEDRRead: TButton
+      object TES3Read: TButton
         Left = 0
         Top = 0
         Width = 50
@@ -217,7 +217,7 @@ object Form1: TForm1
         Caption = 'TES3'
         Enabled = False
         TabOrder = 0
-        OnClick = HEDRReadClick
+        OnClick = TES3ReadClick
       end
       object CellRead: TButton
         Left = 50
@@ -501,6 +501,29 @@ object Form1: TForm1
         TabOrder = 23
         OnClick = CheckConflictsClick
       end
+      object PrepareE: TButton
+        Left = 0
+        Top = 325
+        Width = 145
+        Height = 25
+        Hint = 'akella\1C. INFO replace @# to {}'
+        Caption = 'Prepare for editing'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 24
+        OnClick = PrepareEClick
+      end
+      object PrepareGame: TButton
+        Left = 0
+        Top = 350
+        Width = 136
+        Height = 25
+        Hint = 'akella\1C. INFO replace @# to {}'
+        Caption = 'Prepare for game'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 25
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -556,7 +579,7 @@ object Form1: TForm1
             Caption = 'Float 4 bytes'
           end
           item
-            Caption = 'Integer 2 bytes unsigned'
+            Caption = 'Integer 2 bytes'
           end
           item
             Caption = 'Integer 1 bytes'
@@ -888,7 +911,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00740010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A007C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
