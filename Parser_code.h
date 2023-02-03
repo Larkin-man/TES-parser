@@ -360,6 +360,8 @@ public:		// User declarations
 		FindIdx = -1;
 		SubDelete.clear();
 		DELEStarts.clear();
+		RefStarts.clear();
+		RefEnds.clear();
 	}
 	void tolog(String msg)
 	{
@@ -523,7 +525,9 @@ public:		// User declarations
 		if (Length > Max)
 			Length = Max;
 	}
-	void PrepareFor(char SIMBS[4]);
+	std::vector<long> RefStarts;
+	std::vector<long> RefEnds;
+	void PrepareFor(char SYMBS[4]);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

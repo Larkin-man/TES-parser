@@ -778,6 +778,9 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 			fseek(curr, *ele, SEEK_SET);
 			fwrite(&symb, 1, 1, curr);
 		}
+		fseek(curr, 437, SEEK_SET);
+		fread (mem, EoF-437, 1, curr);
+
 		if (Deleted.empty())
 		{
 			fclose (curr);
@@ -793,7 +796,7 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	if (!save)
 		return ShowMessage( "Cannot open binary file.");
 	Save->Enabled = false;
-	std::set<int>::iterator el = Deleted.begin();
+	std::set<long>::iterator el = Deleted.begin();
 	if (*el > cap)
 	{
 		mem = new byte[*el];

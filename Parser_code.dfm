@@ -523,6 +523,7 @@ object Form1: TForm1
         ParentShowHint = False
         ShowHint = True
         TabOrder = 25
+        OnClick = PrepareGameClick
       end
     end
     object PanelSubRead: TPanel
@@ -627,6 +628,7 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
+        ExplicitWidth = 100
       end
     end
   end
@@ -911,7 +913,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A007C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A00800010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
