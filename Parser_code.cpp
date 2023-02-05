@@ -742,7 +742,7 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	FILE *curr = NULL;
 	String Nam = "CLEAR_" + PluginName;
 	byte *mem;
-	int cap;
+	long cap;
 	int Len;
 	if (RefStarts.empty() == false || RefEnds.empty() == false)
 	{

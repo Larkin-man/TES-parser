@@ -395,7 +395,7 @@ public:		// User declarations
 			ToLog(String(msg).SetLength(4), param);
 	}
 	Set <char, 0, 255> TagSymb;
-	std::set<int> Deleted;
+	std::set<long> Deleted;
 	int DeletedSize;
 	bool Tes3;
 	TableLoader types;
@@ -528,6 +528,7 @@ public:		// User declarations
 	std::vector<long> RefStarts;
 	std::vector<long> RefEnds;
 	void PrepareFor(char SYMBS[4]);
+	bool PrepareForEdit;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
