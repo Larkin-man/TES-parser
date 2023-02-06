@@ -363,9 +363,15 @@ public:		// User declarations
 		RefStarts.clear();
 		RefEnds.clear();
 	}
-	void tolog(String msg)
+	void tolog(String msg, int Len = -1)
 	{
-		Out->Lines->Add(msg);
+		if (LogUp) {
+		if (Len == -1)
+			Out->Lines->Add(msg);
+		else if (msg.Length() > Len)
+			Out->Lines->Add(msg.SetLength(Len));
+		else
+			Out->Lines->Add(msg); }
 	}
 	void ToLog(String msg, const char *param = NULL)
 	{
@@ -378,6 +384,7 @@ public:		// User declarations
 		else
 			Out->Lines->Add(msg);
 	}
+
 	void ToLogS(String msg, String param)
 	{
 		if (LogUp)

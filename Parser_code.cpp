@@ -778,9 +778,6 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 			fseek(curr, *ele, SEEK_SET);
 			fwrite(&symb, 1, 1, curr);
 		}
-		fseek(curr, 437, SEEK_SET);
-		fread (mem, EoF-437, 1, curr);
-
 		if (Deleted.empty())
 		{
 			fclose (curr);
@@ -788,6 +785,8 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 			ToLog("Сохранено: "+Nam);
 			return;
 		}
+		else
+			Nam = "DONE_" + PluginName;
 	}
 	else
 		curr = file;
@@ -797,17 +796,17 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 		return ShowMessage( "Cannot open binary file.");
 	Save->Enabled = false;
 	std::set<long>::iterator el = Deleted.begin();
-	if (*el > cap)
-	{
-		mem = new byte[*el];
-		cap = *el;
-	}
-	//cap = *el;
-	//mem = new byte[cap];
-	fseek(curr, 0, SEEK_SET);
 	fseek(save, 0, SEEK_SET);
-	fread (mem, cap, 1, curr);
-	fwrite(mem, cap, 1, save);
+
+	fseek(curr, 0, SEEK_SET);
+	Len = *el;
+	if (Len > cap)
+	{
+		mem = new byte[Len];
+		cap = Len;
+	}
+	fread (mem, Len, 1, curr);
+	fwrite(mem, Len, 1, save);
 	for (el++; el != Deleted.end(); ++el)
 	{
 		//Out->Lines->Add(*el);
