@@ -514,6 +514,8 @@ void TForm1::DeleteRecord(int Row)
 {
 	if (Row >= 0)
 	{
+		if (RefStarts.empty() == false || RefEnds.empty() == false)
+      	return;
 		int Offset = List->Cells[CSTART][Row].ToInt();
 		if	(Deleted.find(Offset) == Deleted.end())
 		//if (List->Cells[CSIZE][List->Row] != "-X-")
@@ -741,12 +743,15 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 		return;
 	FILE *curr = NULL;
 	String Nam = "CLEAR_" + PluginName;
-	byte *mem;
-	long cap;
+	byte *mem = NULL;
+	long cap = 0;
 	int Len;
 	if (RefStarts.empty() == false || RefEnds.empty() == false)
 	{
-		curr = fopen (Nam.c_str(), "w+b");
+		if (Deleted.empty())
+			curr = fopen (Nam.c_str(), "wb");
+		else
+			curr = fopen (Nam.c_str(), "w+b");
 		if (!curr)
 			return ShowMessage( "Cannot open binary file.");
 		Save->Enabled = false;
@@ -829,6 +834,7 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	fwrite(&Len, 4, 1, save);
 	delete [] mem;
 	fclose (save);
+	fflush(curr);
 	ToLog("Сохранено: "+Nam);
 }
 //---------------------------------------------------------------------------
@@ -2384,6 +2390,8 @@ void __fastcall TForm1::PrepareGameClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TForm1::PrepareFor(char SYMBS[4])
 {
+	if (Deleted.empty() == false)
+		return;
 	RefStarts.clear();
 	RefEnds.clear();
 	char 	Name[5];	Name[4] = '\0';
