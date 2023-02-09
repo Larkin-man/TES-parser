@@ -4,7 +4,7 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parseer'
   ClientHeight = 757
-  ClientWidth = 1072
+  ClientWidth = 1097
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,7 +18,7 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 19
   object Splitter1: TSplitter
-    Left = 585
+    Left = 601
     Top = 27
     Height = 730
     ExplicitLeft = 546
@@ -36,13 +36,14 @@ object Form1: TForm1
   object PanelUp: TPanel
     Left = 0
     Top = 0
-    Width = 1072
+    Width = 1097
     Height = 27
     Align = alTop
     Caption = 'PanelUp'
     PopupMenu = PopupMenu1
     ShowCaption = False
     TabOrder = 0
+    ExplicitWidth = 1072
     object LDele: TLabel
       AlignWithMargins = True
       Left = 517
@@ -172,9 +173,9 @@ object Form1: TForm1
     end
   end
   object Out: TMemo
-    Left = 588
+    Left = 604
     Top = 27
-    Width = 269
+    Width = 278
     Height = 730
     Align = alClient
     Lines.Strings = (
@@ -183,15 +184,18 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
+    ExplicitLeft = 588
+    ExplicitWidth = 269
   end
   object PanelPRO: TPanel
-    Left = 857
+    Left = 882
     Top = 27
     Width = 215
     Height = 730
     Align = alRight
     ShowCaption = False
     TabOrder = 4
+    ExplicitLeft = 857
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 3
@@ -628,7 +632,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 100
       end
     end
   end
@@ -765,7 +768,7 @@ object Form1: TForm1
   object PanelList2: TPanel
     Left = 308
     Top = 27
-    Width = 277
+    Width = 293
     Height = 730
     Align = alLeft
     Caption = 'PanelList'
@@ -775,7 +778,7 @@ object Form1: TForm1
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 269
+      Width = 285
       Height = 17
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -784,39 +787,46 @@ object Form1: TForm1
       Font.Style = []
       Sections = <
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Header'
           Width = 36
         end
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Offset'
           Width = 49
         end
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Size'
           Width = 42
         end
         item
+          AllowClick = False
           AutoSize = True
           ImageIndex = -1
           Text = 'Data'
-          Width = 118
+          Width = 128
         end
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Type'
-          Width = 24
+          Width = 30
         end>
+      Style = hsFlat
       OnSectionResize = HeaderControl2SectionResize
       ParentFont = False
       OnResize = HeaderControl2Resize
+      ExplicitWidth = 279
     end
     object List2: TStringGrid
       Left = 1
       Top = 24
-      Width = 275
+      Width = 291
       Height = 679
       Align = alClient
       DefaultColWidth = 60
@@ -836,11 +846,12 @@ object Form1: TForm1
       TabOrder = 1
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
+      ExplicitWidth = 275
     end
     object SubDescript: TEdit
       Left = 1
       Top = 703
-      Width = 275
+      Width = 291
       Height = 26
       Align = alBottom
       Color = cl3DLight
@@ -853,6 +864,7 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
+      ExplicitWidth = 275
     end
   end
   object OpenDialog1: TOpenDialog

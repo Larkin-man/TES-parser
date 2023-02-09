@@ -446,10 +446,10 @@ void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 	{
 		case INTFIELDS:
 			for (unsigned int i = 0; i < Univ.Length/sizeof(int); ++i)
-				ToLog( ((int*)Univ.Data)[i] );
+				tolog( ((int*)Univ.Data)[i] );
 			break;
 		case TEXTFIELDS:
-			ToLog( (char*)Univ.Data );
+				ToLogLen( (char*)Univ.Data , Univ.Length );
 			break;
 		case STRFIELDS:
 			if (localeinstalled)
@@ -457,24 +457,24 @@ void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 				wchar_t* mas = new wchar_t[Univ.Length+1];
 				mbstowcs(mas, (char*)(Univ.Data), Univ.Length+1);
 				for (unsigned int i = 0; i < Univ.Length; ++i)
-					ToLog(String ( mas[i]));
+					tolog(String ( mas[i]));
 				delete []mas;
 			}
 			else
 				for (unsigned int i = 0; i < Univ.Length; ++i)
-					ToLog( ((char*)Univ.Data)[i] );
+					tolog( ((char*)Univ.Data)[i] );
 			break;
 		case FLOATFIELDS:
 			for (unsigned int i = 0; i < Univ.Length/sizeof(float); ++i)
-				ToLog( ((float*)Univ.Data)[i]);
+				tolog( ((float*)Univ.Data)[i]);
 			break;
 		case WORDFIELDS:
 			for (unsigned int i = 0; i < Univ.Length/sizeof(short); ++i)
-				ToLog( ((short*)Univ.Data)[i]);
+				tolog( ((short*)Univ.Data)[i]);
 			break;
 		case BYTEFIELDS:
 			for (unsigned int i = 0; i < Univ.Length; ++i)
-				ToLog( ((byte*)Univ.Data)[i]);
+				tolog( ((byte*)Univ.Data)[i]);
 			break;
 	}
 	if (PanelList2->Visible)   	
