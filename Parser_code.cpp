@@ -492,7 +492,6 @@ void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 				}
 			}
 }
-
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::DeleteClick(TObject *Sender)
@@ -518,7 +517,6 @@ void TForm1::DeleteRecord(int Row)
       	return;
 		int Offset = List->Cells[CSTART][Row].ToInt();
 		if	(Deleted.find(Offset) == Deleted.end())
-		//if (List->Cells[CSIZE][List->Row] != "-X-")
 		{
 			Deleted.insert(Offset);
 			DeletedSize += List->Cells[CSIZE][Row].ToIntDef(0);
@@ -1039,7 +1037,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 				if (Name[1]=='N'&&Name[2]=='A'&&Name[3]=='M')
 				{
 					st = file->curp;
-					if (st[0] >= 32)
+					if (st[0] >= 32 && st[1] >= 32)
 					{
 						InterpretStr = (char*)st;
 						InterpretStr.SetLength(Len);
@@ -1203,8 +1201,8 @@ void __fastcall TForm1::HeaderControl1Resize(TObject *Sender)
 void __fastcall TForm1::TestPClick(TObject *Sender)
 {
 	TestMenuClick(Sender);
-	for (int i = 0; i < nTypes; ++i)
-		Out->Lines->Add(String(TagTypes[i].Name) +"\t"+ String(TagTypes[i].Type));
+	//for (int i = 0; i < nTypes; ++i)
+	//	Out->Lines->Add(String(TagTypes[i].Name) +"\t"+ String(TagTypes[i].Type));
 }
 //---------------------------------------------------------------------------
 
@@ -2071,7 +2069,7 @@ void __fastcall TForm1::HeaderControl2Resize(TObject *Sender)
 void __fastcall TForm1::HeaderControl2SectionResize(THeaderControl *HeaderControl,
 			 THeaderSection *Section)
 {
-	List2->ColWidths[Section->Index] = Section->Width;
+	List2->ColWidths[Section->Index] = Section->Width;// - Section->Index;
 }
 //---------------------------------------------------------------------------
 

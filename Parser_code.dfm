@@ -239,6 +239,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'sGMDT'
         TabOrder = 2
+        Visible = False
         OnClick = GMDTReadClick
       end
       object TestP: TButton
@@ -248,6 +249,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'TestP'
         TabOrder = 4
+        Visible = False
         OnClick = TestPClick
       end
       object SPELread: TButton
@@ -257,6 +259,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'SPEL'
         TabOrder = 5
+        Visible = False
         OnClick = SPELreadClick
       end
       object DelTrash: TButton
@@ -278,6 +281,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'SPLM'
         TabOrder = 10
+        Visible = False
         OnClick = SPLMreadClick
       end
       object ExportBtn: TButton
@@ -371,7 +375,6 @@ object Form1: TForm1
         ParentShowHint = False
         ShowHint = True
         TabOrder = 11
-        Visible = False
         OnClick = PushCoordClick
       end
       object Wordwap: TCheckBox
