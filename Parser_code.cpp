@@ -571,32 +571,63 @@ void __fastcall TForm1::DelDatasClick(TObject *Sender)
 
 void __fastcall TForm1::NextSClick(TObject *Sender)
 {
-	char Header[4];
-	//Out->Lines->Append(ftell(file));
-	if (ftell(file) >= EoF)//(feof(file))
+	if (ftell(file) >= EoF)
 	{
 		NextS->Caption = "End";
 		return;
 	}
-	fread(&Header, 4, 1, file);
-	if (Header)
+	char 	Name[5];
+	int 	Len;
+	bool 	OneBody = true;
+	static long sTell = 0;
+	static Char sName[4];
+	long 	Tell = ftell(file);
+	Name[4] = '\0';
+	fread(&Name, 4, 1, file);
+	if ( !(TagSymb.Contains(Name[0])&&TagSymb.Contains(Name[1])&&TagSymb.Contains(Name[2])&&TagSymb.Contains(Name[3])))
 	{
-		String hedr = "Next=0123[";
-		hedr[6] = Header[0];
-		hedr[7] = Header[1];
-		hedr[8] = Header[2];
-		hedr[9] = Header[3];
-		NextS->Caption = hedr;
-		int len = 0;
-		fread(&len, SLENSIZE, 1, file);
-		NextS->Caption = NextS->Caption + IntToStr(len) + "]";
-		fseek(file, -(4+SLENSIZE), SEEK_CUR);
+		Out->Lines->Add(sName + IntToStr((int)sTell));																						 //List->Items->Count-1
+		switch (Application->MessageBoxA(L"Its default?", sName,MB_YESNOCANCEL))
+		{
+			case	ID_YES:
+				fseek(file, sTell+4, SEEK_SET);
+				fread(&Len, LENSIZE, 1, file);
+				 fseek(file, tab.LenLen[tab.TagCount] - LENSIZE, SEEK_CUR);
+				fseek(file, Len, SEEK_CUR);
+				sTell = Tell;
+				sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
+				List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+				return;
+			case  ID_NO:
+         	fseek(file, sTell+4, SEEK_SET);
+				fread(&Len, LENSIZE, 1, file);
+				fseek(file, Len, SEEK_CUR);
+            sTell = Tell;
+				sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
+				List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+				return;
+			default: EoF = 1; return;
+		}
 	}
-	else
+	sTell = Tell;
+	sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
+
+	fread(&Len, LENSIZE, 1, file);
+	//uni->Add(Name);
+	int Tag = 0;
+	for (; Tag < tab.TagCount; ++Tag)
+		if (tab.Name[Tag] == Name)
+			break;
+	if (tab.LenLen[Tag] != LENSIZE)
 	{
-		NextS->Caption = "Next null or end.";
-		fseek(file, -4, SEEK_CUR);
+   	if (Sost->Checked)
+				OneBody = false;
+		fseek(file, tab.LenLen[Tag] - LENSIZE, SEEK_CUR);
 	}
+
+	if (OneBody)
+		fseek(file, Len, SEEK_CUR);
+	List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
 }
 //---------------------------------------------------------------------------
 
@@ -1103,7 +1134,37 @@ void TForm1::SetDescription(int Num, int Row)
 	//SubIndexes[i] = -1;
 }
 //---------------------------------------------------------------------------
-
+void Sorting()
+{
+	int Col = Section->Index;
+	CompareString = (Col==CHEADER||Col==CDATA);
+	//String  t;
+	List->ScrollBars = ssNone;
+	int tim = 100;
+	for (int i=0; i < List->RowCount; i++)       //тут можно -4
+	{
+		//printf("i=%d\n",i);
+		if (i>tim)
+		{
+			tim += 100;
+			Out->Lines->Add(float((float)i/List->RowCount));
+      }
+		for (int j=List->RowCount-1; j >= i+1; j--)
+			if (ListCompare(List->Cells[Col][i], List->Cells[Col][j]))   //.Compare(List->Cells[Col][j]))медленней
+			{
+				List->Cols[CHEADER]->Exchange(i,j);
+				List->Cols[CSTART]->Exchange(i,j);
+				List->Cols[CSIZE]->Exchange(i,j);
+				List->Cols[CDATA]->Exchange(i,j);
+				//print (M[i], M[j]);
+				//t = List->Cells[Section->Index][i];
+				//List->Cells[Col][i] = List->Cells[Col][j];
+				//List->Cells[Col][j] = t;
+			}
+	}
+	List->ScrollBars = ssVertical; //List->Items->EndUpdate();
+	//List->Refresh();
+}
 void TForm1::QuickSort(int iLo, int iHi)  //рекурсивная
 {
 	int Lo, Hi;
@@ -1170,6 +1231,18 @@ void TForm1::QuickSort(int iLo, int iHi)  //рекурсивная
 	//Out->Lines->Add("end;\n");
 }
 //---------------------------------------------------------------------------
+void __fastcall TForm1::LoadListClick(TObject *Sender)
+{
+	FindList = new TStringList;
+	FindList->LoadFromFile("Find List.txt");
+	if (FindList == NULL)
+		return ShowMessage("Not found Find List.txt");
+	if (FindList->Count <= 0)
+		return ShowMessage("Find List.txt is Empty");
+	FindCurr = 0;
+	Out->Lines->Add(FindList->Count);
+	FindNAME->Enabled = true;
+}
 
 void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl,
 			 THeaderSection *Section)
@@ -1200,9 +1273,32 @@ void __fastcall TForm1::HeaderControl1Resize(TObject *Sender)
 
 void __fastcall TForm1::TestPClick(TObject *Sender)
 {
-	TestMenuClick(Sender);
-	//for (int i = 0; i < nTypes; ++i)
-	//	Out->Lines->Add(String(TagTypes[i].Name) +"\t"+ String(TagTypes[i].Type));
+	//Out->Lines->Add(sizeof(RECORD3INT));
+	//Out->Lines->Add(sizeof(RECORD1INT1STR));
+	//Out->Lines->Add(sizeof(RECORD4INT1STR));
+	//Out->Lines->Add(sizeof(ff));
+	const int size = 13;
+	char flu[size];
+	flu[0] = 27;
+	flu[1] = 0;
+	flu[2] = 8;
+	flu[3] = 16;
+	flu[4] = 2;
+	flu[5] = 4;
+	flu[6] = 1;
+	flu[7] = 0;
+	flu[8] = 0;	flu[9] = 0; flu[10] = 0; flu[11] = 0;
+	int *i = (int*)flu;
+	ToLog(i[0]);
+	ToLog(i[1]);
+	i[1] = 333;
+	unsigned int hh = 0;
+	for (int *i = (int*)flu; hh < size/sizeof(int); ++i, hh++)
+		ToLog(*i);
+	ToLog("neu");
+	//int *s = i + size;
+	for (int *i = (int*)flu; i < (int*)(flu + size); ++i)
+		ToLog(*i);
 }
 //---------------------------------------------------------------------------
 
@@ -1900,51 +1996,80 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 		else
 			Offset = el->Offset;
 	//
-	//for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
-	//	Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
+		for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
+			Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
 	fseek(file, 0, SEEK_SET);
-	int MemSize = 0;
-	byte *Mem = NULL;
-	int Len;
-	fseek(file, 0, SEEK_SET);
-
-	el = SubDelete.begin();
-	for (; el != SubDelete.end(); ++el)
-	{
-		int GoodSize = el->Offset - ftell(file);
-		if (GoodSize > MemSize)
-		{
-			Mem = new byte[GoodSize];
-			MemSize = GoodSize;
-		}
-		if (GoodSize > 0)
-		{
-			fread (Mem, GoodSize, 1, file);
-			fwrite(Mem, GoodSize, 1, save);
-		}
-		fseek(file, el->Size, SEEK_CUR); //к началу слудующего блока
-	}
-	//Перепишем размеры main
-	int AllDeletedSize = 0;
+	int MainLen;
+	int MainOffset;
 	int DeletedSize = 0;
+	int AllDeletedSize = 0;
+	int squeeze;
+	byte *mem;
+	int Len;
+	int cap;
 	el = SubDelete.begin();
-	for (; el != SubDelete.end(); ++el)
+	//читаем маинлен чтоб его уменьшить потом
+	MainOffset = el->MainLenOffset;
+	cap = el->Offset;
+	mem = new byte[cap];
+	fseek(file, 0, SEEK_SET);
+	fread (mem, cap, 1, file);
+	fwrite(mem, cap, 1, save);
+
+			fseek(file, 4, SEEK_CUR); //промотал TES3 char
+			fread (&Len, LENSIZE, 1, file);
+		fseek(file, -4 - LENSIZE, SEEK_CUR);
+		DeletedSize = (4 + LENSIZE + Len);
+	for (el++; el != SubDelete.end(); ++el)
 	{
-		DeletedSize += el->Size;
-		if (el+1 != SubDelete.end() && (el+1)->MainLenOffset != el->MainLenOffset )
+	  //fseek(fi;e в начало кучи
+		fseek(file, 4, SEEK_CUR); //промотал MAIN NAME
+		fread (&Len, LENSIZE, 1, file);
+		fseek(file, Len, SEEK_CUR);
+		squeeze = el->Offset - ftell(file);
+		if (squeeze > cap)
 		{
-			//Out->Lines->Add(IntToStr(DeletedSize)+"dasaf");
-			fseek(save, el->MainLenOffset - AllDeletedSize, SEEK_SET); //промотал TES3 char
-			int NewLen = el->MainLen - DeletedSize;
-			fwrite(&NewLen, SLENSIZE, 1, save);
+			mem = new byte[squeeze];
+			cap = squeeze;
+		}
+		if (squeeze > 0)
+		{
+			fread (mem, squeeze, 1, file);
+			fwrite(mem, squeeze, 1, save);
+		}
+			el->Offset = 4 + LENSIZE + Len; //?для уменьшения лен base
+		//if (DeletedSize != 0)
+		DeletedSize += (4 + LENSIZE + Len);
+		int mlo = el->MainLenOffset;
+		Offset = el->Offset;
+
+		if (el+1 != SubDelete.end() && (el+1)->MainLenOffset != el->MainLenOffset)
+		//if (MainOffset != el->MainLenOffset)
+		{
+			//Out->Lines->Add(IntToStr(MainOffset)+"<>"+IntToStr(el->MainLenOffset));
+			//Out->Lines->Add(DeletedSize);
+			//уменьшение размера
+			//int endsave = ftell(save);
+			fseek(save, MainOffset-AllDeletedSize, SEEK_SET);
 			AllDeletedSize += DeletedSize;
-			DeletedSize = 0;
+			int idx = List->Cols[CSTART]->IndexOf(String(MainOffset-4));
+			if (idx == -1)				return;
+			Len = List->Cells[CSIZE][idx].ToInt();
+				  //fread (&Len, LENSIZE, 1, save); вместо предыдущей
+			Len -= DeletedSize;
+			ToLog(IntToStr(Len)+"=Lenзаписали DeleteSize="+IntToStr(DeletedSize));
+				  //fseek(save, -LENSIZE, SEEK_CUR);
+			fwrite(&Len, LENSIZE, 1, save);
+			fseek(save, 0, SEEK_END); //fseek(save, endsave, SEEK_SET);
+			MainOffset = el->MainLenOffset;
+			DeletedSize = 0; //da
 		}
 	}
-	delete [] Mem;
+	delete [] mem;
 	fclose (save);
 	Out->Lines->Add("Сохранено: "+Nam);
 	Out->Lines->Add("AllDeletedSize="+IntToStr(AllDeletedSize));
+	//el = SubDelete.begin();
 }
 //---------------------------------------------------------------------------
 
