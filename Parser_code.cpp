@@ -73,6 +73,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	localeinstalled = false;
 	Univ.Capacity = 0;
 	PanelPRO->Visible = ProModeCK->Checked;
+	MovedFRMR Moved; Moved.MVRF[0]='M';Moved.MVRF[1]='V';Moved.MVRF[2]='R';Moved.MVRF[3]='F';// "MVRF";
+	Moved.Len1 = 4;
+	Moved.CNDT[0]='C'; Moved.CNDT[1]='N'; Moved.CNDT[2]='D'; Moved.CNDT[3]='T';//"CNDT";
+	Moved.Len2 = 8;
 }
 //---------------------------------------------------------------------------
 
@@ -576,43 +580,44 @@ void __fastcall TForm1::NextSClick(TObject *Sender)
 		NextS->Caption = "End";
 		return;
 	}
-	char 	Name[5];
+	char 	Name[5];	Name[4] = '\0';
 	int 	Len;
-	bool 	OneBody = true;
-	static long sTell = 0;
-	static Char sName[4];
+	char 	sName[5]; sName[4] = '\0';
 	long 	Tell = ftell(file);
-	Name[4] = '\0';
+
 	fread(&Name, 4, 1, file);
-	if ( !(TagSymb.Contains(Name[0])&&TagSymb.Contains(Name[1])&&TagSymb.Contains(Name[2])&&TagSymb.Contains(Name[3])))
+	fread(&Len, LENSIZE, 1, file);
+	List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
+	if ( !(Name[0]=='D'&&Name[1]=='A'&&Name[2]=='T'&&Name[3]=='A'))
 	{
-		Out->Lines->Add(sName + IntToStr((int)sTell));																						 //List->Items->Count-1
-		switch (Application->MessageBoxA(L"Its default?", sName,MB_YESNOCANCEL))
+		if (Sost->Checked)
+			fseek(file, LENTODEF, SEEK_CUR);
+		fread(&sName, 4, 1, file); //Чтение проверочное тега
+		if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
+		{ //Если криво значит НЕ дефолтный тег,
+			//ToLog(ftell(file),"ftell(K)");
+			fseek(file, Len - DEFAULTLENLEN, SEEK_CUR);
+			fread(&sName, 4, 1, file); //Чтение проверочное тега
+			if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
+			{
+				if (!feof(file))
+				{
+					ToLog(ftell(file),"ftell(EnF).");
+					EoF = 1; return;
+				}
+			}
+			else
+				fseek(file, -4, SEEK_CUR);
+		}
+		else
 		{
-			case	ID_YES:
-				fseek(file, sTell+4, SEEK_SET);
-				fread(&Len, LENSIZE, 1, file);
-				 fseek(file, tab.LenLen[tab.TagCount] - LENSIZE, SEEK_CUR);
-				fseek(file, Len, SEEK_CUR);
-				sTell = Tell;
-				sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
-				List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
-				return;
-			case  ID_NO:
-         	fseek(file, sTell+4, SEEK_SET);
-				fread(&Len, LENSIZE, 1, file);
-				fseek(file, Len, SEEK_CUR);
-            sTell = Tell;
-				sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
-				List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
-				return;
-			default: EoF = 1; return;
+			fseek(file, -4, SEEK_CUR);
 		}
 	}
-	sTell = Tell;
-	sName[0] = Name[0]; sName[1] = Name[1]; sName[2] = Name[2]; sName[3] = Name[3];
+	else
+		fseek(file, Len, SEEK_CUR);
+		//Out->Lines->Add(sName + IntToStr((int)sTell)); 																					 //List->Items->Count-1
 
-	fread(&Len, LENSIZE, 1, file);
 	//uni->Add(Name);
 	int Tag = 0;
 	for (; Tag < tab.TagCount; ++Tag)
@@ -768,102 +773,60 @@ void __fastcall TForm1::SPELreadClick(TObject *Sender)
 
 void __fastcall TForm1::SaveClick(TObject *Sender)
 {
-	if (RefStarts.empty() && Deleted.empty() && RefEnds.empty())
+	if (Deleted.empty())
 		return;
-	FILE *curr = NULL;
-	String Nam = "CLEAR_" + PluginName;
-	byte *mem = NULL;
-	long cap = 0;
-	int Len;
-	if (RefStarts.empty() == false || RefEnds.empty() == false)
-	{
-		if (Deleted.empty())
-			curr = fopen (Nam.c_str(), "wb");
-		else
-			curr = fopen (Nam.c_str(), "w+b");
-		if (!curr)
-			return ShowMessage( "Cannot open binary file.");
-		Save->Enabled = false;
-		fseek(file, 0, SEEK_END);
-		EoF = ftell(file);
-		fseek(file, 0, SEEK_SET);
-		fseek(curr, 0, SEEK_SET);
-		cap = 65536;
-		mem = new byte[cap];
-		for (Len = cap; Len < EoF; Len += cap)
-		{
-			fread (mem, cap, 1, file);
-			fwrite(mem, cap, 1, curr);
-		}
-		Len = EoF+cap-Len;
-		fread (mem, Len, 1, file);
-		fwrite(mem, Len, 1, curr);
-		char symb = PrepareForEdit ? '{' : '@';
-		std::vector<long>::iterator ele = RefStarts.begin();
-		for (; ele != RefStarts.end(); ++ele)
-		{
-			fseek(curr, *ele, SEEK_SET);
-			fwrite(&symb, 1, 1, curr);
-		}
-		symb = PrepareForEdit ? '}' : '#';
-		ele = RefEnds.begin();
-		for (; ele != RefEnds.end(); ++ele)
-		{
-			fseek(curr, *ele, SEEK_SET);
-			fwrite(&symb, 1, 1, curr);
-		}
-		if (Deleted.empty())
-		{
-			fclose (curr);
-			delete [] mem;
-			ToLog("Сохранено: "+Nam);
-			return;
-		}
-		else
-			Nam = "DONE_" + PluginName;
-	}
-	else
-		curr = file;
-	Deleted.insert(EoF);
+	Save2->Enabled = false;
+	String Nam = Form1->Caption;
+	Nam = Nam.SubString(1, Nam.Pos(" - TES"));
+	Nam = "DEL_" + Nam;
 	save = fopen (Nam.c_str(), "wb");
 	if (!save)
-		return ShowMessage( "Cannot open binary file.");
-	Save->Enabled = false;
-	std::set<long>::iterator el = Deleted.begin();
-	fseek(save, 0, SEEK_SET);
+		return ShowMessage( "Cannot open binary file");
+   fseek(file, 0, SEEK_END);
+	EoF = ftell(file);
+	Deleted.insert(EoF);
+	fseek(file, 0, SEEK_SET);
 
-	fseek(curr, 0, SEEK_SET);
-	Len = *el;
-	if (Len > cap)
-	{
-		mem = new byte[Len];
-		cap = Len;
-	}
-	fread (mem, Len, 1, curr);
-	fwrite(mem, Len, 1, save);
+	byte *mem;
+	std::set<int>::iterator el = Deleted.begin();
+	int cap = *el;
+	mem = new byte[cap];
+	fseek(file, 0, SEEK_SET);
+	fread (mem, cap, 1, file);
+	fwrite(mem, cap, 1, save);
 	for (el++; el != Deleted.end(); ++el)
 	{
 		//Out->Lines->Add(*el);
-		fseek(curr, 4, SEEK_CUR);
-		fread (&Len, LENSIZE, 1, curr);
-		fseek(curr, MOVERLENTOSNAME+Len, SEEK_CUR);
-		Len = *el - ftell(curr);
+		int Len;
+		fseek(file, 4, SEEK_CUR);
+		fread (&Len, LENSIZE, 1, file);
+		fseek(file, Len, SEEK_CUR);
+		Len = *el - ftell(file);
 		if (Len > cap)
 		{
 			mem = new byte[Len];
 			cap = Len;
 		}
-		fread (mem, Len, 1, curr);
+		fread (mem, Len, 1, file);
 		fwrite(mem, Len, 1, save);
 	}
-	//Запись Record Count
-	Len = List->RowCount - 1 - Deleted.size() + 1;
-	//fseek(save, (1+3+1+1+1+1)*4+32+256, SEEK_SET);
-	fseek(save, POSNRECORDS, SEEK_SET);
-	fwrite(&Len, 4, 1, save);
+	//Перепишем новые размеры Header
+	int DelSize = 0;
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+		int newlen = List->Cells[CHEADER][i].ToIntDef(-1);
+		if (newlen > -1)
+		{
+			int Offset = List->Cells[CSTART][i].ToInt();
+			fseek(save, Offset + LENSIZE - DelSize, SEEK_SET);
+			//fread (mem, cap, 1, save);
+			fwrite(&newlen, LENSIZE, 1, save);
+			DelSize += (List->Cells[CSIZE][i].ToInt() - newlen);
+		}
+	}
+
 	delete [] mem;
 	fclose (save);
-	fflush(curr);
 	ToLog("Сохранено: "+Nam);
 }
 //---------------------------------------------------------------------------
@@ -2447,7 +2410,13 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	//fread(&RecordCount, 4, 1, conf);
 	fseek(conf, 0, SEEK_SET);
 	if (ShowData1->Checked)
-		RefreshData(conf, StartCon);
+		{
+			//List->RowCount++;
+			//fseek(file, MLENTOSLEN-8, SEEK_CUR);
+			//fseek(file, 304, SEEK_CUR);
+			//fread(&Len, 4, 1, file);
+			//List->Cells[CDATA][0] = "Number of records: "+IntToStr(Len);
+		}
 	if (List->RowCount > AddedRow)
 		List->RowCount = AddedRow;
 	int nConf = 0;

@@ -465,6 +465,30 @@ public:		// User declarations
 		nTypes++;
 	}
 	String PluginName;
+	void Read3Byte()
+	{  
+  		fread(&Bytes3, 2*4, 1, file);
+   		char4ToLog(Bytes3.Name);
+  		ToLog(Bytes3.Length,"Length");
+		Bytes3.Create();
+		fread(Bytes3.Data, Bytes3.Length, 1, file);
+		for (size_t i = 0; i < Bytes3.Length/sizeof(int); ++i)
+			ToLog(Bytes3.Data[i].X+" "+Bytes3.Data[i].Y+" "+Bytes3.Data[i].Z);
+		NextSClick(Sender);
+	}
+	void ReadNAM5()
+	{
+		fread(&Nam5, 12, 1, file);
+		char4ToLog(Nam5.NAM5);
+		ToLog(Nam5.NAM5_Length,"Length");
+		String dd = "Colors:";
+		dd += Nam5.Red; dd += ' ';
+		dd += Nam5.Green; dd += ' ';
+		dd += Nam5.Blue; dd += ' ';
+		dd += Nam5.Null;
+		ToLog(dd);
+		//NextSClick(Sender);
+	}
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
