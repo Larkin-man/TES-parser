@@ -2482,14 +2482,20 @@ void __fastcall TForm1::PrepareGameClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TForm1::PrepareFor(char SYMBS[4])
 {
-	if (Deleted.empty() == false)
-		return;
+	tolog("Reopening "+PluginName);
+	fclose(file);
+	file = fopen(OpenDialog1->FileName.c_str(), "r+b");
+   if (!file)
+		return ShowMessage( "Cannot open binary file.");
 	RefStarts.clear();
 	RefEnds.clear();
+
 	char 	Name[5];	Name[4] = '\0';
 	int 	Len;
-	char 	curr;
-	int 	kol = 0;
+	long 	Tell=0;
+	char curr;
+	int kol = 0;
+
 	for (int i = 0; i < List->RowCount; i++)
 	{
 		if (List->Cells[CHEADER][i].Compare("INFO") == 0)
@@ -2498,8 +2504,6 @@ void TForm1::PrepareFor(char SYMBS[4])
 			if (size <= MNAMETOSUBLEN)
 				continue;
 			int end = List->Cells[CSTART][i].ToInt();
-			if (end > EoF)
-				break;
 			fseek(file, end, SEEK_SET);
 			fseek(file, MLENTOSLEN, SEEK_CUR);
 			end += size;
@@ -2518,7 +2522,9 @@ void TForm1::PrepareFor(char SYMBS[4])
 							if (nach)
 								tolog("Warning, double of { in " + List->Cells[CDATA][i] +" offset="+ IntToStr((int)ftell(file)));
 							nach = true;
-							RefStarts.push_back(ftell(file)-1);
+							fseek(file, -1, SEEK_CUR);
+							fwrite(&SYMBS[2], 1, 1, file);
+							fseek(file, 0, SEEK_CUR);
 							kol++;
 						} else
 						if (curr == SYMBS[1])
@@ -2526,7 +2532,9 @@ void TForm1::PrepareFor(char SYMBS[4])
 							if (!nach)
 								tolog("Warning, double of } in " + List->Cells[CDATA][i] +" offset="+IntToStr((int)ftell(file)));
 							nach = false;
-							RefEnds.push_back(ftell(file)-1);
+							fseek(file, -1, SEEK_CUR);
+							fwrite(&SYMBS[3], 1, 1, file);
+							fseek(file, 0, SEEK_CUR);
 							kol++;
 						}
 					}
@@ -2538,11 +2546,15 @@ void TForm1::PrepareFor(char SYMBS[4])
 		}
 	}
 	if (kol > 0)
-	{
 		tolog("Done. "+IntToStr(kol)+" substitutions. Click Save to complete.");
-		Save->Enabled = true;
-	}
 	else
-		tolog("No "+String(SYMBS[0]));
+		tolog("None of "+String(SYMBS[0]));
+	//save = fopen ("ddd", "wb");
+	//if (!save)
+	//	return ShowMessage( "Cannot open binary file");
+	//fseek(file, 0, SEEK_END);
+	//EoF = ftell(file);
+	//Deleted.insert(EoF);
+	fseek(file, 0, SEEK_SET);
 }
 //---------------------------------------------------------------------------
