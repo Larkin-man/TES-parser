@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-
+	
 #include <vcl.h>
 #include <stdio.h>
 #include <set>
@@ -73,16 +73,12 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	localeinstalled = false;
 	Univ.Capacity = 0;
 	PanelPRO->Visible = ProModeCK->Checked;
-	MovedFRMR Moved; Moved.MVRF[0]='M';Moved.MVRF[1]='V';Moved.MVRF[2]='R';Moved.MVRF[3]='F';// "MVRF";
-	Moved.Len1 = 4;
-	Moved.CNDT[0]='C'; Moved.CNDT[1]='N'; Moved.CNDT[2]='D'; Moved.CNDT[3]='T';//"CNDT";
-	Moved.Len2 = 8;
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 {
-	if (OpenDialog1->Execute() != ID_OK)
+    if (OpenDialog1->Execute() != ID_OK)
 		return;
 	if (file)
 		fclose(file);
@@ -105,8 +101,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	for (int i=OpenDialog1->FileName.Length(); i>1; --i)
 		if (OpenDialog1->FileName[i] == '\\')
 		{
-			OpenedFileName = OpenDialog1->FileName;
-			PluginName = OpenedFileName.SubString(i+1, OpenedFileName.Length());
+			PluginName = OpenDialog1->FileName.SubString(i+1, OpenDialog1->FileName.Length());
 			Form1->Caption = PluginName + " - TES parseer";
 			break;
 		}
@@ -124,12 +119,12 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	fread(&Len, 4, 1, file);
 	NextS->Caption = "Next="+String(Name)+"[" + IntToStr(Len) + "]";
 	//fseek(file, -(4+SLENSIZE), SEEK_CUR);
-	if (strncmp(Name, "TES3", 4) == 0)
+    if (strncmp(Name, "TES3", 4) == 0)
 	{
 		Setup(4, 12, 320); //TES3
 		fseek(file, MLENTOSLEN, SEEK_CUR);
 		fread(&Ver, 4, 1, file);
-		ToLog("Elder Scrolls 3 Morrowind file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
+		ToLog("Elder Scrolls 3 Morrowind file structure ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
 		Tes3 = true;
 	}
 	else
@@ -161,27 +156,27 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		POSNRECORDS = 8;
 		if (Ver > 0.1 && Ver <= 0.97 && mls == 20)
 		{
-			ToLog("Fallout 3 file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
+			ToLog("Fallout 3 file structure ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
 			Setup(2, mls, 34);
 		}
 		if (Ver > 0.97 && Ver <= 1.15 && mls == 16)
 		{
-			ToLog("Elder Scrolls 4 Oblivion file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
+			ToLog("Elder Scrolls 4 Oblivion file structure ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
 			Setup(2, mls, 30);
 		}
 		if (Ver > 1.32 && Ver <= 1.5 && mls == 20)
 		{
-			ToLog("Fallout New Vegas file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
+			ToLog("Fallout New Vegas file structure ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
 			Setup(2, mls, 34);
 		}
 		if (Ver > 1.5 && Ver <= 1.9 && mls == 20)
 		{
-			ToLog("Elder Scrolls 5 Skyrim file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
+			ToLog("Elder Scrolls 5 Skyrim file structure ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
 			Setup(2, mls, 34); //sky=34
 		}
 		if (mls == 12)
 		{
-			ToLog("Elder Scrolls 3 Morrowind file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
+			ToLog("Elder Scrolls 3 Morrowind file structure ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
 			Setup(4, 12, 320); //TES3
 			Tes3 = true;
 		}
@@ -190,7 +185,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 			ToLog("Unknown file type "+IntToStr(MAINLENSIZE));
 		}
 	}
-	TES3Read->Enabled = Tes3;
+	HEDRRead->Enabled = Tes3;
 	fseek(file, MLENTOSLEN-4-SLENSIZE, SEEK_SET);
 	Tell = MLENTOSLEN + Len;
 	String Req = " ";
@@ -371,7 +366,7 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::TES3ReadClick(TObject *Sender)
+void __fastcall TForm1::HEDRReadClick(TObject *Sender)
 {  //(TES3 + HEDR ++?)
 	if (ftell(file) > 0)
 		fseek(file, 0, SEEK_SET);
@@ -450,35 +445,40 @@ void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 	{
 		case INTFIELDS:
 			for (unsigned int i = 0; i < Univ.Length/sizeof(int); ++i)
-				tolog( ((int*)Univ.Data)[i] );
+				ToLog(Univ.Data[i].i);
 			break;
 		case TEXTFIELDS:
-				ToLogLen( (char*)Univ.Data , Univ.Length );
+			ToLog(&Univ.Data->c);
 			break;
 		case STRFIELDS:
 			if (localeinstalled)
-			{
+         {
 				wchar_t* mas = new wchar_t[Univ.Length+1];
-				mbstowcs(mas, (char*)(Univ.Data), Univ.Length+1);
+				mbstowcs(mas, &(Univ.Data->c), Univ.Length+1);
 				for (unsigned int i = 0; i < Univ.Length; ++i)
-					tolog(String ( mas[i]));
+					ToLog(String ( mas[i]));
 				delete []mas;
+
 			}
 			else
 				for (unsigned int i = 0; i < Univ.Length; ++i)
-					tolog( ((char*)Univ.Data)[i] );
+					ToLog(String ( (&Univ.Data[i/4].c)[i%4] ));
 			break;
 		case FLOATFIELDS:
 			for (unsigned int i = 0; i < Univ.Length/sizeof(float); ++i)
-				tolog( ((float*)Univ.Data)[i]);
+				ToLog(Univ.Data[i].f);
 			break;
 		case WORDFIELDS:
-			for (unsigned int i = 0; i < Univ.Length/sizeof(short); ++i)
-				tolog( ((short*)Univ.Data)[i]);
+			for (unsigned int i = 0; i < Univ.Length/4; ++i)
+			{
+				ToLog((unsigned int)Univ.Data[i].uw[0]);
+				ToLog((unsigned int)Univ.Data[i].uw[1]);
+			}
 			break;
 		case BYTEFIELDS:
+			byte* gg = reinterpret_cast<byte*>(Univ.Data);
 			for (unsigned int i = 0; i < Univ.Length; ++i)
-				tolog( ((byte*)Univ.Data)[i]);
+				ToLog(IntToStr(gg[i]));
 			break;
 	}
 	if (PanelList2->Visible)   	
@@ -496,6 +496,7 @@ void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 				}
 			}
 }
+
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::DeleteClick(TObject *Sender)
@@ -517,10 +518,9 @@ void TForm1::DeleteRecord(int Row)
 {
 	if (Row >= 0)
 	{
-		if (RefStarts.empty() == false || RefEnds.empty() == false)
-      	return;
 		int Offset = List->Cells[CSTART][Row].ToInt();
 		if	(Deleted.find(Offset) == Deleted.end())
+		//if (List->Cells[CSIZE][List->Row] != "-X-")
 		{
 			Deleted.insert(Offset);
 			DeletedSize += List->Cells[CSIZE][Row].ToIntDef(0);
@@ -575,64 +575,32 @@ void __fastcall TForm1::DelDatasClick(TObject *Sender)
 
 void __fastcall TForm1::NextSClick(TObject *Sender)
 {
-	if (ftell(file) >= EoF)
+	char Header[4];
+	//Out->Lines->Append(ftell(file));
+	if (ftell(file) >= EoF)//(feof(file))
 	{
 		NextS->Caption = "End";
 		return;
 	}
-	char 	Name[5];	Name[4] = '\0';
-	int 	Len;
-	char 	sName[5]; sName[4] = '\0';
-	long 	Tell = ftell(file);
-
-	fread(&Name, 4, 1, file);
-	fread(&Len, LENSIZE, 1, file);
-	List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
-	if ( !(Name[0]=='D'&&Name[1]=='A'&&Name[2]=='T'&&Name[3]=='A'))
+	fread(&Header, 4, 1, file);
+	if (Header)
 	{
-		if (Sost->Checked)
-			fseek(file, LENTODEF, SEEK_CUR);
-		fread(&sName, 4, 1, file); //Чтение проверочное тега
-		if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
-		{ //Если криво значит НЕ дефолтный тег,
-			//ToLog(ftell(file),"ftell(K)");
-			fseek(file, Len - DEFAULTLENLEN, SEEK_CUR);
-			fread(&sName, 4, 1, file); //Чтение проверочное тега
-			if ( !(TagSymb.Contains(sName[0])&&TagSymb.Contains(sName[1])&&TagSymb.Contains(sName[2])&&TagSymb.Contains(sName[3])))
-			{
-				if (!feof(file))
-				{
-					ToLog(ftell(file),"ftell(EnF).");
-					EoF = 1; return;
-				}
-			}
-			else
-				fseek(file, -4, SEEK_CUR);
-		}
-		else
-		{
-			fseek(file, -4, SEEK_CUR);
-		}
+		String hedr = "Next=0123[";
+		hedr[6] = Header[0];
+		hedr[7] = Header[1];
+		hedr[8] = Header[2];
+		hedr[9] = Header[3];
+		NextS->Caption = hedr;
+		int len = 0;
+		fread(&len, SLENSIZE, 1, file);
+		NextS->Caption = NextS->Caption + IntToStr(len) + "]";
+		fseek(file, -(4+SLENSIZE), SEEK_CUR);
 	}
 	else
-		fseek(file, Len, SEEK_CUR);
-		//Out->Lines->Add(sName + IntToStr((int)sTell)); 																					 //List->Items->Count-1
-
-	//uni->Add(Name);
-	int Tag = 0;
-	for (; Tag < tab.TagCount; ++Tag)
-		if (tab.Name[Tag] == Name)
-			break;
-	if (tab.LenLen[Tag] != LENSIZE)
 	{
-   	if (Sost->Checked)
-				OneBody = false;
-		fseek(file, tab.LenLen[Tag] - LENSIZE, SEEK_CUR);
+		NextS->Caption = "Next null or end.";
+		fseek(file, -4, SEEK_CUR);
 	}
-
-	if (OneBody)
-		fseek(file, Len, SEEK_CUR);
-	List->Items->Add(String(Name) +"[" + IntToStr(Len)+"]"+IntToStr((int)Tell) );
 }
 //---------------------------------------------------------------------------
 
@@ -642,7 +610,7 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 	int row;
 	if (FindIdx >= Out->Lines->Count)
 		FindIdx = -1;
-	FindIdx++;
+	FindIdx ++;
 	FindNext->Caption = "Find "+IntToStr(FindIdx);
 	if (Out->SelLength <= 0)
 	{
@@ -767,29 +735,109 @@ void __fastcall TForm1::SPELreadClick(TObject *Sender)
 	else if (Export)
 		Export->Add(exp);
 	NextSClick(Sender);
-
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::SaveClick(TObject *Sender)
 {
-	if (Deleted.empty())
+	if (RefStarts.empty() && Deleted.empty() && RefEnds.empty())
 		return;
-	Save2->Enabled = false;
+<<<<<<< Updated upstream
+	FILE *curr = NULL;
+	String Nam = "CLEAR_" + PluginName;
+	byte *mem = NULL;
+	long cap = 0;
+	int Len;
+	if (RefStarts.empty() == false || RefEnds.empty() == false)
+	{
+		if (Deleted.empty())
+			curr = fopen (Nam.c_str(), "wb");
+		else
+			curr = fopen (Nam.c_str(), "w+b");
+		if (!curr)
+			return ShowMessage( "Cannot open binary file.");
+		Save->Enabled = false;
+		fseek(file, 0, SEEK_END);
+		EoF = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		fseek(curr, 0, SEEK_SET);
+		cap = 65536;
+		mem = new byte[cap];
+		for (Len = cap; Len < EoF; Len += cap)
+		{
+			fread (mem, cap, 1, file);
+			fwrite(mem, cap, 1, curr);
+		}
+		Len = EoF+cap-Len;
+		fread (mem, Len, 1, file);
+		fwrite(mem, Len, 1, curr);
+		char symb = PrepareForEdit ? '{' : '@';
+		std::vector<long>::iterator ele = RefStarts.begin();
+		for (; ele != RefStarts.end(); ++ele)
+		{
+			fseek(curr, *ele, SEEK_SET);
+			fwrite(&symb, 1, 1, curr);
+		}
+		symb = PrepareForEdit ? '}' : '#';
+		ele = RefEnds.begin();
+		for (; ele != RefEnds.end(); ++ele)
+		{
+			fseek(curr, *ele, SEEK_SET);
+			fwrite(&symb, 1, 1, curr);
+		}
+		if (Deleted.empty())
+		{
+			fclose (curr);
+			delete [] mem;
+			ToLog("Сохранено: "+Nam);
+			return;
+		}
+		else
+			Nam = "DONE_" + PluginName;
+	}
+	else
+		curr = file;
+	Deleted.insert(EoF);
+=======
+	Save->Enabled = false;
 	String Nam = Form1->Caption;
 	Nam = Nam.SubString(1, Nam.Pos(" - TES"));
-	Nam = "DEL_" + Nam;
+	if (Nam.Length() <= 0)
+	{
+		Nam = "ABCkoord.esp";
+		Nam[1] = file->curp[0]; Nam[2] = file->curp[1]; Nam[3] = file->curp[2];
+	}
+	Nam = "CLEAR_" + Nam;
+>>>>>>> Stashed changes
 	save = fopen (Nam.c_str(), "wb");
 	if (!save)
-		return ShowMessage( "Cannot open binary file");
-   fseek(file, 0, SEEK_END);
-	EoF = ftell(file);
-	Deleted.insert(EoF);
-	fseek(file, 0, SEEK_SET);
+		return ShowMessage( "Cannot open binary file.");
+	Save->Enabled = false;
+	std::set<long>::iterator el = Deleted.begin();
+	fseek(save, 0, SEEK_SET);
 
+<<<<<<< Updated upstream
+	fseek(curr, 0, SEEK_SET);
+	Len = *el;
+	if (Len > cap)
+	{
+		mem = new byte[Len];
+		cap = Len;
+	}
+	fread (mem, Len, 1, curr);
+	fwrite(mem, Len, 1, save);
+	for (el++; el != Deleted.end(); ++el)
+	{
+		//Out->Lines->Add(*el);
+		fseek(curr, 4, SEEK_CUR);
+		fread (&Len, LENSIZE, 1, curr);
+		fseek(curr, MOVERLENTOSNAME+Len, SEEK_CUR);
+		Len = *el - ftell(curr);
+=======
 	byte *mem;
 	std::set<int>::iterator el = Deleted.begin();
 	int cap = *el;
+	int Len;
 	mem = new byte[cap];
 	fseek(file, 0, SEEK_SET);
 	fread (mem, cap, 1, file);
@@ -797,36 +845,27 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	for (el++; el != Deleted.end(); ++el)
 	{
 		//Out->Lines->Add(*el);
-		int Len;
 		fseek(file, 4, SEEK_CUR);
 		fread (&Len, LENSIZE, 1, file);
-		fseek(file, Len, SEEK_CUR);
+		fseek(file, MOVERLENTOSNAME+Len, SEEK_CUR);
 		Len = *el - ftell(file);
+>>>>>>> Stashed changes
 		if (Len > cap)
 		{
 			mem = new byte[Len];
 			cap = Len;
 		}
-		fread (mem, Len, 1, file);
+		fread (mem, Len, 1, curr);
 		fwrite(mem, Len, 1, save);
 	}
-	//Перепишем новые размеры Header
-	int DelSize = 0;
-	for (int i = 0; i < List->RowCount; ++i)
-	{
-		int newlen = List->Cells[CHEADER][i].ToIntDef(-1);
-		if (newlen > -1)
-		{
-			int Offset = List->Cells[CSTART][i].ToInt();
-			fseek(save, Offset + LENSIZE - DelSize, SEEK_SET);
-			//fread (mem, cap, 1, save);
-			fwrite(&newlen, LENSIZE, 1, save);
-			DelSize += (List->Cells[CSIZE][i].ToInt() - newlen);
-		}
-	}
-
+	//Запись Record Count
+	Len = List->RowCount - 1 - Deleted.size() + 1;
+	//fseek(save, (1+3+1+1+1+1)*4+32+256, SEEK_SET);
+	fseek(save, POSNRECORDS, SEEK_SET);
+	fwrite(&Len, 4, 1, save);
 	delete [] mem;
 	fclose (save);
+	fflush(curr);
 	ToLog("Сохранено: "+Nam);
 }
 //---------------------------------------------------------------------------
@@ -847,7 +886,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 {
 	if (Opening)
 		return;
-	//1 Чекнем секрет поле maina
+	//Чекнем секрет поле maina
 	int Offset = List->Cells[CSTART][ARow].ToInt();
 	fseek(file, Offset + 4 + LENSIZE, SEEK_SET);
 	fread(SecretData, 4, SecretLen, file);
@@ -862,7 +901,6 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 			Secr->Visible = true;
 			break;
 		}
-	//------------
 	if (PanelList2->Visible == false)
 		return;
 	SubDescript->Visible = false;
@@ -870,11 +908,10 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	String HEAD, InterpretStr, find;
 	unsigned int Len;
 	unsigned char *st = NULL;
-	//void *st = NULL;
 	DebugL2c = 0;
 	if (ARow >= 0)
 	{
-		//TYPES TABLE найдем HEAD от и до
+		//TYPES TABLES найдем HEAD от и до
 		HEAD = List->Cells[CHEADER][ARow];
 		if (Tes3==false && HEAD=="NPC_")
 		{
@@ -883,18 +920,20 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		}
 		int m1=-1, m2=-2; //определим начало и конец для оптимизации
 		for (int t = 0; t < types.RowCount; ++t)
-			if (HEAD.Compare(THeader[t]) == 0)
+			if (THeader[t].Compare(HEAD) == 0)
 			{
 				if (m1 == -1)
 					m1 = t;
 				m2 = t;
 			} else if (m1 != -1)
 				break;
-		//--------------
+		//if (m2 == -1)
+		//	return;
+		///////////
 		Indextt = ARow;
 		ToE->Text = List->Cells[CSTART][ARow];
 		BlockList2Sel = true;
-		//GoClick(Sender);
+	//GoClick(Sender);
 		//Сбросить номер строки
 		if (SelMainHedr.Compare(HEAD) != 0)
 		{
@@ -931,58 +970,53 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 			List2->Cells[CSIZE][Row] = Univ.Length;
 			List2->Cells[CDATA][Row] = "";
 			List2->Cells[CTYPE][Row] = "";
-			Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
+			Len = Univ.Length > 64 ? 64 : Univ.Length;
 			st = NULL;
 			InterpretStr = "";
-			//1 сначала ищем в TYPES.txt
+			//1 сначада ищем в TYPES.txt
 			find = List2->Cells[CHEADER][Row];//= List2->Cells[CHEADER][sub];
 			//SetDescription(-1, Row);
 			for (int t = m1; t <= m2; ++t)
-				if (find.Compare(TSubHeader[t]) == 0)
+				if (TSubHeader[t].Compare(find) == 0)
 				{  //нашли
 					if (TDescr[t].Length() > 0)
 						SetDescription(t, Row); //	SubIndexes[Row] = t;
 					else
 						SetDescription(-1, Row);
-					st = file->curp;
-					List2->Cells[CTYPE][Row] = TType[t][1];
-					switch (TType[t][1])
+					//////REINTERPRET
+					if (TType[t].Length() >= 1)
 					{
-						//case 't': List2->Cells[CDATA][Row] = st;  break;  //ToLog(&Name[8]);
-						case 's': List2->Cells[CDATA][Row] = String((char*)st);  break;
-						case 'i':
-						for (unsigned int i = 0; i < Len; i+=sizeof(int))
-								InterpretStr += IntToStr(*(int*)&st[i])+" ";
-							break;
-						case 'b':
-							for (unsigned int i = 0; i < Len; ++i)
-								InterpretStr += IntToStr(*(byte*)&st[i])+" ";
-							break;
-						case 'f': for (unsigned int i = 0; i < Len; i+=sizeof(float))
-								InterpretStr += FloatToStrF(*(float*)&st[i], ffGeneral, 4, 2)+" ";
-							break;
-						case 'w': for (unsigned int i = 0; i < Len; i+=sizeof(short))
-								InterpretStr += IntToStr(*(short*)&st[i])+" ";
-							break;
-						case 'F': //FRMR
-							ish.i = 0; ish.b[0] = *(byte*)&st[3];
-							InterpretStr = IntToStr(ish.i);
-							ish.b[0] = *(byte*)&st[0]; ish.b[1] = *(byte*)&st[1]; ish.b[2] = *(byte*)&st[2];
-							InterpretStr = IntToStr(ish.i) + " " + InterpretStr +" ";
-							break;
-						default :
-							for (unsigned int i = 0; i < Len; ++i)
-								InterpretStr += IntToStr(*(byte*)&st[i])+" ";
+						st = file->curp;
+						List2->Cells[CTYPE][Row] = TType[t][1];
+						switch (TType[t][1])
+						{
+							//case 't': List2->Cells[CDATA][Row] = st;  break;  //ToLog(&Name[8]);
+							case 's': List2->Cells[CDATA][Row] = String((char*)st);  break;
+							case 'i':
+								for (unsigned int i = 0; i < Len; i+=sizeof(int))
+									InterpretStr += IntToStr(*(int*)&st[i])+" ";
+								break;
+							case 'b':
+								for (unsigned int i = 0; i < Len; ++i)
+									InterpretStr += IntToStr(*(byte*)&st[i])+" ";
+								break;
+							case 'f': for (unsigned int i = 0; i < Len/sizeof(float); i+=sizeof(float))
+									InterpretStr += FloatToStrF(*(float*)&st[i], ffGeneral, 4, 2)+" ";
+								break;
+							case 'F': //FRMR
+								ish.i = 0; ish.b[0] = *(byte*)&st[3];
+								InterpretStr = IntToStr(ish.i);
+								ish.b[0] = *(byte*)&st[0]; ish.b[1] = *(byte*)&st[1]; ish.b[2] = *(byte*)&st[2];
+								InterpretStr = IntToStr(ish.i) + " " + InterpretStr +" ";
+								break;
+						}
+						if (InterpretStr.Length() > 0)
+							List2->Cells[CDATA][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
 					}
-					if (InterpretStr.Length() > 0)
-						List2->Cells[CDATA][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
-
 				}
-			//Не нашли в TYPES.txt
 			if	(List2->Cells[CTYPE][Row] == "")
 			{
-				SetDescription(-1, Row); //ETOSHTO
-				unsigned int pe;
+				SetDescription(-1, Row);
 				//2 Не нашли. Поищем в встроеных
 				for (int i = 0; i < nTypes; ++i)
 					if (strncmp(TagTypes[i].Name, Name, 4) == 0)
@@ -991,20 +1025,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 						List2->Cells[CTYPE][Row] = TagTypes[i].Type;
 						switch (TagTypes[i].Type)
 						{
-							case 't':
-								//check pechatn symbols
-								for (pe = 0; pe < Univ.Length-1; pe++)
-									if (st[pe] < 32)
-										break;
-								if (pe >= Univ.Length-1)
-								{
-									find = (char*)st;
-									if ((unsigned int)find.Length() > Univ.Length)
-										List2->Cells[CDATA][Row] = find.SetLength(Univ.Length);
-									else
-										List2->Cells[CDATA][Row] = find;
-									i = nTypes;	break;
-								}
+							case 't': if (st[0] >= 32) {
+								List2->Cells[CDATA][Row] = (char*)st; i = nTypes;  break; }
 							case '1':
 								for (unsigned int i = 0; i < Len; i+=1)
 									InterpretStr += IntToStr(*(byte*)&st[i])+" ";
@@ -1031,7 +1053,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 				if (Name[1]=='N'&&Name[2]=='A'&&Name[3]=='M')
 				{
 					st = file->curp;
-					if (st[0] >= 32 && st[1] >= 32)
+					if (st[0] >= 32)
 					{
 						InterpretStr = (char*)st;
 						InterpretStr.SetLength(Len);
@@ -1076,7 +1098,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		BlockList2Sel = true;
 		List2->Selection.Top = 0;
 		List2->Selection.Bottom = 0;
-	  BlockList2Sel = false;
+      BlockList2Sel = false;
 		fseek(file, List->Cells[CSTART][ARow].ToInt() + 4 + MAINLENSIZE, SEEK_SET);
 		NextSClick(Sender);
 	}
@@ -1097,37 +1119,7 @@ void TForm1::SetDescription(int Num, int Row)
 	//SubIndexes[i] = -1;
 }
 //---------------------------------------------------------------------------
-void Sorting()
-{
-	int Col = Section->Index;
-	CompareString = (Col==CHEADER||Col==CDATA);
-	//String  t;
-	List->ScrollBars = ssNone;
-	int tim = 100;
-	for (int i=0; i < List->RowCount; i++)       //тут можно -4
-	{
-		//printf("i=%d\n",i);
-		if (i>tim)
-		{
-			tim += 100;
-			Out->Lines->Add(float((float)i/List->RowCount));
-      }
-		for (int j=List->RowCount-1; j >= i+1; j--)
-			if (ListCompare(List->Cells[Col][i], List->Cells[Col][j]))   //.Compare(List->Cells[Col][j]))медленней
-			{
-				List->Cols[CHEADER]->Exchange(i,j);
-				List->Cols[CSTART]->Exchange(i,j);
-				List->Cols[CSIZE]->Exchange(i,j);
-				List->Cols[CDATA]->Exchange(i,j);
-				//print (M[i], M[j]);
-				//t = List->Cells[Section->Index][i];
-				//List->Cells[Col][i] = List->Cells[Col][j];
-				//List->Cells[Col][j] = t;
-			}
-	}
-	List->ScrollBars = ssVertical; //List->Items->EndUpdate();
-	//List->Refresh();
-}
+
 void TForm1::QuickSort(int iLo, int iHi)  //рекурсивная
 {
 	int Lo, Hi;
@@ -1194,33 +1186,21 @@ void TForm1::QuickSort(int iLo, int iHi)  //рекурсивная
 	//Out->Lines->Add("end;\n");
 }
 //---------------------------------------------------------------------------
-void __fastcall TForm1::LoadListClick(TObject *Sender)
-{
-	FindList = new TStringList;
-	FindList->LoadFromFile("Find List.txt");
-	if (FindList == NULL)
-		return ShowMessage("Not found Find List.txt");
-	if (FindList->Count <= 0)
-		return ShowMessage("Find List.txt is Empty");
-	FindCurr = 0;
-	Out->Lines->Add(FindList->Count);
-	FindNAME->Enabled = true;
-}
 
 void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl,
 			 THeaderSection *Section)
 {
 	//Tick = ::GetTickCount();
-	//static bool HasSorting[4] ={false,false,false,false};
+	 //static bool HasSorting[4] ={false,false,false,false};
 	//TStrings *Curr = List->Rows[1];
 	//Out->Lines->Exchange(1,2);
-	//List->Rows->Exchange(1,3);  неработает
+	//List->Rows->Exchange(1,3);  ythf,jnftn
 	//List->Rows[1] = List->Rows[2];
 	//List->Rows[2] = Curr;    неработает обмен
 	SortingColumn = Section->Index;
 	CompareString = (SortingColumn==CHEADER||SortingColumn==CDATA);
 	List->ScrollBars = ssNone;
-	QuickSort(0, List->RowCount-1);
+	QuickSort(0,List->RowCount-1);
 	//Tick = ::GetTickCount() - Tick;  //Вычислить время расчета
 	//Out->Lines->Add("Время расчета : "+FloatToStr(Tick)+" миллисек.");
 	List->ScrollBars = ssVertical;
@@ -1236,32 +1216,14 @@ void __fastcall TForm1::HeaderControl1Resize(TObject *Sender)
 
 void __fastcall TForm1::TestPClick(TObject *Sender)
 {
-	//Out->Lines->Add(sizeof(RECORD3INT));
-	//Out->Lines->Add(sizeof(RECORD1INT1STR));
-	//Out->Lines->Add(sizeof(RECORD4INT1STR));
-	//Out->Lines->Add(sizeof(ff));
-	const int size = 13;
-	char flu[size];
-	flu[0] = 27;
-	flu[1] = 0;
-	flu[2] = 8;
-	flu[3] = 16;
-	flu[4] = 2;
-	flu[5] = 4;
-	flu[6] = 1;
-	flu[7] = 0;
-	flu[8] = 0;	flu[9] = 0; flu[10] = 0; flu[11] = 0;
-	int *i = (int*)flu;
-	ToLog(i[0]);
-	ToLog(i[1]);
-	i[1] = 333;
-	unsigned int hh = 0;
-	for (int *i = (int*)flu; hh < size/sizeof(int); ++i, hh++)
-		ToLog(*i);
-	ToLog("neu");
-	//int *s = i + size;
-	for (int *i = (int*)flu; i < (int*)(flu + size); ++i)
-		ToLog(*i);
+	TestMenuClick(Sender);
+<<<<<<< Updated upstream
+	//for (int i = 0; i < nTypes; ++i)
+	//	Out->Lines->Add(String(TagTypes[i].Name) +"\t"+ String(TagTypes[i].Type));
+=======
+	for (int i = 0; i < nTypes; ++i)
+		Out->Lines->Add(String(TagTypes[i].Name) +"\t"+ String(TagTypes[i].Type));
+>>>>>>> Stashed changes
 }
 //---------------------------------------------------------------------------
 
@@ -1423,8 +1385,8 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 		}
 	}
 	LogUp = true;
-	Export->SaveToFile(PluginName+".txt");
-	ShowMessage("Saved:"+PluginName+".txt");
+	Export->SaveToFile(PluginName+".csv");
+	ShowMessage("Saved:"+PluginName+".csv");
 }
 //---------------------------------------------------------------------------
 
@@ -1498,8 +1460,7 @@ void __fastcall TForm1::List2SelectCell(TObject *Sender, int ACol, int ARow, boo
 		if (bloklist2 == 1)
 			bloklist2 = 0;
 		ToE->Text = List2->Cells[CSTART][ARow];
-
-		if (ARow < cSubIndexes && SubIndexes[ARow] > 0 && SubIndexes[ARow] < types.RowCount)
+		if (SubIndexes[ARow] != -1)
 		{
 			SubDescript->Text = TDescr[SubIndexes[ARow]];
 			SubDescript->Visible = true;
@@ -1959,80 +1920,51 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 		else
 			Offset = el->Offset;
 	//
-		for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
-			Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
+	//for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
+	//	Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
 	fseek(file, 0, SEEK_SET);
-	int MainLen;
-	int MainOffset;
-	int DeletedSize = 0;
-	int AllDeletedSize = 0;
-	int squeeze;
-	byte *mem;
+	int MemSize = 0;
+	byte *Mem = NULL;
 	int Len;
-	int cap;
-	el = SubDelete.begin();
-	//читаем маинлен чтоб его уменьшить потом
-	MainOffset = el->MainLenOffset;
-	cap = el->Offset;
-	mem = new byte[cap];
 	fseek(file, 0, SEEK_SET);
-	fread (mem, cap, 1, file);
-	fwrite(mem, cap, 1, save);
 
-			fseek(file, 4, SEEK_CUR); //промотал TES3 char
-			fread (&Len, LENSIZE, 1, file);
-		fseek(file, -4 - LENSIZE, SEEK_CUR);
-		DeletedSize = (4 + LENSIZE + Len);
-	for (el++; el != SubDelete.end(); ++el)
+	el = SubDelete.begin();
+	for (; el != SubDelete.end(); ++el)
 	{
-	  //fseek(fi;e в начало кучи
-		fseek(file, 4, SEEK_CUR); //промотал MAIN NAME
-		fread (&Len, LENSIZE, 1, file);
-		fseek(file, Len, SEEK_CUR);
-		squeeze = el->Offset - ftell(file);
-		if (squeeze > cap)
+		int GoodSize = el->Offset - ftell(file);
+		if (GoodSize > MemSize)
 		{
-			mem = new byte[squeeze];
-			cap = squeeze;
+			Mem = new byte[GoodSize];
+			MemSize = GoodSize;
 		}
-		if (squeeze > 0)
+		if (GoodSize > 0)
 		{
-			fread (mem, squeeze, 1, file);
-			fwrite(mem, squeeze, 1, save);
+			fread (Mem, GoodSize, 1, file);
+			fwrite(Mem, GoodSize, 1, save);
 		}
-			el->Offset = 4 + LENSIZE + Len; //?для уменьшения лен base
-		//if (DeletedSize != 0)
-		DeletedSize += (4 + LENSIZE + Len);
-		int mlo = el->MainLenOffset;
-		Offset = el->Offset;
-
-		if (el+1 != SubDelete.end() && (el+1)->MainLenOffset != el->MainLenOffset)
-		//if (MainOffset != el->MainLenOffset)
+		fseek(file, el->Size, SEEK_CUR); //к началу слудующего блока
+	}
+	//Перепишем размеры main
+	int AllDeletedSize = 0;
+	int DeletedSize = 0;
+	el = SubDelete.begin();
+	for (; el != SubDelete.end(); ++el)
+	{
+		DeletedSize += el->Size;
+		if (el+1 != SubDelete.end() && (el+1)->MainLenOffset != el->MainLenOffset )
 		{
-			//Out->Lines->Add(IntToStr(MainOffset)+"<>"+IntToStr(el->MainLenOffset));
-			//Out->Lines->Add(DeletedSize);
-			//уменьшение размера
-			//int endsave = ftell(save);
-			fseek(save, MainOffset-AllDeletedSize, SEEK_SET);
+			//Out->Lines->Add(IntToStr(DeletedSize)+"dasaf");
+			fseek(save, el->MainLenOffset - AllDeletedSize, SEEK_SET); //промотал TES3 char
+			int NewLen = el->MainLen - DeletedSize;
+			fwrite(&NewLen, SLENSIZE, 1, save);
 			AllDeletedSize += DeletedSize;
-			int idx = List->Cols[CSTART]->IndexOf(String(MainOffset-4));
-			if (idx == -1)				return;
-			Len = List->Cells[CSIZE][idx].ToInt();
-				  //fread (&Len, LENSIZE, 1, save); вместо предыдущей
-			Len -= DeletedSize;
-			ToLog(IntToStr(Len)+"=Lenзаписали DeleteSize="+IntToStr(DeletedSize));
-				  //fseek(save, -LENSIZE, SEEK_CUR);
-			fwrite(&Len, LENSIZE, 1, save);
-			fseek(save, 0, SEEK_END); //fseek(save, endsave, SEEK_SET);
-			MainOffset = el->MainLenOffset;
-			DeletedSize = 0; //da
+			DeletedSize = 0;
 		}
 	}
-	delete [] mem;
+	delete [] Mem;
 	fclose (save);
 	Out->Lines->Add("Сохранено: "+Nam);
 	Out->Lines->Add("AllDeletedSize="+IntToStr(AllDeletedSize));
-	//el = SubDelete.begin();
 }
 //---------------------------------------------------------------------------
 
@@ -2157,7 +2089,7 @@ void __fastcall TForm1::HeaderControl2Resize(TObject *Sender)
 void __fastcall TForm1::HeaderControl2SectionResize(THeaderControl *HeaderControl,
 			 THeaderSection *Section)
 {
-	List2->ColWidths[Section->Index] = Section->Width;// - Section->Index;
+	List2->ColWidths[Section->Index] = Section->Width;
 }
 //---------------------------------------------------------------------------
 
@@ -2370,10 +2302,8 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 			Form1->Caption = PluginName + " - TES parseer";
 			break;
 		}
-	bool dele = false;
-	dele = (Application->MessageBoxA(L"Delete conflicts?", L"Option", MB_YESNO) == ID_YES);
 	Opening = true;
-	TES3Read->Enabled = true;
+	HEDRRead->Enabled = true;
 	if (ClearOut->Checked)
 		Out->Lines->Clear();
 	Out->Lines->Add("Check conflicts for " + PluginName);
@@ -2410,13 +2340,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	//fread(&RecordCount, 4, 1, conf);
 	fseek(conf, 0, SEEK_SET);
 	if (ShowData1->Checked)
-		{
-			//List->RowCount++;
-			//fseek(file, MLENTOSLEN-8, SEEK_CUR);
-			//fseek(file, 304, SEEK_CUR);
-			//fread(&Len, 4, 1, file);
-			//List->Cells[CDATA][0] = "Number of records: "+IntToStr(Len);
-		}
+		RefreshData(conf, StartCon);
 	if (List->RowCount > AddedRow)
 		List->RowCount = AddedRow;
 	int nConf = 0;
@@ -2434,8 +2358,6 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 				{
 					Out->Lines->Add( Hed + "\t" + Dat +"\t"+List->Cells[CSTART][j]+"\t"+List->Cells[CSIZE][j] );
 					nConf++;
-					if (dele)
-						DeleteRecord(j);
 				}
 				else
 					Out->Lines->Add("Same identifiers\t"+Dat+"\t"+List->Cells[CHEADER][j]+"\t"+Hed+"\t"+List->Cells[CSTART][j] );
@@ -2467,6 +2389,7 @@ bool __fastcall TForm1::FormHelp(WORD Command, int Data, bool &CallHelp)
 }
 //---------------------------------------------------------------------------
 
+<<<<<<< Updated upstream
 void __fastcall TForm1::PrepareEClick(TObject *Sender)
 {
 	PrepareForEdit = true;
@@ -2482,20 +2405,14 @@ void __fastcall TForm1::PrepareGameClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TForm1::PrepareFor(char SYMBS[4])
 {
-	tolog("Reopening "+PluginName);
-	fclose(file);
-	file = fopen(OpenDialog1->FileName.c_str(), "r+b");
-   if (!file)
-		return ShowMessage( "Cannot open binary file.");
+	if (Deleted.empty() == false)
+		return;
 	RefStarts.clear();
 	RefEnds.clear();
-
 	char 	Name[5];	Name[4] = '\0';
 	int 	Len;
-	long 	Tell=0;
-	char curr;
-	int kol = 0;
-
+	char 	curr;
+	int 	kol = 0;
 	for (int i = 0; i < List->RowCount; i++)
 	{
 		if (List->Cells[CHEADER][i].Compare("INFO") == 0)
@@ -2504,6 +2421,8 @@ void TForm1::PrepareFor(char SYMBS[4])
 			if (size <= MNAMETOSUBLEN)
 				continue;
 			int end = List->Cells[CSTART][i].ToInt();
+			if (end > EoF)
+				break;
 			fseek(file, end, SEEK_SET);
 			fseek(file, MLENTOSLEN, SEEK_CUR);
 			end += size;
@@ -2522,9 +2441,7 @@ void TForm1::PrepareFor(char SYMBS[4])
 							if (nach)
 								tolog("Warning, double of { in " + List->Cells[CDATA][i] +" offset="+ IntToStr((int)ftell(file)));
 							nach = true;
-							fseek(file, -1, SEEK_CUR);
-							fwrite(&SYMBS[2], 1, 1, file);
-							fseek(file, 0, SEEK_CUR);
+							RefStarts.push_back(ftell(file)-1);
 							kol++;
 						} else
 						if (curr == SYMBS[1])
@@ -2532,9 +2449,7 @@ void TForm1::PrepareFor(char SYMBS[4])
 							if (!nach)
 								tolog("Warning, double of } in " + List->Cells[CDATA][i] +" offset="+IntToStr((int)ftell(file)));
 							nach = false;
-							fseek(file, -1, SEEK_CUR);
-							fwrite(&SYMBS[3], 1, 1, file);
-							fseek(file, 0, SEEK_CUR);
+							RefEnds.push_back(ftell(file)-1);
 							kol++;
 						}
 					}
@@ -2546,15 +2461,13 @@ void TForm1::PrepareFor(char SYMBS[4])
 		}
 	}
 	if (kol > 0)
+	{
 		tolog("Done. "+IntToStr(kol)+" substitutions. Click Save to complete.");
+		Save->Enabled = true;
+	}
 	else
-		tolog("None of "+String(SYMBS[0]));
-	//save = fopen ("ddd", "wb");
-	//if (!save)
-	//	return ShowMessage( "Cannot open binary file");
-	//fseek(file, 0, SEEK_END);
-	//EoF = ftell(file);
-	//Deleted.insert(EoF);
-	fseek(file, 0, SEEK_SET);
+		tolog("No "+String(SYMBS[0]));
 }
 //---------------------------------------------------------------------------
+=======
+>>>>>>> Stashed changes
