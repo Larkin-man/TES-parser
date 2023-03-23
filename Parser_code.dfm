@@ -4,7 +4,7 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parseer'
   ClientHeight = 757
-  ClientWidth = 1097
+  ClientWidth = 1072
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,7 +18,7 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 19
   object Splitter1: TSplitter
-    Left = 601
+    Left = 585
     Top = 27
     Height = 730
     ExplicitLeft = 546
@@ -36,14 +36,13 @@ object Form1: TForm1
   object PanelUp: TPanel
     Left = 0
     Top = 0
-    Width = 1097
+    Width = 1072
     Height = 27
     Align = alTop
     Caption = 'PanelUp'
     PopupMenu = PopupMenu1
     ShowCaption = False
     TabOrder = 0
-    ExplicitWidth = 1072
     object LDele: TLabel
       AlignWithMargins = True
       Left = 517
@@ -173,9 +172,9 @@ object Form1: TForm1
     end
   end
   object Out: TMemo
-    Left = 604
+    Left = 588
     Top = 27
-    Width = 278
+    Width = 269
     Height = 730
     Align = alClient
     Lines.Strings = (
@@ -184,18 +183,15 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
-    ExplicitLeft = 588
-    ExplicitWidth = 269
   end
   object PanelPRO: TPanel
-    Left = 882
+    Left = 857
     Top = 27
     Width = 215
     Height = 730
     Align = alRight
     ShowCaption = False
     TabOrder = 4
-    ExplicitLeft = 857
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 3
@@ -212,7 +208,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      object TES3Read: TButton
+      object HEDRRead: TButton
         Left = 0
         Top = 0
         Width = 50
@@ -221,7 +217,7 @@ object Form1: TForm1
         Caption = 'TES3'
         Enabled = False
         TabOrder = 0
-        OnClick = TES3ReadClick
+        OnClick = HEDRReadClick
       end
       object CellRead: TButton
         Left = 50
@@ -239,7 +235,6 @@ object Form1: TForm1
         Height = 25
         Caption = 'sGMDT'
         TabOrder = 2
-        Visible = False
         OnClick = GMDTReadClick
       end
       object TestP: TButton
@@ -249,7 +244,6 @@ object Form1: TForm1
         Height = 25
         Caption = 'TestP'
         TabOrder = 4
-        Visible = False
         OnClick = TestPClick
       end
       object SPELread: TButton
@@ -259,7 +253,6 @@ object Form1: TForm1
         Height = 25
         Caption = 'SPEL'
         TabOrder = 5
-        Visible = False
         OnClick = SPELreadClick
       end
       object DelTrash: TButton
@@ -281,7 +274,6 @@ object Form1: TForm1
         Height = 25
         Caption = 'SPLM'
         TabOrder = 10
-        Visible = False
         OnClick = SPLMreadClick
       end
       object ExportBtn: TButton
@@ -375,6 +367,7 @@ object Form1: TForm1
         ParentShowHint = False
         ShowHint = True
         TabOrder = 11
+        Visible = False
         OnClick = PushCoordClick
       end
       object Wordwap: TCheckBox
@@ -508,30 +501,6 @@ object Form1: TForm1
         TabOrder = 23
         OnClick = CheckConflictsClick
       end
-      object PrepareE: TButton
-        Left = 0
-        Top = 325
-        Width = 145
-        Height = 25
-        Hint = 'akella\1C. INFO replace @# to {}'
-        Caption = 'Prepare for editing'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 24
-        OnClick = PrepareEClick
-      end
-      object PrepareGame: TButton
-        Left = 0
-        Top = 350
-        Width = 136
-        Height = 25
-        Hint = 'akella\1C. INFO replace @# to {}'
-        Caption = 'Prepare for game'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 25
-        OnClick = PrepareGameClick
-      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -578,16 +547,16 @@ object Form1: TForm1
             Caption = 'Integer 4 bytes'
           end
           item
-            Caption = 'String'
+            Caption = 'Text'
           end
           item
-            Caption = 'Localized symbol'
+            Caption = 'Localized string'
           end
           item
             Caption = 'Float 4 bytes'
           end
           item
-            Caption = 'Integer 2 bytes'
+            Caption = 'Integer 2 bytes unsigned'
           end
           item
             Caption = 'Integer 1 bytes'
@@ -771,7 +740,7 @@ object Form1: TForm1
   object PanelList2: TPanel
     Left = 308
     Top = 27
-    Width = 293
+    Width = 277
     Height = 730
     Align = alLeft
     Caption = 'PanelList'
@@ -781,7 +750,7 @@ object Form1: TForm1
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 285
+      Width = 269
       Height = 17
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -790,46 +759,39 @@ object Form1: TForm1
       Font.Style = []
       Sections = <
         item
-          AllowClick = False
           ImageIndex = -1
           Text = 'Header'
           Width = 36
         end
         item
-          AllowClick = False
           ImageIndex = -1
           Text = 'Offset'
           Width = 49
         end
         item
-          AllowClick = False
           ImageIndex = -1
           Text = 'Size'
           Width = 42
         end
         item
-          AllowClick = False
           AutoSize = True
           ImageIndex = -1
           Text = 'Data'
-          Width = 128
+          Width = 118
         end
         item
-          AllowClick = False
           ImageIndex = -1
           Text = 'Type'
-          Width = 30
+          Width = 24
         end>
-      Style = hsFlat
       OnSectionResize = HeaderControl2SectionResize
       ParentFont = False
       OnResize = HeaderControl2Resize
-      ExplicitWidth = 279
     end
     object List2: TStringGrid
       Left = 1
       Top = 24
-      Width = 291
+      Width = 275
       Height = 679
       Align = alClient
       DefaultColWidth = 60
@@ -849,12 +811,11 @@ object Form1: TForm1
       TabOrder = 1
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
-      ExplicitWidth = 275
     end
     object SubDescript: TEdit
       Left = 1
       Top = 703
-      Width = 291
+      Width = 275
       Height = 26
       Align = alBottom
       Color = cl3DLight
@@ -867,7 +828,6 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
-      ExplicitWidth = 275
     end
   end
   object OpenDialog1: TOpenDialog
@@ -928,7 +888,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00800010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A00700010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
