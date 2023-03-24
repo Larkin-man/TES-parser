@@ -4,7 +4,7 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parseer'
   ClientHeight = 757
-  ClientWidth = 1072
+  ClientWidth = 1097
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,7 +18,7 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 19
   object Splitter1: TSplitter
-    Left = 585
+    Left = 601
     Top = 27
     Height = 730
     ExplicitLeft = 546
@@ -36,7 +36,7 @@ object Form1: TForm1
   object PanelUp: TPanel
     Left = 0
     Top = 0
-    Width = 1072
+    Width = 1097
     Height = 27
     Align = alTop
     Caption = 'PanelUp'
@@ -146,8 +146,6 @@ object Form1: TForm1
       Height = 19
       Align = alLeft
       Caption = 'Pro mode'
-      Checked = True
-      State = cbChecked
       TabOrder = 4
       OnClick = ProModeCKClick
     end
@@ -172,9 +170,9 @@ object Form1: TForm1
     end
   end
   object Out: TMemo
-    Left = 588
+    Left = 604
     Top = 27
-    Width = 269
+    Width = 278
     Height = 730
     Align = alClient
     Lines.Strings = (
@@ -185,7 +183,7 @@ object Form1: TForm1
     TabOrder = 3
   end
   object PanelPRO: TPanel
-    Left = 857
+    Left = 882
     Top = 27
     Width = 215
     Height = 730
@@ -208,7 +206,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      object HEDRRead: TButton
+      object TES3Read: TButton
         Left = 0
         Top = 0
         Width = 50
@@ -217,7 +215,7 @@ object Form1: TForm1
         Caption = 'TES3'
         Enabled = False
         TabOrder = 0
-        OnClick = HEDRReadClick
+        OnClick = TES3ReadClick
       end
       object CellRead: TButton
         Left = 50
@@ -235,6 +233,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'sGMDT'
         TabOrder = 2
+        Visible = False
         OnClick = GMDTReadClick
       end
       object TestP: TButton
@@ -244,6 +243,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'TestP'
         TabOrder = 4
+        Visible = False
         OnClick = TestPClick
       end
       object SPELread: TButton
@@ -253,6 +253,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'SPEL'
         TabOrder = 5
+        Visible = False
         OnClick = SPELreadClick
       end
       object DelTrash: TButton
@@ -274,6 +275,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'SPLM'
         TabOrder = 10
+        Visible = False
         OnClick = SPLMreadClick
       end
       object ExportBtn: TButton
@@ -367,7 +369,6 @@ object Form1: TForm1
         ParentShowHint = False
         ShowHint = True
         TabOrder = 11
-        Visible = False
         OnClick = PushCoordClick
       end
       object Wordwap: TCheckBox
@@ -501,6 +502,30 @@ object Form1: TForm1
         TabOrder = 23
         OnClick = CheckConflictsClick
       end
+      object PrepareE: TButton
+        Left = 0
+        Top = 325
+        Width = 145
+        Height = 25
+        Hint = 'akella\1C. INFO replace @# to {}'
+        Caption = 'Prepare for editing'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 24
+        OnClick = PrepareEClick
+      end
+      object PrepareGame: TButton
+        Left = 0
+        Top = 350
+        Width = 136
+        Height = 25
+        Hint = 'akella\1C. INFO replace @# to {}'
+        Caption = 'Prepare for game'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 25
+        OnClick = PrepareGameClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -547,16 +572,16 @@ object Form1: TForm1
             Caption = 'Integer 4 bytes'
           end
           item
-            Caption = 'Text'
+            Caption = 'String'
           end
           item
-            Caption = 'Localized string'
+            Caption = 'Localized symbol'
           end
           item
             Caption = 'Float 4 bytes'
           end
           item
-            Caption = 'Integer 2 bytes unsigned'
+            Caption = 'Integer 2 bytes'
           end
           item
             Caption = 'Integer 1 bytes'
@@ -740,7 +765,7 @@ object Form1: TForm1
   object PanelList2: TPanel
     Left = 308
     Top = 27
-    Width = 277
+    Width = 293
     Height = 730
     Align = alLeft
     Caption = 'PanelList'
@@ -750,7 +775,7 @@ object Form1: TForm1
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 269
+      Width = 285
       Height = 17
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -759,31 +784,37 @@ object Form1: TForm1
       Font.Style = []
       Sections = <
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Header'
           Width = 36
         end
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Offset'
           Width = 49
         end
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Size'
           Width = 42
         end
         item
+          AllowClick = False
           AutoSize = True
           ImageIndex = -1
           Text = 'Data'
-          Width = 118
+          Width = 128
         end
         item
+          AllowClick = False
           ImageIndex = -1
           Text = 'Type'
-          Width = 24
+          Width = 30
         end>
+      Style = hsFlat
       OnSectionResize = HeaderControl2SectionResize
       ParentFont = False
       OnResize = HeaderControl2Resize
@@ -791,7 +822,7 @@ object Form1: TForm1
     object List2: TStringGrid
       Left = 1
       Top = 24
-      Width = 275
+      Width = 291
       Height = 679
       Align = alClient
       DefaultColWidth = 60
@@ -815,7 +846,7 @@ object Form1: TForm1
     object SubDescript: TEdit
       Left = 1
       Top = 703
-      Width = 275
+      Width = 291
       Height = 26
       Align = alBottom
       Color = cl3DLight
@@ -888,7 +919,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00700010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A00840010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
