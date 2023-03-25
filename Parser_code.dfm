@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parseer'
-  ClientHeight = 757
+  ClientHeight = 745
   ClientWidth = 1097
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -14,13 +14,12 @@ object Form1: TForm1
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
-  OnHelp = FormHelp
   PixelsPerInch = 96
   TextHeight = 19
   object Splitter1: TSplitter
     Left = 601
     Top = 27
-    Height = 730
+    Height = 718
     ExplicitLeft = 546
     ExplicitTop = 32
     ExplicitHeight = 547
@@ -28,7 +27,7 @@ object Form1: TForm1
   object Splitter2: TSplitter
     Left = 305
     Top = 27
-    Height = 730
+    Height = 718
     ExplicitLeft = 276
     ExplicitTop = -3
     ExplicitHeight = 498
@@ -173,7 +172,7 @@ object Form1: TForm1
     Left = 604
     Top = 27
     Width = 278
-    Height = 730
+    Height = 718
     Align = alClient
     Lines.Strings = (
       'List'
@@ -186,16 +185,17 @@ object Form1: TForm1
     Left = 882
     Top = 27
     Width = 215
-    Height = 730
+    Height = 718
     Align = alRight
     ShowCaption = False
     TabOrder = 4
+    ExplicitHeight = 730
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 3
       Top = 237
       Width = 209
-      Height = 490
+      Height = 478
       Margins.Left = 2
       Margins.Top = 1
       Margins.Right = 2
@@ -206,6 +206,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
+      ExplicitHeight = 490
       object TES3Read: TButton
         Left = 0
         Top = 0
@@ -629,6 +630,7 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
+        ExplicitWidth = 100
       end
     end
   end
@@ -636,11 +638,12 @@ object Form1: TForm1
     Left = 0
     Top = 27
     Width = 305
-    Height = 730
+    Height = 718
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
+    ExplicitHeight = 730
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -766,11 +769,12 @@ object Form1: TForm1
     Left = 308
     Top = 27
     Width = 293
-    Height = 730
+    Height = 718
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
+    ExplicitHeight = 730
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 4
@@ -919,7 +923,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00840010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A008C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -11,7 +11,7 @@
 int const  TAGSS = 33;
 #include "Parser_code.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
+//#pragma package(smart_init)
 #pragma resource "*.dfm"
 TForm1 *Form1;
 //---------------------------------------------------------------------------
@@ -84,11 +84,11 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		fclose(file);
 	if (Rewrites->Checked)
 	{
-		file = fopen (OpenDialog1->FileName.c_str(), "r+b");
+		file = _wfopen(OpenDialog1->FileName.c_str(), L"r+b");
 		Save->Enabled = true;
 	}
 	else
-		file = fopen (OpenDialog1->FileName.c_str(), "rb");
+		file = _wfopen(OpenDialog1->FileName.c_str(), L"rb");
 	if (!file)
 		return ShowMessage( "Cannot open binary file.");
 	fseek(file, 0, SEEK_END);
@@ -747,9 +747,9 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	if (RefStarts.empty() == false || RefEnds.empty() == false)
 	{
 		if (Deleted.empty())
-			curr = fopen (Nam.c_str(), "wb");
+			curr = _wfopen(Nam.c_str(), L"wb");
 		else
-			curr = fopen (Nam.c_str(), "w+b");
+			curr = _wfopen(Nam.c_str(), L"w+b");
 		if (!curr)
 			return ShowMessage( "Cannot open binary file.");
 		Save->Enabled = false;
@@ -794,7 +794,7 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	else
 		curr = file;
 	Deleted.insert(EoF);
-	save = fopen (Nam.c_str(), "wb");
+	save = _wfopen(Nam.c_str(), L"wb");
 	if (!save)
 		return ShowMessage( "Cannot open binary file.");
 	Save->Enabled = false;
@@ -1880,7 +1880,7 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 	if (SubDelete.empty())
 		return;
 	String Nam = "DONE_"+PluginName;
-	save = fopen (Nam.c_str(), "wb");
+	save = _wfopen(Nam.c_str(), L"wb");
 	if (!save) return ShowMessage( "Cannot open binary file.");
 	fseek(file, 0, SEEK_END);
 	EoF = ftell(file);
@@ -2141,7 +2141,7 @@ void __fastcall TForm1::setlocaleBtnClick(TObject *Sender)
 		localeinstalled = false;
 		break;
 	case ID_YES:
-   	setlocale(LC_ALL, EFinds->Text.c_str());
+		setlocale(LC_ALL, AnsiString(EFinds->Text).c_str());
 		localeinstalled = true;
 		break;
 	}
@@ -2270,7 +2270,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	if (OpenDialog1->Execute() != ID_OK)
 		return;
 	FILE* conf = NULL;
-	conf = fopen (OpenDialog1->FileName.c_str(), "rb");
+	conf = _wfopen(OpenDialog1->FileName.c_str(), L"rb");
 	if (!conf)
 		return ShowMessage( "Cannot open binary file.");
 	fseek(conf, 0, SEEK_END);
