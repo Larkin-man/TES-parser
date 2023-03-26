@@ -2457,3 +2457,23 @@ void TForm1::PrepareFor(char SYMBS[4])
 		tolog("No "+String(SYMBS[0]));
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
+{
+	if (List->Row == -1)
+		return ShowMessage("No one selected");
+	int type = 0;
+	if (List->Selection.Top == List->Selection.Bottom)
+		type = ID_NO;
+	else
+		if ( (type=Application->MessageBoxA(L"Export subheaders to string?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
+			return;
+	Int8 expAll = ID_YES;
+	if (List->Row == -1 || List->Selection.Bottom - List->Selection.Top + 1 == List->RowCount)
+	{
+		if ( (expAll=Application->MessageBoxA(L"Export all scripts?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
+			return;
+	}
+}
+//---------------------------------------------------------------------------
+

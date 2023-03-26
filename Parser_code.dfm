@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parseer'
-  ClientHeight = 745
+  ClientHeight = 645
   ClientWidth = 1097
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object Form1: TForm1
   object Splitter1: TSplitter
     Left = 601
     Top = 27
-    Height = 718
+    Height = 618
     ExplicitLeft = 546
     ExplicitTop = 32
     ExplicitHeight = 547
@@ -27,7 +27,7 @@ object Form1: TForm1
   object Splitter2: TSplitter
     Left = 305
     Top = 27
-    Height = 718
+    Height = 618
     ExplicitLeft = 276
     ExplicitTop = -3
     ExplicitHeight = 498
@@ -172,7 +172,7 @@ object Form1: TForm1
     Left = 604
     Top = 27
     Width = 278
-    Height = 718
+    Height = 618
     Align = alClient
     Lines.Strings = (
       'List'
@@ -180,22 +180,23 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
+    ExplicitHeight = 718
   end
   object PanelPRO: TPanel
     Left = 882
     Top = 27
     Width = 215
-    Height = 718
+    Height = 618
     Align = alRight
     ShowCaption = False
     TabOrder = 4
-    ExplicitHeight = 730
+    ExplicitHeight = 718
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 3
       Top = 237
       Width = 209
-      Height = 478
+      Height = 378
       Margins.Left = 2
       Margins.Top = 1
       Margins.Right = 2
@@ -206,7 +207,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      ExplicitHeight = 490
+      ExplicitHeight = 478
       object TES3Read: TButton
         Left = 0
         Top = 0
@@ -527,6 +528,15 @@ object Form1: TForm1
         TabOrder = 25
         OnClick = PrepareGameClick
       end
+      object ExportScriptsBtn: TButton
+        Left = 0
+        Top = 375
+        Width = 75
+        Height = 25
+        Caption = 'Export Scripts'
+        TabOrder = 26
+        OnClick = ExportScriptsBtnClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -630,7 +640,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 100
       end
     end
   end
@@ -638,12 +647,12 @@ object Form1: TForm1
     Left = 0
     Top = 27
     Width = 305
-    Height = 718
+    Height = 618
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
-    ExplicitHeight = 730
+    ExplicitHeight = 718
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -744,7 +753,7 @@ object Form1: TForm1
       Left = 1
       Top = 64
       Width = 303
-      Height = 665
+      Height = 553
       Align = alClient
       ColCount = 4
       DefaultColWidth = 60
@@ -763,18 +772,19 @@ object Form1: TForm1
       TabOrder = 2
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
+      ExplicitHeight = 653
     end
   end
   object PanelList2: TPanel
     Left = 308
     Top = 27
     Width = 293
-    Height = 718
+    Height = 618
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
-    ExplicitHeight = 730
+    ExplicitHeight = 718
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 4
@@ -827,7 +837,7 @@ object Form1: TForm1
       Left = 1
       Top = 24
       Width = 291
-      Height = 679
+      Height = 567
       Align = alClient
       DefaultColWidth = 60
       DefaultRowHeight = 16
@@ -846,10 +856,11 @@ object Form1: TForm1
       TabOrder = 1
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
+      ExplicitHeight = 667
     end
     object SubDescript: TEdit
       Left = 1
-      Top = 703
+      Top = 591
       Width = 291
       Height = 26
       Align = alBottom
@@ -863,6 +874,7 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
+      ExplicitTop = 691
     end
   end
   object OpenDialog1: TOpenDialog
