@@ -42,7 +42,6 @@ object Form1: TForm1
     PopupMenu = PopupMenu1
     ShowCaption = False
     TabOrder = 0
-    ExplicitWidth = 1097
     object LDele: TLabel
       AlignWithMargins = True
       Left = 517
@@ -183,8 +182,6 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
-    ExplicitWidth = 278
-    ExplicitHeight = 626
   end
   object PanelPRO: TPanel
     Left = 887
@@ -194,8 +191,6 @@ object Form1: TForm1
     Align = alRight
     ShowCaption = False
     TabOrder = 4
-    ExplicitLeft = 882
-    ExplicitHeight = 626
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 3
@@ -212,7 +207,6 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      ExplicitHeight = 386
       object TES3Read: TButton
         Left = 0
         Top = 0
@@ -657,7 +651,6 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
-    ExplicitHeight = 626
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -777,7 +770,6 @@ object Form1: TForm1
       TabOrder = 2
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
-      ExplicitHeight = 561
     end
   end
   object PanelList2: TPanel
@@ -789,7 +781,6 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
-    ExplicitHeight = 626
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 4
@@ -861,7 +852,6 @@ object Form1: TForm1
       TabOrder = 1
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
-      ExplicitHeight = 575
     end
     object SubDescript: TEdit
       Left = 1
@@ -879,7 +869,6 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
-      ExplicitTop = 599
     end
   end
   object OpenDialog1: TOpenDialog
@@ -940,7 +929,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00940010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A00A00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

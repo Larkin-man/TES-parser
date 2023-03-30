@@ -519,13 +519,26 @@ public:		// User declarations
 	int RecordCount;
 	int DebugL2c;
 	void SetDescription(int Num, int Row);
-	void Dran()
+	void DoUpdateList(bool begin)
 	{
-		List->ScrollBars = ssVertical;
-		List->Cols[0]->EndUpdate();
-		List->Cols[1]->EndUpdate();
-		List->Cols[2]->EndUpdate();
-		List->Cols[3]->EndUpdate();
+		if (begin)
+		{
+			List->Row = 0; //Tick = ::GetTickCount();
+			Out->SetFocus();
+      	List->Cols[0]->BeginUpdate();
+			List->Cols[1]->BeginUpdate();
+			List->Cols[2]->BeginUpdate();
+			List->Cols[3]->BeginUpdate();
+			List->ScrollBars = ssNone; //List->Items->BeginUpdate();
+		}
+		else
+		{
+			List->Cols[0]->EndUpdate();
+			List->Cols[1]->EndUpdate();
+			List->Cols[2]->EndUpdate();
+			List->Cols[3]->EndUpdate();
+			List->ScrollBars = ssVertical;
+		}
 	}
 	bool localeinstalled;
 	int bloklist2;
