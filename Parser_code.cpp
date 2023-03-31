@@ -103,7 +103,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		{
 			OpenedFileName = OpenDialog1->FileName;
 			PluginName = OpenedFileName.SubString(i+1, OpenedFileName.Length());
-			Form1->Caption = PluginName + " - TES parseer";
+			Form1->Caption = PluginName + " - TES parser";
 			break;
 		}
 
@@ -205,15 +205,9 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	}
 	Req.SetLength(Req.Length()-2);
 	tolog("Required:"+Req);
-	List->Row = 0;
-	//Tick = ::GetTickCount();
-	List->Cols[0]->BeginUpdate();
-	List->Cols[1]->BeginUpdate();
-	List->Cols[2]->BeginUpdate();
-	List->Cols[3]->BeginUpdate();
-	List2->RowCount = 1; List2->Rows[0]->Clear();
-	Out->SetFocus();
-	List->ScrollBars = ssNone; //List->Items->BeginUpdate();
+	DoUpdateList(true);
+	List2->RowCount = 1;
+	List2->Rows[0]->Clear();
 	fseek(file, 0, SEEK_SET);
 	AddedRow = 0;
 	while ((Tell = ftell(file)) < EoF)
@@ -244,7 +238,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 			List->Cells[CDATA][0] = "Number of records: "+IntToStr(RecordCount);
 		RefreshData(file, 1);
 	}
-	Dran();
+	DoUpdateList(false);
 	fseek(file, 0, SEEK_SET);
 	//NextSClick(Sender);
 	if (RecordCount != List->RowCount - 1)
@@ -1286,21 +1280,48 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 {
 	if (List->Row == -1)
 		return ShowMessage("No one selected");
+	static Char expo1[] = L"Export";
+	static Char expo2[] = L"Export all";
+	Char *Expo;
+	bool expAll = false;
+	if (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1)
+	{
+		Expo = expo2;
+		expAll = true;
+	}
+	else
+		Expo = expo1;
 	int type = 0;
 	if (List->Selection.Top == List->Selection.Bottom)
 		type = ID_NO;
 	else
-		if ( (type=Application->MessageBoxA(L"Export subheaders to string?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
+		if ( (type=Application->MessageBoxA(L"Export subheaders to string?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
 			return;
+	int expTab = 0;
+	if (expAll && type == ID_YES)
+		if ( (expTab=Application->MessageBoxA(L"Export only table?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
+			return;
+	if (expTab == ID_YES)
+	{
+		Export = new TStringList;
+		Export->Append("№\tHeader\tOffset\tSize\tData");
+		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+			Export->Append(List->Cells[CHEADER][i]+"\t" + List->Cells[CSTART][i]+"\t"
+				+ List->Cells[CSIZE][i]+"\t" + List->Cells[CDATA][i]);
+		Export->SaveToFile(PluginName+".txt");
+		ShowMessage("Saved:"+PluginName+".txt");
+		return;
+	}
 	int expOff = 0;
-	if ( (expOff=Application->MessageBoxA(L"Export Offset?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
+	if ( (expOff=Application->MessageBoxA(L"Export Offset?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
 		return;
 	int expSize = 0;
-	if ( (expSize=Application->MessageBoxA(L"Export Size?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
+	if ( (expSize=Application->MessageBoxA(L"Export Size?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
 		return;
 	Export = new TStringList;
 	LogUp = false;
 	bool stup = true;
+
 	if (type == ID_NO) //Ровная таблица
 	{
 		int num = 1;
@@ -2284,7 +2305,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 		if (OpenDialog1->FileName[i] == '\\')
 		{
 			PluginName = PluginName + " + "+OpenDialog1->FileName.SubString(i+1, OpenDialog1->FileName.Length());
-			Form1->Caption = PluginName + " - TES parseer";
+			Form1->Caption = PluginName + " - TES parser";
 			break;
 		}
 	bool dele = false;
@@ -2295,68 +2316,90 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 		Out->Lines->Clear();
 	Out->Lines->Add("Check conflicts for " + PluginName);
 	Out->Lines->Add("Size="+IntToStr(EoC));
+	int Hard = 0;
+	if ( (Hard=Application->MessageBoxA(L"Check full data?", L"Option", MB_YESNOCANCEL))== ID_CANCEL)
+		return;
 	char 	Name[5];	Name[4] = '\0';
 	int 	Len;
 	char 	sName[5]; sName[4] = '\0';
 	long 	Tell;
-	fseek(conf, 0, SEEK_SET);
-	fread(&Name, 4, 1, conf);
-	List->Row = 0;
-	List->Cols[0]->BeginUpdate();
-	List->Cols[1]->BeginUpdate();
-	List->Cols[2]->BeginUpdate();
-	List->Cols[3]->BeginUpdate();
-	Out->SetFocus();
-	List->ScrollBars = ssNone;
-	fseek(conf, 0, SEEK_SET);
+	DoUpdateList(true);
 	AddedRow = List->RowCount;
 	int StartCon = List->RowCount;
+	fseek(conf, 0, SEEK_SET);
 	while ((Tell = ftell(conf)) < EoC)
 	{
 		fread(&Name, 4, 1, conf);
 		fread(&Len, 4, 1, conf);
-		AddRow(Name, Len, Tell);
 		fseek(conf, MOVERLENTOSNAME, SEEK_CUR);
 			if (Tes3 || strncmp(Name,"GRUP", 4)!=0 )
 				fseek(conf, Len, SEEK_CUR);
 			else //its GRUP
 				List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
+		AddRow(Name, Len, Tell);
 	}
 	Out->Lines->Add("End on "+IntToStr((int)ftell(conf)));
+	///закончен список
 	//fseek(conf, POSNRECORDS, SEEK_SET);
 	//fread(&RecordCount, 4, 1, conf);
 	fseek(conf, 0, SEEK_SET);
-	if (ShowData1->Checked)
+	if (ShowData1->Checked && Hard==ID_NO)
 		RefreshData(conf, StartCon);
 	if (List->RowCount > AddedRow)
 		List->RowCount = AddedRow;
 	int nConf = 0;
 	Out->WordWrap = false;
 	Wordwap->Checked = false;
-	for (int i = StartCon+1; i < List->RowCount; i++)
+	if (Hard == ID_YES)
 	{
-		//Out->Lines->Add(List->Cells[CDATA][i]+List->Cells[CHEADER][i]);
-		String Dat = List->Cells[CDATA][i];
-		String Hed = List->Cells[CHEADER][i];
-		for (int j = 1; j < StartCon; ++j)
-			if ( Dat.Compare(List->Cells[CDATA][j])==0)
+		byte buf[4096];
+		byte main[4096];
+		int mainLen;
+		for (int i = StartCon+1; i < List->RowCount; i++)
+		{
+			Len = List->Cells[CSIZE][i].ToInt();
+			String Hed = List->Cells[CHEADER][i];
+			fseek(conf, List->Cells[CSTART][i].ToInt(), SEEK_SET);
+			if (Len > 4096)
 			{
-				if (Hed.Compare(List->Cells[CHEADER][j])==0)
-				{
-					Out->Lines->Add( Hed + "\t" + Dat +"\t"+List->Cells[CSTART][j]+"\t"+List->Cells[CSIZE][j] );
-					nConf++;
-					if (dele)
-						DeleteRecord(j);
-				}
-				else
-					Out->Lines->Add("Same identifiers\t"+Dat+"\t"+List->Cells[CHEADER][j]+"\t"+Hed+"\t"+List->Cells[CSTART][j] );
+				tolog(Hed+StrToInt(Len)+" too long");
+				Len = 4096;
 			}
+
+
+			for (int j = 1; j < StartCon; ++j)
+			{
+
+         }
+		}
+	}
+	else
+	{
+		for (int i = StartCon+1; i < List->RowCount; i++)
+		{
+			//Out->Lines->Add(List->Cells[CDATA][i]+List->Cells[CHEADER][i]);
+			String Dat = List->Cells[CDATA][i];
+			String Hed = List->Cells[CHEADER][i];
+			for (int j = 1; j < StartCon; ++j)
+				if ( Dat.Compare(List->Cells[CDATA][j])==0)
+				{
+					if (Hed.Compare(List->Cells[CHEADER][j])==0)
+					{
+						Out->Lines->Add( Hed + "\t" + Dat +"\t"+List->Cells[CSTART][j]+"\t"+List->Cells[CSIZE][j] );
+						nConf++;
+						if (dele)
+							DeleteRecord(j);
+					}
+					else
+						Out->Lines->Add("Same identifiers\t"+Dat+"\t"+List->Cells[CHEADER][j]+"\t"+Hed+"\t"+List->Cells[CSTART][j] );
+				}
+		}
 	}
 	if (nConf == 0)
 		Out->Lines->Add("No conflicts.");
 	else
 		Out->Lines->Add("--------"+IntToStr(nConf)+" conflicts.");
-	Dran();
+	DoUpdateList(false);
 	EnableLsit2Delete1->Enabled = false;
 	Save2->Visible = false;
 	Save->Visible = false;
@@ -2460,20 +2503,55 @@ void TForm1::PrepareFor(char SYMBS[4])
 
 void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 {
-	if (List->Row == -1)
-		return ShowMessage("No one selected");
-	int type = 0;
-	if (List->Selection.Top == List->Selection.Bottom)
-		type = ID_NO;
-	else
-		if ( (type=Application->MessageBoxA(L"Export subheaders to string?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
-			return;
 	Int8 expAll = ID_YES;
-	if (List->Row == -1 || List->Selection.Bottom - List->Selection.Top + 1 == List->RowCount)
+	if (List->Row != -1 || List->Selection.Bottom - List->Selection.Top + 1 != List->RowCount)
 	{
 		if ( (expAll=Application->MessageBoxA(L"Export all scripts?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
 			return;
 	}
+	int i = ( expAll == ID_YES)? 0 : List->Selection.Top;
+	int end = ( expAll == ID_YES)? List->RowCount : List->Selection.Bottom + 1;
+	//TStringList *out = new TStringList;
+	int tall;
+	int len;
+	char 	Name[5];	Name[4] = '\0';
+	FILE *scpt = NULL;
+	int cap = 1024;
+	char *buf = new char[cap];
+
+	for (; i < end; i++)
+	{
+		if (List->Cells[0][i] == "SCPT")
+		{
+			int ende = List->Cells[CSTART][i].ToInt();
+			fseek(file, ende + MLENTOSLEN, SEEK_SET);
+			ende += List->Cells[CSIZE][i].ToInt();
+			len = 0;
+			do
+			{
+				fseek(file, len, SEEK_CUR);
+				if (ftell(file) > ende)
+					break;
+				fread(&Name, 4, 1, file);
+				fread(&len, LENSIZE, 1, file);
+			} while (strncmp(Name, "SCTX", 4) != 0);
+
+			if (ftell(file) <= ende)
+			{
+				if (len > cap)
+				{
+					cap = len;
+					buf = new char[cap];
+				}
+				scpt = _wfopen((List->Cells[CDATA][i]+".txt").c_str(), L"wb");
+				fread(buf, len, 1, file);
+				fwrite(buf, len, 1, scpt);
+				fclose(scpt);
+			}
+
+		}
+	}
+	delete []buf;
 }
 //---------------------------------------------------------------------------
 
