@@ -2104,7 +2104,7 @@ void __fastcall TForm1::GMDTReadClick(TObject *Sender)
 	char 	Name[5];	Name[4] = '\0';
 	int 	Len;
 	float Cord[6];
-	char whe[64];
+	char whe[68];
 	char Player[32];
 	fseek(file, ToE->Text.ToIntDef(0), SEEK_SET);
 	fread(&Name, 4, 1, file);
@@ -2353,7 +2353,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	if (Hard == ID_YES)
 	{
 		byte buf[4096];
-		byte main[4096];
+		byte mainb[4096];
 		int mainLen;
 		for (int i = StartCon+1; i < List->RowCount; i++)
 		{
@@ -2365,6 +2365,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 				tolog(Hed+StrToInt(Len)+" too long");
 				Len = 4096;
 			}
+			fread(mainb, Len, 1, conf);
 
 
 			for (int j = 1; j < StartCon; ++j)
