@@ -1859,7 +1859,7 @@ void TForm1::Delete2(int Row2)
 }
 //---------------------------------------------------------------------------
 ///subheaderlen = 4+4+len
-bool Compa(TForm1::DeleteItem a, TForm1::DeleteItem b)
+bool Compa(DeleteItem a, DeleteItem b)
 {
 	return a.Offset < b.Offset;
 }
@@ -2321,26 +2321,46 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	Wordwap->Checked = false;
 	if (Hard == ID_YES)
 	{
+		int MainLen;
+		byte mainbuf[4096];
 		byte buf[4096];
-		byte mainb[4096];
-		int mainLen;
 		for (int i = StartCon+1; i < List->RowCount; i++)
-		{
-			Len = List->Cells[CSIZE][i].ToInt();
+		{  //по конфликтному
+			MainLen = List->Cells[CSIZE][i].ToInt();
 			String Hed = List->Cells[CHEADER][i];
-			fseek(conf, List->Cells[CSTART][i].ToInt(), SEEK_SET);
-			if (Len > 4096)
-			{
-				tolog(Hed+StrToInt(Len)+" too long");
-				Len = 4096;
-			}
-			fread(mainb, Len, 1, conf);
-
-
+			if (MainLen > 4096)
+				tolog(Hed+StrToInt(MainLen)+" too long");
+			mainbuf[0] = 0;
 			for (int j = 1; j < StartCon; ++j)
 			{
+				Len = List->Cells[CSIZE][j].ToInt();
+				if (MainLen != Len)
+					continue;
+				if (Hed.Compare(List->Cells[CHEADER][j]) != 0)
+					continue;
+				if (mainbuf[0] == 0 && Len > 0)
+				{
+					fseek(conf, List->Cells[CSTART][i].ToInt() + MLENTOSLEN, SEEK_SET);
+					fread(mainbuf, MainLen>4096?4096:MainLen, 1, conf);
+				}
+				fseek(file, List->Cells[CSTART][j].ToInt() + MLENTOSLEN, SEEK_SET);
+				fread(buf, Len>4096?4096:Len, 1, file);
+				int b = 0;
+				for (; b < Len; b++)
+					if (buf[b] != mainbuf[b])
+						break;
+				if (b == Len)
+				{
+					nConf++;
+					if (Len == 4096)
+						tolog(List->Cells[CSTART][i]+" MAYBIIDEN "+List->Cells[CSTART][j]);
+					else
+						tolog(List->Cells[CSTART][i]+" IDEN "+List->Cells[CSTART][j]);
+				}
+				else
+					tolog(List->Cells[CSTART][i]+" noide "+List->Cells[CSTART][j]+" on"+IntToStr(b));
 
-         }
+			}
 		}
 	}
 	else
