@@ -6,8 +6,8 @@
 #include <vector>
 #include <algorithm>
 //#include <float.h>
-#include "Headers.h"
 #pragma hdrstop
+#include "Headers.h"
 #include "TableLoader.cpp"
 int const  TAGSS = 33;
 #include "Parser_code.h"
@@ -2357,8 +2357,8 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 					else
 						tolog(List->Cells[CSTART][i]+" IDEN "+List->Cells[CSTART][j]);
 				}
-				else
-					tolog(List->Cells[CSTART][i]+" noide "+List->Cells[CSTART][j]+" on"+IntToStr(b));
+				//else
+				//	tolog(List->Cells[CSTART][i]+" noide "+List->Cells[CSTART][j]+" on"+IntToStr(b));
 
 			}
 		}
@@ -2542,6 +2542,24 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 		}
 	}
 	delete []buf;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::DelOffsetsClick(TObject *Sender)
+{
+	std::set<int> Ena;
+	Wordwap = false;
+	Out->WordWrap = false;
+	int def;
+	for (int i = 0; i < Out->Lines->Count; i++)
+	{
+		def = Out->Lines->Strings[i].ToIntDef(-1);
+		if (def >= 0)
+			Ena.insert(def);
+	}
+	for (int i = 0; i < List->RowCount; i++)
+		if (Ena.find(List->Cells[CSTART][i].ToInt()) == Ena.end()) //его нет
+			DeleteRecord(i);
 }
 //---------------------------------------------------------------------------
 

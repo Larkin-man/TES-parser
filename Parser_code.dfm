@@ -536,6 +536,18 @@ object Form1: TForm1
         TabOrder = 26
         OnClick = ExportScriptsBtnClick
       end
+      object DelOffsets: TButton
+        Left = 113
+        Top = 375
+        Width = 88
+        Height = 25
+        Hint = 'Delete offsets wi memo'
+        Caption = 'DelOffsets'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 27
+        OnClick = DelOffsetsClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -929,7 +941,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00A00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000A00A40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

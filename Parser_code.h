@@ -110,6 +110,7 @@ __published:	// IDE-managed Components
 	TButton *PrepareE;
 	TButton *PrepareGame;
 	TButton *ExportScriptsBtn;
+	TButton *DelOffsets;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -171,6 +172,7 @@ __published:	// IDE-managed Components
 	void __fastcall PrepareEClick(TObject *Sender);
 	void __fastcall PrepareGameClick(TObject *Sender);
 	void __fastcall ExportScriptsBtnClick(TObject *Sender);
+	void __fastcall DelOffsetsClick(TObject *Sender);
 
 
 private:	// User declarations
