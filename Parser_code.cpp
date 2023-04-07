@@ -405,7 +405,6 @@ void __fastcall TForm1::CellReadClick(TObject *Sender)
 	ToLog(Cell.Data_Length[1],"This is *");
 	ToLog(Cell.GridX,"GridX");
 	ToLog(Cell.GridY,"GridY");
-
 	int Stop = Cell.i[0] - CELLNAMEDATALEN - Cell.Length;
 	if (Stop == 0)
 	{
@@ -697,7 +696,6 @@ void __fastcall TForm1::SPELreadClick(TObject *Sender)
 	fread(Spel.FNAMData, Spel.FNAMLen, 1, file);
 	ToLog(Spel.FNAMData);
 	exp += '\t';exp += Spel.FNAMData;
-
 	fread(&Spel.SPDT, 13*4, 1, file);
 	char4ToLog(Spel.SPDT);	ToLog(Spel.SPDTLen,"Length");
 	ToLog(Spel.Type,"Type"); ToLog(Spel.Cost,"Cost"); ToLog(Spel.Flags,"Flags");
@@ -1809,6 +1807,7 @@ void __fastcall TForm1::EnableLsit2Delete1Click(TObject *Sender)
 	mWarning = false;
 	Save2->Visible = EnableLsit2Delete1->Checked;
 	Save->Visible = !EnableLsit2Delete1->Checked;
+	DeleteExtraData->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
@@ -1952,19 +1951,25 @@ void __fastcall TForm1::FindinList2Click(TObject *Sender)
 //Удаляет из листа 2 все до следующего заголовка FRMR NAM0 DATA
 void __fastcall TForm1::DeleteExtraDataClick(TObject *Sender)
 {
+	bool FindingName = true;
 	int Row = List2->Row + 1;
+	String Head;
 	for (; Row < List2->RowCount; ++Row)
-		if (List2->Cells[CHEADER][Row] == "FRMR")
-			break;
-		else if (List2->Cells[CHEADER][Row] == "NAM0")
-			break;
+		if (FindingName)
+      {
+			if (List2->Cells[CHEADER][Row] == "NAME")
+				FindingName = false;
+		}
 		else if (List2->Cells[CHEADER][Row] == "DATA")
-			break;
-		else if (List2->Cells[CHEADER][Row] == "XSCL")
-			continue;
+			FindingName = true;
 		else
-			Delete2(Row);
-	return FindinList2Click(Sender);
+		{
+      	Head = List2->Cells[CHEADER][Row];
+			if (Head=="ANAM" || Head=="INTV" || Head=="NAM9" || Head=="CNAM"
+				|| Head=="INDX" )
+				Delete2(Row);
+		}
+	//return FindinList2Click(Sender);
 }
 //---------------------------------------------------------------------------
 

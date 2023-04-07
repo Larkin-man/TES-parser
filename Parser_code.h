@@ -28,14 +28,8 @@ const int FLOATFIELDS = 3;
 const int WORDFIELDS = 4;
 const int BYTEFIELDS = 5;
 ////////////////////////
-const int LENSIZE12 = 5;
-////////////////////////
 const int CELLNAMEDATALEN = 28;
 const int CELLRGNNLEN = 8;
-
-//const int MAINLENSIZE = 12;
-
-
 
 class TForm1 : public TForm
 {
