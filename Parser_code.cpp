@@ -33,9 +33,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	TagSymb << '_';
 	for (int i = 0; i < 4; ++i)
 	{
-		List->ColWidths[i] = HeaderControl1->Sections->Items[i]->Width;
-		List2->ColWidths[i] = HeaderControl1->Sections->Items[i]->Width;
+		List->ColWidths[i] = HeaderControl1->Sections->Items[i]->Width - 1;
+		List2->ColWidths[i] = HeaderControl2->Sections->Items[i]->Width - 1;
 	}
+	List2->ColWidths[4] = HeaderControl2->Sections->Items[4]->Width - 1;
 	OpenDialog1->InitialDir = GetCurrentDir();
 	Export = NULL;
 	//Out->Lines->Add(sizeof());
@@ -60,7 +61,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	AddTagType("ITXT",'t'); AddTagType("RDMP",'t');
 	AddTagType("XATO",'t');
 	if (nTypes != TAGSS)
-    	tolog("REPLACE TAGGS COUNT!!!!!!");
+		tolog("REPLACE TAGGS COUNT!!!!!!");
 	types.IgnoreFirstString = false;
 	types.IgnoreDelimitersPack = false;
 	types.LoadFromResource("TEXTRES","ssss",&THeader,&TSubHeader,&TType,&TDescr);
@@ -649,7 +650,7 @@ void __fastcall TForm1::GoClick(TObject *Sender)
 		}
 		else
 		{
-			List2->Cols[CDATA]->Clear();
+			List2->Cols[CDATA2]->Clear();
 			List2->Cols[CTYPE]->Clear();
 			for (int i = 0; i < List->RowCount; ++i)
 			{
@@ -817,16 +818,51 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	ToLog("Сохранено: "+Nam);
 }
 //---------------------------------------------------------------------------
+//header resize , auto run with start
+void __fastcall TForm1::HeaderControl1Resize(TObject *Sender)
+{
+	List->ColWidths[CDATA] = List->ClientWidth
+		- HeaderControl1->Sections->Items[0]->Width
+		- HeaderControl1->Sections->Items[1]->Width
+		- HeaderControl1->Sections->Items[2]->Width - 1;
+}
+//---------------------------------------------------------------------------
 
 void __fastcall TForm1::HeaderControl1SectionResize(THeaderControl *HeaderControl,
 			 THeaderSection *Section)
 {
-	List->ColWidths[Section->Index] = Section->Width;
-	//if (Section->Index == CDATA-1)
-	//	List->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width;
-		//List->DefaultRowHeight--;  testheight
-		//Out->Lines->Add(List->DefaultRowHeight);
-	//Out->Lines->Add(Section->Width);
+	List->ColWidths[Section->Index] = Section->Width - 1;
+	//if (HeaderControl1->Sections->Items[CDATA]->Right >= List->Left + List->ClientWidth - 1)
+	if (Section->Index != CDATA)	//{
+		HeaderControl1->Sections->Items[CDATA]->Width = List->ClientWidth
+		- HeaderControl1->Sections->Items[0]->Width
+		- HeaderControl1->Sections->Items[1]->Width
+		- HeaderControl1->Sections->Items[2]->Width - 1;
+		//HeaderControl1Resize(NULL); }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::HeaderControl2Resize(TObject *Sender)
+{
+	List2->ColWidths[CDATA2] = List2->ClientWidth
+		- HeaderControl2->Sections->Items[0]->Width
+		- HeaderControl2->Sections->Items[1]->Width
+		- HeaderControl2->Sections->Items[2]->Width
+		- HeaderControl2->Sections->Items[3]->Width - 1;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::HeaderControl2SectionResize(THeaderControl *HeaderControl,
+			 THeaderSection *Section)
+{
+	List2->ColWidths[Section->Index] = Section->Width - 1;
+	//if (HeaderControl2->Sections->Items[CDATA2]->Right >= List2->Left + List2->ClientWidth - 1)
+	if (Section->Index != CDATA2) //	{
+		HeaderControl2->Sections->Items[CDATA2]->Width = List2->ClientWidth
+		- HeaderControl2->Sections->Items[0]->Width
+		- HeaderControl2->Sections->Items[1]->Width
+		- HeaderControl2->Sections->Items[2]->Width
+		- HeaderControl2->Sections->Items[3]->Width - 1; //	}
 }
 //---------------------------------------------------------------------------
 
@@ -916,7 +952,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 			fread(&Univ.Length, SLENSIZE, 1, file);
 			List2->Cells[CHEADER][Row] = Name;
 			List2->Cells[CSIZE][Row] = Univ.Length;
-			List2->Cells[CDATA][Row] = "";
+			List2->Cells[CDATA2][Row] = "";
 			List2->Cells[CTYPE][Row] = "";
 			Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
 			st = NULL;
@@ -935,8 +971,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 					List2->Cells[CTYPE][Row] = TType[t][1];
 					switch (TType[t][1])
 					{
-						//case 't': List2->Cells[CDATA][Row] = st;  break;  //ToLog(&Name[8]);
-						case 's': List2->Cells[CDATA][Row] = String((char*)st);  break;
+						//case 't': List2->Cells[CDATA2][Row] = st;  break;  //ToLog(&Name[8]);
+						case 's': List2->Cells[CDATA2][Row] = String((char*)st);  break;
 						case 'i':
 						for (unsigned int i = 0; i < Len; i+=sizeof(int))
 								InterpretStr += IntToStr(*(int*)&st[i])+" ";
@@ -962,7 +998,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 								InterpretStr += IntToStr(*(byte*)&st[i])+" ";
 					}
 					if (InterpretStr.Length() > 0)
-						List2->Cells[CDATA][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
+						List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
 
 				}
 			//Не нашли в TYPES.txt
@@ -987,9 +1023,9 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 								{
 									find = (char*)st;
 									if ((unsigned int)find.Length() > Univ.Length)
-										List2->Cells[CDATA][Row] = find.SetLength(Univ.Length);
+										List2->Cells[CDATA2][Row] = find.SetLength(Univ.Length);
 									else
-										List2->Cells[CDATA][Row] = find;
+										List2->Cells[CDATA2][Row] = find;
 									i = nTypes;	break;
 								}
 							case '1':
@@ -1009,7 +1045,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 								i = nTypes; break;
 						}
 						if (InterpretStr.Length() > 0)
-							List2->Cells[CDATA][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
+							List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
 					}
 			}
 			if	(List2->Cells[CTYPE][Row] == "")
@@ -1022,7 +1058,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 					{
 						InterpretStr = (char*)st;
 						InterpretStr.SetLength(Len);
-						List2->Cells[CDATA][Row] = InterpretStr;
+						List2->Cells[CDATA2][Row] = InterpretStr;
 						List2->Cells[CTYPE][Row] = "NAM";
 					}
 				}
@@ -1033,10 +1069,9 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 				st = file->curp;
 				for (unsigned int i = 0; i < Len; ++i)
 					InterpretStr += IntToStr(*(byte*)&st[i])+" ";
-				List2->Cells[CDATA][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
+				List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
 			}
 
-			//const int CDATA = 3;
 			fseek(file, Univ.Length, SEEK_CUR);
 			Pos = ftell(file);
 			Row++;
@@ -1170,12 +1205,6 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 	//Out->Lines->Add("Время расчета : "+FloatToStr(Tick)+" миллисек.");
 	List->ScrollBars = ssVertical;
 	 //HasSorting[SortingColumn] = !HasSorting[SortingColumn];
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::HeaderControl1Resize(TObject *Sender)
-{
-	List->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width-22;
 }
 //---------------------------------------------------------------------------
 
@@ -1434,7 +1463,7 @@ void __fastcall TForm1::List2SelectCell(TObject *Sender, int ACol, int ARow, boo
 	if (ARow >= 0)
 	{
 		if (CheckCoord->Tag == 1)
-			EFinds->Text = List2->Cells[CDATA][ARow];
+			EFinds->Text = List2->Cells[CDATA2][ARow];
 		if (bloklist2 == 1)
 			bloklist2 = 0;
 		ToE->Text = List2->Cells[CSTART][ARow];
@@ -1448,7 +1477,7 @@ void __fastcall TForm1::List2SelectCell(TObject *Sender, int ACol, int ARow, boo
 		fseek(file, ToE->Text.ToIntDef(0), SEEK_SET);
 		NextSClick(Sender);
 		if (CheckCoord->Tag == 1)
-			Form1->Caption = CurrCell + "|"+ List2->Cells[CDATA][ARow];
+			Form1->Caption = CurrCell + "|"+ List2->Cells[CDATA2][ARow];
 	}
 }
 //---------------------------------------------------------------------------
@@ -1511,14 +1540,14 @@ void __fastcall TForm1::SPLMreadClick(TObject *Sender)
 		else if (strncmp(Name, "NAM0", 4) == 0)
 		{
 			Data = IntToStr(Byte(st[0]));
-			//List2->Cells[CDATA][i] = Data;
+			//List2->Cells[CDATA2][i] = Data;
 			ToLogS(Data, "NAM0");
 			Coun[1]++;
 		}
 		else if (strncmp(Name, "XNAM", 4) == 0)
 		{
 			Data = IntToStr(Byte(st[0]));
-			//List2->Cells[CDATA][i] = Data;
+			//List2->Cells[CDATA2][i] = Data;
 			ToLogS(Data, "XNAM");
 			Coun[2]++;
 			break;
@@ -1538,7 +1567,7 @@ void __fastcall TForm1::SPLMreadClick(TObject *Sender)
 			for (int un = 0; un < 10; ++un)
 				ToLog(s.nuls[un]);
 			Coun[3]++;
-			List2->Cells[CDATA][i] = s.str;
+			List2->Cells[CDATA2][i] = s.str;
 		}
 		else if (strncmp(Name, "NPDT", 4) == 0)
 		{
@@ -1742,6 +1771,10 @@ void __fastcall TForm1::TestMenuClick(TObject *Sender)
 			Count++;
 	Out->Lines->Add("Selected count ="+IntToStr(Count));
 	EFinds->Width += 20;
+	tolog(List->ClientWidth);
+	tolog(List->Width);
+	tolog(HeaderControl1->ClientWidth);
+	tolog(HeaderControl1->Width);
 }
 //---------------------------------------------------------------------------
 
@@ -1941,7 +1974,7 @@ void __fastcall TForm1::FindinList2Click(TObject *Sender)
 {
 	String Find = EFinds->Text;
 	for (int Row = List2->Row + 1; Row < List2->RowCount; ++Row)
-		if	(List2->Cells[CDATA][Row].Pos(Find) == 1)
+		if	(List2->Cells[CDATA2][Row].Pos(Find) == 1)
 		{
 			List2->Row = Row;
 			break;
@@ -2031,18 +2064,18 @@ void __fastcall TForm1::CheckCoordClick(TObject *Sender)
 					max = Data[2];
 					maxi = List2->Cells[CSTART][j].ToInt();
 					if (List2->Cells[CHEADER][j-1] == "XSCL")
-						maxs = List2->Cells[CDATA][j-2];
+						maxs = List2->Cells[CDATA2][j-2];
 					else
-						maxs = List2->Cells[CDATA][j-1];
+						maxs = List2->Cells[CDATA2][j-1];
 				}
 				if (Data[2] < min)
 				{
 					min = Data[2];
 					mini = List2->Cells[CSTART][j].ToInt();
 					if (List2->Cells[CHEADER][j-1] == "XSCL")
-						mins = List2->Cells[CDATA][j-2];
+						mins = List2->Cells[CDATA2][j-2];
 					else
-						mins = List2->Cells[CDATA][j-1];
+						mins = List2->Cells[CDATA2][j-1];
 				}
 			}
 		}
@@ -2052,24 +2085,6 @@ void __fastcall TForm1::CheckCoordClick(TObject *Sender)
 		Out->Lines->Add(mins+"=Min:"+FloatToStr(min)+" in "+IntToStr(mini));
 		Out->Lines->Add(max-min);
 	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::HeaderControl2Resize(TObject *Sender)
-{
-	//List2->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width-22-28;
-	List2->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width
-	 - HeaderControl1->Sections->Items[CSIZE]->Width;//-22-28;
-	//tolog(HeaderControl1->Sections->Items[CDATA]->Width);
-	//tolog(HeaderControl1->Sections->Items[CSIZE]->Width);
-	//List2->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width;//-22-28;
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::HeaderControl2SectionResize(THeaderControl *HeaderControl,
-			 THeaderSection *Section)
-{
-	List2->ColWidths[Section->Index] = Section->Width;// - Section->Index;
 }
 //---------------------------------------------------------------------------
 
@@ -2091,7 +2106,7 @@ void __fastcall TForm1::GMDTReadClick(TObject *Sender)
 		ToLog(Cord[i]);
 	ToLog(whe);
 	ToLog(Player);
-	List2->Cells[CDATA][List2->Row] = Player;
+	List2->Cells[CDATA2][List2->Row] = Player;
 }
 //---------------------------------------------------------------------------
 
@@ -2163,7 +2178,7 @@ void __fastcall TForm1::FindinSublistsClick(TObject *Sender)
 	{
 		ListSelectCell(Sender, 0, i, CanSelect);
 		for (int Row = 0; Row < List2->RowCount; ++Row)
-			if	(List2->Cells[CDATA][Row].Pos(Find) == 1)
+			if	(List2->Cells[CDATA2][Row].Pos(Find) == 1)
 			{
 				List->Row = i;
 				List2->Row = Row;
@@ -2565,6 +2580,14 @@ void __fastcall TForm1::DelOffsetsClick(TObject *Sender)
 	for (int i = 0; i < List->RowCount; i++)
 		if (Ena.find(List->Cells[CSTART][i].ToInt()) == Ena.end()) //его нет
 			DeleteRecord(i);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::LoadCellsClick(TObject *Sender)
+{
+	//
+	//basecel.LoadFromFile("BASECELLS.txt");
+
 }
 //---------------------------------------------------------------------------
 

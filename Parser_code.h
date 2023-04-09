@@ -19,7 +19,9 @@ const int CHEADER = 0;
 const int CSTART = 1;
 const int CSIZE = 2;
 const int CDATA = 3;
-const int CTYPE = 4;
+//////////List2/////////
+const int CDATA2 = 4;
+const int CTYPE = 3;
 ////////////////////////
 const int INTFIELDS = 0;
 const int TEXTFIELDS = 1;
@@ -105,6 +107,7 @@ __published:	// IDE-managed Components
 	TButton *PrepareGame;
 	TButton *ExportScriptsBtn;
 	TButton *DelOffsets;
+	TButton *LoadCells;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -167,6 +170,7 @@ __published:	// IDE-managed Components
 	void __fastcall PrepareGameClick(TObject *Sender);
 	void __fastcall ExportScriptsBtnClick(TObject *Sender);
 	void __fastcall DelOffsetsClick(TObject *Sender);
+	void __fastcall LoadCellsClick(TObject *Sender);
 
 
 private:	// User declarations
@@ -367,6 +371,8 @@ public:		// User declarations
 			List->Cols[2]->EndUpdate();
 			List->Cols[3]->EndUpdate();
 			List->ScrollBars = ssVertical;
+			HeaderControl1Resize(NULL);
+         //HeaderControl2Resize(NULL);
 		}
 	}
 	bool localeinstalled;
@@ -381,6 +387,7 @@ public:		// User declarations
 	std::vector<long> RefEnds;
 	void PrepareFor(char SYMBS[4]);
 	bool PrepareForEdit;
+	TableLoader basecel;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

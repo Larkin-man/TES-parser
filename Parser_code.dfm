@@ -182,6 +182,10 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
+    ExplicitLeft = 607
+    ExplicitTop = 30
+    ExplicitWidth = 277
+    ExplicitHeight = 628
   end
   object PanelPRO: TPanel
     Left = 887
@@ -549,6 +553,15 @@ object Form1: TForm1
         TabOrder = 27
         OnClick = DelOffsetsClick
       end
+      object LoadCells: TButton
+        Left = 0
+        Top = 400
+        Width = 75
+        Height = 25
+        Caption = 'LoadCells'
+        TabOrder = 28
+        OnClick = LoadCellsClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -724,10 +737,14 @@ object Form1: TForm1
     end
     object HeaderControl1: THeaderControl
       AlignWithMargins = True
-      Left = 4
-      Top = 44
-      Width = 297
+      Left = 1
+      Top = 41
+      Width = 303
       Height = 17
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 1
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -13
@@ -737,7 +754,7 @@ object Form1: TForm1
         item
           ImageIndex = -1
           Text = 'Header'
-          Width = 36
+          Width = 38
         end
         item
           ImageIndex = -1
@@ -753,21 +770,24 @@ object Form1: TForm1
           AutoSize = True
           ImageIndex = -1
           Text = 'Data'
-          Width = 170
+          Width = 174
         end>
       OnSectionClick = HeaderControl1SectionClick
       OnSectionResize = HeaderControl1SectionResize
       ParentFont = False
       OnResize = HeaderControl1Resize
+      ExplicitLeft = 2
+      ExplicitTop = 38
     end
     object List: TStringGrid
       Left = 1
-      Top = 64
+      Top = 59
       Width = 303
-      Height = 569
+      Height = 574
       Align = alClient
+      BorderStyle = bsNone
       ColCount = 4
-      DefaultColWidth = 60
+      DefaultColWidth = 70
       DefaultRowHeight = 16
       FixedCols = 0
       RowCount = 1
@@ -777,12 +797,14 @@ object Form1: TForm1
       Font.Height = -12
       Font.Name = 'Tahoma'
       Font.Style = []
-      Options = [goFixedVertLine, goFixedHorzLine, goHorzLine, goRangeSelect, goRowSelect, goThumbTracking]
+      Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goThumbTracking]
       ParentFont = False
       ScrollBars = ssVertical
       TabOrder = 2
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
+      ExplicitTop = 58
+      ExplicitHeight = 575
     end
   end
   object PanelList2: TPanel
@@ -796,10 +818,14 @@ object Form1: TForm1
     TabOrder = 2
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
-      Left = 4
-      Top = 4
-      Width = 285
+      Left = 1
+      Top = 1
+      Width = 291
       Height = 17
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 1
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -13
@@ -810,45 +836,49 @@ object Form1: TForm1
           AllowClick = False
           ImageIndex = -1
           Text = 'Header'
-          Width = 36
+          Width = 38
         end
         item
           AllowClick = False
           ImageIndex = -1
           Text = 'Offset'
-          Width = 49
+          Width = 48
         end
         item
           AllowClick = False
           ImageIndex = -1
           Text = 'Size'
-          Width = 42
+          Width = 38
+        end
+        item
+          AllowClick = False
+          ImageIndex = -1
+          Text = 'Type'
+          Width = 24
         end
         item
           AllowClick = False
           AutoSize = True
           ImageIndex = -1
           Text = 'Data'
-          Width = 128
-        end
-        item
-          AllowClick = False
-          ImageIndex = -1
-          Text = 'Type'
-          Width = 30
+          Width = 143
         end>
       Style = hsFlat
       OnSectionResize = HeaderControl2SectionResize
       ParentFont = False
       OnResize = HeaderControl2Resize
+      ExplicitLeft = 4
+      ExplicitTop = 4
+      ExplicitWidth = 285
     end
     object List2: TStringGrid
       Left = 1
-      Top = 24
+      Top = 19
       Width = 291
-      Height = 583
+      Height = 588
       Align = alClient
-      DefaultColWidth = 60
+      BorderStyle = bsNone
+      DefaultColWidth = 50
       DefaultRowHeight = 16
       FixedCols = 0
       RowCount = 1
@@ -858,13 +888,15 @@ object Form1: TForm1
       Font.Height = -12
       Font.Name = 'Tahoma'
       Font.Style = []
-      Options = [goFixedVertLine, goFixedHorzLine, goHorzLine, goRangeSelect, goRowSelect, goThumbTracking]
+      Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goThumbTracking]
       ParentFont = False
       PopupMenu = PopupMenu1
       ScrollBars = ssVertical
       TabOrder = 1
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
+      ExplicitTop = 18
+      ExplicitHeight = 589
     end
     object SubDescript: TEdit
       Left = 1
@@ -902,7 +934,6 @@ object Form1: TForm1
     end
     object TestMenu: TMenuItem
       Caption = 'test'
-      Visible = False
       OnClick = TestMenuClick
     end
     object NList2: TMenuItem
