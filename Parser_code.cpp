@@ -1095,6 +1095,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	//fseek(file, List2->Cells[CSTART][List2->Row].ToIntDef(0) - ftell(file), SEEK_CUR);
 	if (List2->RowCount >= 0)
 	{
+		PanelSubRead->Enabled = true;
 		BlockList2Sel = true;
 		List2->Selection.Top = 0;
 		List2->Selection.Bottom = 0;
@@ -1782,6 +1783,7 @@ void __fastcall TForm1::NList2Click(TObject *Sender)
 {
 	PanelList2->Visible = NList2->Checked;
 	Splitter2->Visible = NList2->Checked;
+	PanelSubRead->Visible = NList2->Checked;
 }
 //---------------------------------------------------------------------------
 

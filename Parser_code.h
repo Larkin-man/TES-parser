@@ -306,7 +306,9 @@ public:		// User declarations
 	void DeleteRecord(int Row);
 	void Ready(bool ready)
 	{
-		PanelPRO->Enabled = ready;
+		//PanelPRO->Enabled = ready;
+		if (ready == false)
+			PanelSubRead->Enabled = false;
 		FlowPanel1->Enabled = ready;
 		List->Enabled = ready;
 		Panel4->Enabled = ready;
