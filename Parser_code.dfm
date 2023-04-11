@@ -44,14 +44,15 @@ object Form1: TForm1
     TabOrder = 0
     object LDele: TLabel
       AlignWithMargins = True
-      Left = 517
+      Left = 620
       Top = 4
       Width = 107
       Height = 19
       Align = alLeft
       Caption = 'Deleted Size=0'
       Visible = False
-      ExplicitLeft = 452
+      ExplicitLeft = 693
+      ExplicitTop = 2
     end
     object Bevel1: TBevel
       Left = 193
@@ -139,7 +140,7 @@ object Form1: TForm1
     end
     object ProModeCK: TCheckBox
       AlignWithMargins = True
-      Left = 630
+      Left = 517
       Top = 4
       Width = 97
       Height = 19
@@ -149,6 +150,7 @@ object Form1: TForm1
       State = cbChecked
       TabOrder = 4
       OnClick = ProModeCKClick
+      ExplicitLeft = 630
     end
     object Save2: TButton
       Left = 129
@@ -211,306 +213,9 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      object TES3Read: TButton
-        Left = 0
-        Top = 0
-        Width = 50
-        Height = 25
-        Hint = 'read TES3 header'
-        Caption = 'TES3'
-        Enabled = False
-        TabOrder = 0
-        OnClick = TES3ReadClick
-      end
-      object CellRead: TButton
-        Left = 50
-        Top = 0
-        Width = 50
-        Height = 25
-        Caption = 'CELL'
-        TabOrder = 1
-        OnClick = CellReadClick
-      end
-      object GMDTRead: TButton
-        Left = 100
-        Top = 0
-        Width = 50
-        Height = 25
-        Caption = 'sGMDT'
-        TabOrder = 2
-        Visible = False
-        OnClick = GMDTReadClick
-      end
-      object TestP: TButton
-        Left = 150
-        Top = 0
-        Width = 49
-        Height = 25
-        Caption = 'TestP'
-        TabOrder = 4
-        Visible = False
-        OnClick = TestPClick
-      end
-      object SPELread: TButton
-        Left = 0
-        Top = 25
-        Width = 50
-        Height = 25
-        Caption = 'SPEL'
-        TabOrder = 5
-        Visible = False
-        OnClick = SPELreadClick
-      end
-      object DelTrash: TButton
-        Left = 50
-        Top = 25
-        Width = 97
-        Height = 25
-        Hint = 'Auto delete trash CELL'
-        Caption = 'Delete Trash'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 13
-        OnClick = DelTrashClick
-      end
-      object SPLMread: TButton
-        Left = 147
-        Top = 25
-        Width = 49
-        Height = 25
-        Caption = 'SPLM'
-        TabOrder = 10
-        Visible = False
-        OnClick = SPLMreadClick
-      end
-      object ExportBtn: TButton
-        Left = 0
-        Top = 50
-        Width = 58
-        Height = 25
-        Hint = 'Export selected records'
-        Caption = 'Export'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 8
-        OnClick = ExportBtnClick
-      end
-      object ExportSPEL: TButton
-        Left = 58
-        Top = 50
-        Width = 96
-        Height = 25
-        Hint = 'Export selected SPEL'
-        Caption = 'Export SPEL'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 6
-        OnClick = ExportSPELClick
-      end
-      object FindNext: TButton
-        Left = 0
-        Top = 75
-        Width = 79
-        Height = 25
-        Hint = 'Find text from string field. Right click is delete.'
-        Caption = 'Find Next'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 7
-        OnClick = FindNextClick
-        OnContextPopup = NextTagContextPopup
-      end
-      object FindinList2: TButton
-        Left = 79
-        Top = 75
-        Width = 113
-        Height = 25
-        Hint = 'Find in List 2'
-        Caption = 'Find in subList'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 15
-        OnClick = FindinList2Click
-      end
-      object DelDials: TButton
-        Left = 0
-        Top = 100
-        Width = 145
-        Height = 25
-        Hint = 'Delete DIAL'#39's without INFO'
-        Caption = 'Delete trash DIAL'#39's'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 9
-        OnClick = DelDialsClick
-      end
-      object DelDatas: TButton
-        Left = 0
-        Top = 125
-        Width = 77
-        Height = 25
-        Hint = 'Find and delete Headers with Data'#39's from Memo strings.'
-        Caption = 'Del Datas'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 3
-        OnClick = DelDatasClick
-      end
-      object PushCoord: TButton
-        Left = 77
-        Top = 125
-        Width = 121
-        Height = 25
-        Hint = 
-          'For CELL and PGRD subtracts number from coordinates of all objec' +
-          'ts'
-        Caption = 'Swap coordinates'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -15
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 11
-        OnClick = PushCoordClick
-      end
-      object Wordwap: TCheckBox
-        AlignWithMargins = True
-        Left = 2
-        Top = 153
-        Width = 95
-        Height = 17
-        Margins.Left = 2
-        Margins.Right = 1
-        Caption = 'Word wrap'
-        Checked = True
-        State = cbChecked
-        TabOrder = 12
-        OnClick = WordwapClick
-      end
-      object Sel: TButton
-        Left = 98
-        Top = 150
-        Width = 56
-        Height = 25
-        Hint = 'Start clicking on the selected rows in List1'
-        Caption = 'Select'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 14
-        OnClick = SelClick
-      end
-      object NextCell: TButton
-        Left = 0
-        Top = 175
-        Width = 71
-        Height = 25
-        Hint = 'Next CELL LAND PGRD'
-        Caption = 'Next cell'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 20
-        OnClick = NextCellClick
-      end
-      object DeleteExtraData: TButton
-        Left = 71
-        Top = 175
-        Width = 129
-        Height = 25
-        Hint = 
-          'Deletes from a sheet 2 all up to the following heading FRMR NAM0' +
-          ' DATA'
-        Caption = 'Delete ExtraData'
-        Enabled = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 16
-        OnClick = DeleteExtraDataClick
-      end
-      object FindinSublists: TButton
-        Left = 0
-        Top = 200
-        Width = 120
-        Height = 25
-        Hint = 'Find in all list and sublists'
-        Caption = 'Find in sublistS'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 21
-        OnClick = FindinSublistsClick
-      end
-      object setlocaleBtn: TButton
-        Left = 120
-        Top = 200
-        Width = 75
-        Height = 25
-        Hint = 'setlocale for Localized. '#39'Find'#39' field is locale page'
-        Caption = 'setlocale'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 19
-        OnClick = setlocaleBtnClick
-      end
-      object CheckCoord: TButton
-        Left = 0
-        Top = 225
-        Width = 129
-        Height = 25
-        Hint = 'max min of Z of selected CELL'
-        Caption = 'Check coordinate'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -16
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 17
-        OnClick = CheckCoordClick
-        OnContextPopup = CheckCoordContextPopup
-      end
-      object AddMainFields: TButton
-        Left = 0
-        Top = 250
-        Width = 121
-        Height = 25
-        Hint = 'To add bytes after the size'
-        Caption = 'Add main fields'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 18
-        OnClick = AddMainFieldsClick
-      end
-      object Replace: TButton
-        Left = 0
-        Top = 275
-        Width = 94
-        Height = 25
-        Hint = 'Replace @# to {} from clipboard'
-        Caption = 'Replace @#'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 22
-        OnClick = ReplaceClick
-      end
-      object CheckConflicts: TButton
-        Left = 0
-        Top = 300
-        Width = 113
-        Height = 25
-        Hint = 'Check plugin same identifiers'
-        Caption = 'Check conflicts'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 23
-        OnClick = CheckConflictsClick
-      end
       object PrepareE: TButton
         Left = 0
-        Top = 325
+        Top = 0
         Width = 145
         Height = 25
         Hint = 'akella\1C. INFO replace @# to {}'
@@ -522,7 +227,7 @@ object Form1: TForm1
       end
       object PrepareGame: TButton
         Left = 0
-        Top = 350
+        Top = 25
         Width = 136
         Height = 25
         Hint = 'akella\1C. INFO replace @# to {}'
@@ -532,33 +237,319 @@ object Form1: TForm1
         TabOrder = 25
         OnClick = PrepareGameClick
       end
-      object ExportScriptsBtn: TButton
+      object ExportBtn: TButton
+        Left = 136
+        Top = 25
+        Width = 58
+        Height = 25
+        Hint = 'Export selected records'
+        Caption = 'Export'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 8
+        OnClick = ExportBtnClick
+      end
+      object DelTrash: TButton
         Left = 0
-        Top = 375
+        Top = 50
+        Width = 97
+        Height = 25
+        Hint = 'Auto delete trash CELL'
+        Caption = 'Delete Trash'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 13
+        OnClick = DelTrashClick
+      end
+      object Replace: TButton
+        Left = 97
+        Top = 50
+        Width = 94
+        Height = 25
+        Hint = 'Replace @# to {} from clipboard'
+        Caption = 'Replace @#'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 22
+        OnClick = ReplaceClick
+      end
+      object DelDials: TButton
+        Left = 0
+        Top = 75
+        Width = 145
+        Height = 25
+        Hint = 'Delete DIAL'#39's without INFO'
+        Caption = 'Delete trash DIAL'#39's'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 9
+        OnClick = DelDialsClick
+      end
+      object FindNext: TButton
+        Left = 0
+        Top = 100
+        Width = 75
+        Height = 25
+        Hint = 'Find text from string field. Right click is delete.'
+        Caption = 'Find next'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 7
+        OnClick = FindNextClick
+        OnContextPopup = NextTagContextPopup
+      end
+      object ExportSPEL: TButton
+        Left = 75
+        Top = 100
+        Width = 96
+        Height = 25
+        Hint = 'Export selected SPEL'
+        Caption = 'Export SPEL'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 6
+        OnClick = ExportSPELClick
+      end
+      object CheckConflicts: TButton
+        Left = 0
+        Top = 125
         Width = 113
         Height = 25
-        Caption = 'Export Scripts'
+        Hint = 'Check plugin same identifiers'
+        Caption = 'Check conflicts'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 23
+        OnClick = CheckConflictsClick
+      end
+      object setlocaleBtn: TButton
+        Left = 113
+        Top = 125
+        Width = 75
+        Height = 25
+        Hint = 'setlocale for Localized. '#39'Find'#39' field is locale page'
+        Caption = 'setlocale'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 19
+        OnClick = setlocaleBtnClick
+      end
+      object FindinList2: TButton
+        Left = 0
+        Top = 150
+        Width = 113
+        Height = 25
+        Hint = 'Find in List 2'
+        Caption = 'Find in subList'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 14
+        OnClick = FindinList2Click
+      end
+      object DelDatas: TButton
+        Left = 0
+        Top = 175
+        Width = 99
+        Height = 25
+        Hint = 'Find and delete Headers with Data'#39's from Memo strings.'
+        Caption = 'Delete Data'#39's'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 3
+        OnClick = DelDatasClick
+      end
+      object Sel: TButton
+        Left = 99
+        Top = 175
+        Width = 53
+        Height = 25
+        Hint = 'Start clicking on the selected rows in List1'
+        Caption = 'Select'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 16
+        Visible = False
+        OnClick = SelClick
+      end
+      object NextCell: TButton
+        Left = 0
+        Top = 200
+        Width = 71
+        Height = 25
+        Hint = 'Next CELL LAND PGRD'
+        Caption = 'Next Cell'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 20
+        OnClick = NextCellClick
+      end
+      object Wordwap: TCheckBox
+        AlignWithMargins = True
+        Left = 73
+        Top = 203
+        Width = 95
+        Height = 17
+        Margins.Left = 2
+        Margins.Right = 1
+        Caption = 'Word wrap'
+        Checked = True
+        State = cbChecked
+        TabOrder = 12
+        OnClick = WordwapClick
+      end
+      object ExportScriptsBtn: TButton
+        Left = 0
+        Top = 225
+        Width = 107
+        Height = 25
+        Caption = 'Export scripts'
         TabOrder = 26
         OnClick = ExportScriptsBtnClick
       end
-      object DelOffsets: TButton
-        Left = 113
-        Top = 375
-        Width = 88
+      object DeleteExtraData: TButton
+        Left = 0
+        Top = 250
+        Width = 133
         Height = 25
-        Hint = 'Delete offsets wi memo'
-        Caption = 'DelOffsets'
+        Hint = 
+          'Deletes from a sheet 2 all up to the following heading FRMR NAM0' +
+          ' DATA'
+        Caption = 'Delete '#39'ExtraData'#39
+        Enabled = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 15
+        OnClick = DeleteExtraDataClick
+      end
+      object FindinSublists: TButton
+        Left = 0
+        Top = 275
+        Width = 137
+        Height = 25
+        Hint = 'Find in all list and sublists'
+        Caption = 'Find in all sublists'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 21
+        OnClick = FindinSublistsClick
+      end
+      object CheckCoord: TButton
+        Left = 0
+        Top = 300
+        Width = 131
+        Height = 25
+        Hint = 'max min of Z of selected CELL'
+        Caption = 'Check coordinate'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 17
+        OnClick = CheckCoordClick
+        OnContextPopup = CheckCoordContextPopup
+      end
+      object AddMainFields: TButton
+        Left = 0
+        Top = 325
+        Width = 121
+        Height = 25
+        Hint = 'To add bytes after the size'
+        Caption = 'Add main fields'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 18
+        OnClick = AddMainFieldsClick
+      end
+      object DelOffsets: TButton
+        Left = 0
+        Top = 350
+        Width = 105
+        Height = 25
+        Hint = 'Delete offsets from memo'
+        Caption = 'Delete offsets'
         ParentShowHint = False
         ShowHint = True
         TabOrder = 27
         OnClick = DelOffsetsClick
       end
-      object LoadCells: TButton
+      object PushCoord: TButton
+        Left = 0
+        Top = 375
+        Width = 134
+        Height = 25
+        Hint = 
+          'For CELL and PGRD subtracts number from coordinates of all objec' +
+          'ts'
+        Caption = 'Swap coordinates'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 11
+        OnClick = PushCoordClick
+      end
+      object TES3Read: TButton
+        Left = 134
+        Top = 375
+        Width = 50
+        Height = 25
+        Hint = 'read TES3 header'
+        Caption = 'TES3'
+        Enabled = False
+        TabOrder = 0
+        OnClick = TES3ReadClick
+      end
+      object CellRead: TButton
         Left = 0
         Top = 400
-        Width = 75
+        Width = 50
         Height = 25
-        Caption = 'LoadCells'
+        Caption = 'CELL'
+        TabOrder = 1
+        OnClick = CellReadClick
+      end
+      object GMDTRead: TButton
+        Left = 50
+        Top = 400
+        Width = 50
+        Height = 25
+        Caption = 'sGMDT'
+        TabOrder = 2
+        Visible = False
+        OnClick = GMDTReadClick
+      end
+      object TestP: TButton
+        Left = 100
+        Top = 400
+        Width = 49
+        Height = 25
+        Caption = 'TestP'
+        TabOrder = 4
+        Visible = False
+        OnClick = TestPClick
+      end
+      object SPELread: TButton
+        Left = 149
+        Top = 400
+        Width = 50
+        Height = 25
+        Caption = 'SPEL'
+        TabOrder = 5
+        Visible = False
+        OnClick = SPELreadClick
+      end
+      object SPLMread: TButton
+        Left = 0
+        Top = 425
+        Width = 49
+        Height = 25
+        Caption = 'SPLM'
+        TabOrder = 10
+        Visible = False
+        OnClick = SPLMreadClick
+      end
+      object LoadCells: TButton
+        Left = 49
+        Top = 425
+        Width = 81
+        Height = 25
+        Caption = 'Load Cells'
         TabOrder = 28
         OnClick = LoadCellsClick
       end

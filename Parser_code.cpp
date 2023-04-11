@@ -418,6 +418,7 @@ void __fastcall TForm1::CellReadClick(TObject *Sender)
 		Out->Lines->Add("END!");
 	else
 		Out->Lines->Add(Stop);
+	List->Row = List->Row;
 	NextSClick(Sender);
 }
 //---------------------------------------------------------------------------
@@ -1231,6 +1232,7 @@ void __fastcall TForm1::ExportSPELClick(TObject *Sender)
 	}
 	Export->SaveToFile("EXPORT.txt");
 	ShowMessage("Saved EXPORT.txt");
+	List->Row = List->Row;
 }
 //---------------------------------------------------------------------------
 
@@ -1776,6 +1778,11 @@ void __fastcall TForm1::TestMenuClick(TObject *Sender)
 	tolog(List->Width);
 	tolog(HeaderControl1->ClientWidth);
 	tolog(HeaderControl1->Width);
+	GMDTRead->Visible = true;
+	TestP->Visible = true;
+	SPELread->Visible = true;
+	SPLMread->Visible = true;
+	Sel->Visible = true;
 }
 //---------------------------------------------------------------------------
 
@@ -1784,6 +1791,11 @@ void __fastcall TForm1::NList2Click(TObject *Sender)
 	PanelList2->Visible = NList2->Checked;
 	Splitter2->Visible = NList2->Checked;
 	PanelSubRead->Visible = NList2->Checked;
+	FindinList2->Enabled = NList2->Checked;
+	FindinSublists->Enabled = NList2->Checked;
+	PushCoord->Enabled = NList2->Checked;
+	DeleteExtraData->Enabled = NList2->Checked && EnableLsit2Delete1->Checked;
+	CheckCoord->Enabled = NList2->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -2108,7 +2120,6 @@ void __fastcall TForm1::GMDTReadClick(TObject *Sender)
 		ToLog(Cord[i]);
 	ToLog(whe);
 	ToLog(Player);
-	List2->Cells[CDATA2][List2->Row] = Player;
 }
 //---------------------------------------------------------------------------
 
