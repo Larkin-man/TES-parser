@@ -110,5 +110,33 @@ struct BITS //sizeof=4
 	unsigned int b8 : 1;
 } ;
 
+union Interpret
+{
+	int i;
+	float f;
+	short w[2];
+	unsigned short uw[2];
+	Byte b[4];
+	char c;
+} ;
+
+struct DeleteItem
+{    //DeleteItem ti(AI_W->Cells[1][0].ToInt(),AI_W->Cells[1][1].ToInt());
+		//DeletingSubheaders.push_back(ti);
+	DeleteItem(int m, int ml, int o, int s)
+	{
+		MainLenOffset = m;
+		MainLen = ml;
+		Offset = o;
+		Size = s;
+		Addon = NULL;
+	}
+	int MainLenOffset;
+	int MainLen;
+	int Offset;
+	int Size; //size of deleting block
+	byte *Addon;
+	~DeleteItem()	{	if (Addon)	delete []Addon;		}
+};
 
 #endif

@@ -9,7 +9,7 @@ void MHeader::Read(FILE* &file, int lensize)
 {
 	fread(&Name, 4, 1, file);
 	fread(&Length, lensize, 1, file);
-	if ((Length > LENSTOP)||(Length < 0))
+	if (Length > LENSTOP)
 	{
 		ShowMessage("Length is over "+IntToStr((int)LENSTOP));
 		Length = LENSTOP / 4;
