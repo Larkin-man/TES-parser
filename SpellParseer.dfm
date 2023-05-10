@@ -1,0 +1,94 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 168
+  ClientWidth = 409
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -16
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnClose = FormClose
+  PixelsPerInch = 96
+  TextHeight = 19
+  object Edit1: TEdit
+    Left = 8
+    Top = 8
+    Width = 121
+    Height = 26
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    Text = 'SPEL'#9'NAME'#9
+  end
+  object Button1: TButton
+    Left = 8
+    Top = 135
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
+  object Out: TListBox
+    Left = 135
+    Top = 0
+    Width = 274
+    Height = 168
+    Align = alRight
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    ItemHeight = 19
+    TabOrder = 2
+    ExplicitWidth = 290
+    ExplicitHeight = 150
+  end
+  object Edit2: TEdit
+    Left = 8
+    Top = 40
+    Width = 121
+    Height = 26
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 3
+    Text = 'SPEL'#9'FNAM'#9
+  end
+  object Edit4: TEdit
+    Left = 8
+    Top = 103
+    Width = 121
+    Height = 26
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 4
+    Text = 'SPEL'#9'ENAM'#9
+  end
+  object Edit3: TEdit
+    Left = 8
+    Top = 72
+    Width = 121
+    Height = 26
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 5
+    Text = 'SPEL'#9'SPDT'#9
+  end
+end
