@@ -76,6 +76,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	localeinstalled = false;
 	Univ.Capacity = 0;
 	PanelPRO->Visible = ProModeCK->Checked;
+	SortingColumn = CSTART;
+	SearchinDataClick(NULL);
+	ListEnter(NULL);
+	ShowAll = true;
 }
 //---------------------------------------------------------------------------
 
@@ -84,7 +88,10 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	if (OpenDialog1->Execute() != ID_OK)
 		return;
 	if (file)
+	{
 		fclose(file);
+      Ready(false);
+	}
 	if (Rewrites->Checked)
 	{
 		file = _wfopen(OpenDialog1->FileName.c_str(), L"r+b");
@@ -240,7 +247,17 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		if (List->RowCount >= 1)
 			List->Cells[CDATA][0] = "Number of records: "+IntToStr(RecordCount);
 		RefreshData(file, 1);
+		ShowData1->Tag = 1;
 	}
+	else
+	{
+		if (ShowData1->Tag == 1)
+      {
+			ShowData1->Tag = 0;
+			for (int i = 0; i < List->RowCount; i++)
+				List->Cells[CDATA][i] = "";
+		}
+   }
 	DoUpdateList(false);
 	fseek(file, 0, SEEK_SET);
 	//NextSClick(Sender);
@@ -248,6 +265,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		ToLog("Wrong Record Count " +IntToStr(RecordCount)+"("+IntToStr(List->RowCount - 1)+")");
 	//fal 3 wrong
 	Ready(true);
+	SortingColumn = CSTART;
 	if (Rewrites->Checked)
 		Rewrites->Enabled = false;
 	else
@@ -265,7 +283,7 @@ void TForm1::RefreshData(FILE* &file, int Start)
 		int start = List->Cells[CSTART][i].ToInt();
 		fseek(file, start, SEEK_SET);
 		const int MAXSIZE = 64;
-		static char DATA[MAXSIZE];
+		static char DATA[MAXSIZE+1];
 		String Header = List->Cells[CHEADER][i];
 		if (Header == "GRUP")
 		{
@@ -343,10 +361,11 @@ void TForm1::RefreshData(FILE* &file, int Start)
 			fseek(file, MNAMETOSUBLEN, SEEK_CUR);
 			int Len = 0;
 			fread(&Len, SLENSIZE, 1, file);
-			CheckLot(Len, 64);
-			fread(DATA, 64, 1, file);
-			//int a = reinterpret_cast<int>(&(DATA[9]));
-			List->Cells[CDATA][i] = DATA;//&(DATA[9]);
+			CheckLot(Len, MAXSIZE);
+			fread(DATA, MAXSIZE, 1, file);
+			//if (Header == "GMST")
+			DATA[Len] = 0;
+			List->Cells[CDATA][i] = DATA;
 		}
 	}
 }
@@ -597,7 +616,7 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 	{
 		for (; FindIdx < Out->Lines->Count; ++FindIdx)
 			if (Out->Lines->Strings[FindIdx].Length() > 0)
-				if ( (row = List->Cols[3]->IndexOf(Out->Lines->Strings[FindIdx])) > -1 )
+				if ( (row = List->Cols[*SearchingIn]->IndexOf(Out->Lines->Strings[FindIdx])) > -1 )
 				{
 					EFinds->Text = Out->Lines->Strings[FindIdx];
 					List->Row = row;
@@ -606,7 +625,7 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 	}
 	else
 	{
-		row = List->Cols[3]->IndexOf(Out->SelText);
+		row = List->Cols[*SearchingIn]->IndexOf(Out->SelText);
 		if (row > -1)
 		{
 			List->Row = row;
@@ -873,19 +892,22 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		return;
 	//1 Чекнем секрет поле maina
 	int Offset = List->Cells[CSTART][ARow].ToInt();
-	fseek(file, Offset + 4 + LENSIZE, SEEK_SET);
-	fread(SecretData, 4, SecretLen, file);
-	Secr->Visible = false;
-	for (int i = 0; i < SecretLen; ++i)
-		if (SecretData[i] != 0)
-		{
-			Secr->Caption = "";
-			for (int j = 0; j < SecretLen; ++j)
-				Secr->Caption = Secr->Caption + IntToStr(SecretData[j]) + ",";
-			Secr->Caption = Secr->Caption.SetLength(Secr->Caption.Length()-1);
-			Secr->Visible = true;
-			break;
-		}
+	if (ShowAll)
+	{
+		fseek(file, Offset + 4 + LENSIZE, SEEK_SET);
+		fread(SecretData, 4, SecretLen, file);
+		Secr->Visible = false;
+		for (int i = 0; i < SecretLen; ++i)
+			if (SecretData[i] != 0)
+			{
+				Secr->Caption = "";
+				for (int j = 0; j < SecretLen; ++j)
+					Secr->Caption = Secr->Caption + IntToStr(SecretData[j]) + ",";
+				Secr->Caption = Secr->Caption.SetLength(Secr->Caption.Length()-1);
+				Secr->Visible = true;
+				break;
+			}
+	}
 	//------------
 	if (PanelList2->Visible == false)
 		return;
@@ -899,6 +921,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	if (ARow >= 0)
 	{
 		//TYPES TABLE найдем HEAD от и до
+
 		HEAD = List->Cells[CHEADER][ARow];
 		if (Tes3==false && HEAD=="NPC_")
 		{
@@ -983,7 +1006,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 								InterpretStr += IntToStr(*(byte*)&st[i])+" ";
 							break;
 						case 'f': for (unsigned int i = 0; i < Len; i+=sizeof(float))
-								InterpretStr += FloatToStrF(*(float*)&st[i], ffGeneral, 4, 2)+" ";
+								InterpretStr += FloatToStrF(*(float*)&st[i], ffGeneral, 8, 8)+" ";
 							break;
 						case 'w': for (unsigned int i = 0; i < Len; i+=sizeof(short))
 								InterpretStr += IntToStr(*(short*)&st[i])+" ";
@@ -1094,13 +1117,15 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	//if (Check&&Expo)
 	//	FindNAMEClick(Sender);
 	//fseek(file, List2->Cells[CSTART][List2->Row].ToIntDef(0) - ftell(file), SEEK_CUR);
+	if (!ShowAll)
+		return;
 	if (List2->RowCount >= 0)
 	{
 		PanelSubRead->Enabled = true;
 		BlockList2Sel = true;
 		List2->Selection.Top = 0;
 		List2->Selection.Bottom = 0;
-	  BlockList2Sel = false;
+		BlockList2Sel = false;
 		fseek(file, List->Cells[CSTART][ARow].ToInt() + 4 + MAINLENSIZE, SEEK_SET);
 		NextSClick(Sender);
 	}
@@ -1258,12 +1283,14 @@ void __fastcall TForm1::DelDialsClick(TObject *Sender)
 	if (List->Row < 0)
 		return;
 	//Sort
-	SortingColumn = 1;
-	CompareString = false;
-	List->ScrollBars = ssNone;
-	QuickSort(0, List->RowCount-1);
-	List->ScrollBars = ssVertical;
-
+	if (SortingColumn != CSTART)
+	{
+		SortingColumn = CSTART;
+		CompareString = false;
+		List->ScrollBars = ssNone;
+		QuickSort(0, List->RowCount-1);
+		List->ScrollBars = ssVertical;
+	}
 	int Row = 0;
 	int End = List->RowCount;
 	if (List->Selection.Top != List->Selection.Bottom)
@@ -1292,6 +1319,8 @@ void __fastcall TForm1::DelDialsClick(TObject *Sender)
 				NeedDel = false;
 		}
 	}
+	if (LDele->Visible == false)
+   	tolog("It has no trash DIAL");
 }
 //---------------------------------------------------------------------------
 
@@ -1323,7 +1352,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 	if (expTab == ID_YES)
 	{
 		Export = new TStringList;
-		Export->Append("№\tHeader\tOffset\tSize\tData");
+		Export->Append("Header\tOffset\tSize\tData");
 		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
 			Export->Append(List->Cells[CHEADER][i]+"\t" + List->Cells[CSTART][i]+"\t"
 				+ List->Cells[CSIZE][i]+"\t" + List->Cells[CDATA][i]);
@@ -1346,11 +1375,11 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 		int num = 1;
 		if (expOff == ID_YES)
 			if (expSize == ID_YES)
-				Export->Append("№\tHeader\tName\tSubheader\tOffset\tSize\tData");
-			else Export->Append("№\tHeader\tName\tSubheader\tOffset\tData");
+				Export->Append("№\tHeader\tName\tSubheader\tOffset\tSize\tType\tData");
+			else Export->Append("№\tHeader\tName\tSubheader\tOffset\tType\tData");
 		else if (expSize == ID_YES)
-				Export->Append("№\tHeader\tName\tSubheader\tSize\tData");
-			else Export->Append("№\tHeader\tName\tSubheader\tData");
+				Export->Append("№\tHeader\tName\tSubheader\tSize\tType\tData");
+			else Export->Append("№\tHeader\tName\tSubheader\tType\tData");
 		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
 		{
 			String Head = IntToStr(num)+"\t"+List->Cells[CHEADER][i]+"\t"+List->Cells[CDATA][i]+"\t";
@@ -1359,16 +1388,16 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 				if (expOff == ID_YES)
 					if (expSize == ID_YES)
 						Export->Append(Head + List2->Cells[0][j] + "\t"+List2->Cells[1][j]
-						+"\t"+List2->Cells[2][j]+"\t"+List2->Cells[3][j]);
+							+"\t"+List2->Cells[2][j]+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
 					else
 						Export->Append(Head + List2->Cells[0][j] + "\t"+List2->Cells[1][j]
-						+"\t"+List2->Cells[3][j]);
+							+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
 				else
-            	if (expSize == ID_YES)
-						Export->Append(Head + List2->Cells[0][j]
-						+"\t"+List2->Cells[2][j]+"\t"+List2->Cells[3][j]);
+					if (expSize == ID_YES)
+						Export->Append(Head + List2->Cells[0][j]	+"\t"+List2->Cells[2][j]
+							+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
 					else
-						Export->Append(Head + List2->Cells[0][j]+"\t"+List2->Cells[3][j]);
+						Export->Append(Head + List2->Cells[0][j]+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
 			num++;
 		}
 	}
@@ -1389,17 +1418,17 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 				if (expOff == ID_YES)
 					if (expSize == ID_YES)
 						Str += "\t"+ List2->Cells[0][j] + "["+List2->Cells[1][j]
-						+"]{"+List2->Cells[2][j]+"}\t"+List2->Cells[3][j];
+						+"]{"+List2->Cells[2][j]+"}\t"+List2->Cells[CDATA2][j];
 					else
 						Str += "\t"+ List2->Cells[0][j] + "["+List2->Cells[1][j]
-						+"]\t"+List2->Cells[3][j];
+						+"]\t"+List2->Cells[CDATA2][j];
 				else
 					if (expSize == ID_YES)
 						Str += "\t"+ List2->Cells[0][j]
-						+"{"+List2->Cells[2][j]+"}\t"+List2->Cells[3][j];
+						+"{"+List2->Cells[2][j]+"}\t"+List2->Cells[CDATA2][j];
 					else
 						Str += "\t"+ List2->Cells[0][j]
-						+"\t"+List2->Cells[3][j];
+						+"\t"+List2->Cells[CDATA2][j];
 			Export->Append(Str);
 		}
 	}
@@ -1415,9 +1444,9 @@ void __fastcall TForm1::FindStrClick(TObject *Sender)
 	if (find.Length() <= 0)
 		return;
 	int row = 0;
-	if (List->Row <= 0)
+	if (SearchList->Row <= 0)
 	{
-		row = List->Cols[3]->IndexOf(find);
+		row = SearchList->Cols[*SearchingIn]->IndexOf(find);
 		if (row > -1)
 		{
 			EndFind(row);
@@ -1426,15 +1455,15 @@ void __fastcall TForm1::FindStrClick(TObject *Sender)
 		row = 0;
 	}
 	else
-		row = List->Row+1;
-	for (int i = row; i < List->RowCount; ++i)
-		if (List->Cols[3]->Strings[i].Pos(find) == 1)
+		row = SearchList->Row+1;
+	for (int i = row; i < SearchList->RowCount; ++i)
+		if (SearchList->Cols[*SearchingIn]->Strings[i].Pos(find) == 1)
 		{
 			EndFind(i);
 			return;
 		}
 	for (int i = row; i > 0; --i)
-		if (List->Cols[3]->Strings[i].Pos(find) == 1)
+		if (SearchList->Cols[*SearchingIn]->Strings[i].Pos(find) == 1)
 		{
 			EndFind(i);
 			return;
@@ -1442,10 +1471,36 @@ void __fastcall TForm1::FindStrClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void Finding()
+{
+//if (Out->SelLength <= 0)
+//	{
+//		for (; FindIdx < Out->Lines->Count; ++FindIdx)
+//			if (Out->Lines->Strings[FindIdx].Length() > 0)
+//				if ( (row = List->Cols[*SearchingIn]->IndexOf(Out->Lines->Strings[FindIdx])) > -1 )
+//				{
+//					EFinds->Text = Out->Lines->Strings[FindIdx];
+//					List->Row = row;
+//					return;
+//				}
+//	}
+//	else
+//	{
+//		row = List->Cols[*SearchingIn]->IndexOf(Out->SelText);
+//		if (row > -1)
+//		{
+//			List->Row = row;
+//			return;
+//		}
+//	}
+//	ShowMessage("No one finded.");
+}
+
+//---------------------------------------------------------------------------
 void TForm1::EndFind(int Row)
 {
-	List->Row = Row;
-	if (EFinds->Text.Compare(List->Cells[CDATA][Row]) == 0)
+	SearchList->Row = Row;
+	if (EFinds->Text.Compare(List->Cells[*SearchingIn][Row]) == 0)
 		EFinds->Font->Color = clBlack;
 	else
 		EFinds->Font->Color = clBlue;
@@ -1774,10 +1829,6 @@ void __fastcall TForm1::TestMenuClick(TObject *Sender)
 			Count++;
 	Out->Lines->Add("Selected count ="+IntToStr(Count));
 	EFinds->Width += 20;
-	tolog(List->ClientWidth);
-	tolog(List->Width);
-	tolog(HeaderControl1->ClientWidth);
-	tolog(HeaderControl1->Width);
 	GMDTRead->Visible = true;
 	TestP->Visible = true;
 	SPELread->Visible = true;
@@ -1813,7 +1864,7 @@ void __fastcall TForm1::DelTrashClick(TObject *Sender)
 		{
 			ListSelectCell(Sender, 0, i, Can);
 			for (int j = 0; j < List2->RowCount; ++j)
-			if (List2->RowCount <= 4)
+			if (List2->RowCount <= 4) //todo: to optimal
 			{
          	DeleteRecord(i);
 				break;
@@ -1986,13 +2037,9 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 
 void __fastcall TForm1::FindinList2Click(TObject *Sender)
 {
-	String Find = EFinds->Text;
-	for (int Row = List2->Row + 1; Row < List2->RowCount; ++Row)
-		if	(List2->Cells[CDATA2][Row].Pos(Find) == 1)
-		{
-			List2->Row = Row;
-			break;
-		}
+	List2Enter(Sender);
+	FindStrClick(Sender);
+	ListEnter(Sender);
 }
 //---------------------------------------------------------------------------
 //Удаляет из листа 2 все до следующего заголовка FRMR NAM0 DATA
@@ -2187,17 +2234,27 @@ void __fastcall TForm1::FindinSublistsClick(TObject *Sender)
 {
 	String Find = EFinds->Text;
 	bool CanSelect = true;
-	for (int i = List->Row; i < List->RowCount; ++i)
+	for (int Row = List2->Row+1; Row < List2->RowCount; ++Row)
+		if	(List2->Cells[SearchingIn2][Row].Pos(Find) == 1)
+		{
+			List2->Row = Row;
+			return;
+		}
+	ShowAll = false;
+	for (int i = List->Row+1; i < List->RowCount; ++i)
 	{
 		ListSelectCell(Sender, 0, i, CanSelect);
 		for (int Row = 0; Row < List2->RowCount; ++Row)
-			if	(List2->Cells[CDATA2][Row].Pos(Find) == 1)
+			if	(List2->Cells[SearchingIn2][Row].Pos(Find) == 1)
 			{
 				List->Row = i;
 				List2->Row = Row;
+				ShowAll= true;
+				//NextSClick(Sender);
 				return;
 			}
 	}
+	ShowAll= true;
 }
 //---------------------------------------------------------------------------
 
@@ -2264,27 +2321,10 @@ void __fastcall TForm1::ReplaceClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::FindHeader1Click(TObject *Sender)
-{
-//	char find[4];// = "NAME";//	if (EFinds->Text.Length() >= 4)
-//		strncpy(find, EFinds->Text.c_str(), 4); //	else
-//		return ShowMessage("Only four character headers.");
-    TStringGrid *list = List;
-	if (List2->Focused())
-		list = List2;
-	String Find = EFinds->Text;
-	for (int Row = list->Row + 1; Row < list->RowCount; ++Row)
-		if	(list->Cells[CHEADER][Row].Compare(Find) == 0)
-		{
-			list->Row = Row;
-			break;
-		}
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::RewritesClick(TObject *Sender)
 {
 	PushCoord->Visible = Rewrites->Checked;
+	MVRF->Visible = Rewrites->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -2427,6 +2467,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	Save2->Visible = false;
 	Save->Visible = false;
 	Delete->Enabled = false;
+	DelTrash->Enabled= false;
 	//NextSClick(Sender);
 	//if (RecordCount != List->RowCount - 1)
 	//	ToLog("Wrong Record Count " +IntToStr(RecordCount)+"("+IntToStr(List->RowCount - 1)+")");
@@ -2581,14 +2622,20 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 void __fastcall TForm1::DelOffsetsClick(TObject *Sender)
 {
 	std::set<int> Ena;
-	Wordwap = false;
+	Ena.insert(0);
+	Wordwap->Checked = false;
 	Out->WordWrap = false;
 	int def;
 	for (int i = 0; i < Out->Lines->Count; i++)
 	{
-		def = Out->Lines->Strings[i].ToIntDef(-1);
-		if (def >= 0)
+		def = Out->Lines->Strings[i].ToIntDef(0);
+		if (def > 0)
 			Ena.insert(def);
+		else
+		{
+			Out->Lines->Delete(i);
+			i--;
+		}
 	}
 	for (int i = 0; i < List->RowCount; i++)
 		if (Ena.find(List->Cells[CSTART][i].ToInt()) == Ena.end()) //его нет
@@ -2601,6 +2648,110 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 	//
 	//basecel.LoadFromFile("BASECELLS.txt");
 
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FindHeader1Click(TObject *Sender)
+{
+	SearchingIn1 = SearchingIn2 = CHEADER;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::SearchinDataClick(TObject *Sender)
+{
+	SearchingIn1 = CDATA;
+	SearchingIn2 = CDATA2;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::SearchinOffset1Click(TObject *Sender)
+{
+	SearchingIn1 = SearchingIn2 = CSTART;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::SearchinSize1Click(TObject *Sender)
+{
+	SearchingIn1 = SearchingIn2 = CSIZE;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::List2Enter(TObject *Sender)
+{
+	if (FindStr->ImageIndex == 2)
+		FindStr->ImageIndex = 4;
+	SearchingIn = &SearchingIn2;
+	SearchList = List2;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::ListEnter(TObject *Sender)
+{
+ 	if (FindStr->ImageIndex == 4)
+		FindStr->ImageIndex = 2;
+	SearchingIn = &SearchingIn1;
+	SearchList = List;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::MVRFClick(TObject *Sender)
+{
+	static int cn = 0;
+	ShowAll = false;
+	bool CanSelect = true;
+	String find("MVRF");
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+		if (cn > 555)
+		{
+			cn = 0;
+			return;
+		}
+		if (List->Cells[CHEADER][i].Compare("CELL") != 0)
+			continue;
+		ListSelectCell(Sender, 0, i, CanSelect);
+		bool HasMvrf = false;
+		for (int Row = 0; Row < List2->RowCount; ++Row)
+		{
+			if	(List2->Cells[CHEADER][Row].Compare(find) == 0)
+			{
+				cn++;
+				HasMvrf = true;
+				//List->Row = i;
+				//List2->Row = Row;
+				//ShowAll= true;
+				//NextSClick(Sender);
+				//return;
+				Out->Lines->Append("");
+				Out->Lines->Add(List->Cells[CDATA][i]+"\t"+List2->Cells[CDATA2][Row]);
+				continue;
+			}
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("CNDT") == 0)
+			{
+				Out->Lines->Add(List2->Cells[CDATA2][Row]);
+         }
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DELE") == 0)
+			{
+				//Out->Lines->Add(List2->Cells[CHEADER][Row]);
+				HasMvrf = false;
+				continue;
+			}
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DATA") == 0)
+			{
+				fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
+				float z;
+				fread(&z, sizeof(float), 1, file);
+				Out->Lines->Add(z);
+				z += 1000.0;
+				fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
+				fwrite(&z, sizeof(float), 1, file);
+				HasMvrf = false;
+				continue;
+			}
+
+		}
+	}
+	ShowAll = true;
 }
 //---------------------------------------------------------------------------
 

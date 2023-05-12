@@ -136,7 +136,7 @@ struct DeleteItem
 	int Offset;
 	int Size; //size of deleting block
 	byte *Addon;
-	~DeleteItem()	{	if (Addon)	delete []Addon;		}
+	~DeleteItem()	{	if (Addon)	delete []Addon; Addon = NULL;		}
 };
 
 #endif

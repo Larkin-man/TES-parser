@@ -108,6 +108,11 @@ __published:	// IDE-managed Components
 	TButton *ExportScriptsBtn;
 	TButton *DelOffsets;
 	TButton *LoadCells;
+	TMenuItem *SearchinData;
+	TMenuItem *SearchinOffset1;
+	TMenuItem *SearchinSize1;
+	TMenuItem *N1;
+	TButton *Button1;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -171,6 +176,11 @@ __published:	// IDE-managed Components
 	void __fastcall ExportScriptsBtnClick(TObject *Sender);
 	void __fastcall DelOffsetsClick(TObject *Sender);
 	void __fastcall LoadCellsClick(TObject *Sender);
+	void __fastcall SearchinDataClick(TObject *Sender);
+	void __fastcall SearchinOffset1Click(TObject *Sender);
+	void __fastcall SearchinSize1Click(TObject *Sender);
+	void __fastcall List2Enter(TObject *Sender);
+	void __fastcall ListEnter(TObject *Sender);
 
 
 private:	// User declarations
@@ -388,6 +398,10 @@ public:		// User declarations
 	void PrepareFor(char SYMBS[4]);
 	bool PrepareForEdit;
 	TableLoader basecel;
+	int SearchingIn1;
+	int SearchingIn2;
+	int *SearchingIn;
+	TStringGrid *SearchList;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

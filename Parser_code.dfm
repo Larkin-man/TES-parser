@@ -44,7 +44,7 @@ object Form1: TForm1
     TabOrder = 0
     object LDele: TLabel
       AlignWithMargins = True
-      Left = 620
+      Left = 704
       Top = 4
       Width = 107
       Height = 19
@@ -137,10 +137,12 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 3
       OnClick = FindStrClick
+      ExplicitLeft = 442
+      ExplicitTop = 0
     end
     object ProModeCK: TCheckBox
       AlignWithMargins = True
-      Left = 517
+      Left = 601
       Top = 4
       Width = 97
       Height = 19
@@ -150,7 +152,7 @@ object Form1: TForm1
       State = cbChecked
       TabOrder = 4
       OnClick = ProModeCKClick
-      ExplicitLeft = 630
+      ExplicitLeft = 517
     end
     object Save2: TButton
       Left = 129
@@ -171,11 +173,34 @@ object Form1: TForm1
       Visible = False
       OnClick = Save2Click
     end
+    object Button1: TButton
+      Left = 514
+      Top = 1
+      Width = 84
+      Height = 25
+      Hint = 'Find string in Data'
+      Align = alLeft
+      Caption = 'Sub Find'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Pitch = fpVariable
+      Font.Style = []
+      ImageIndex = 2
+      Images = ImageList1
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 6
+      Visible = False
+      OnClick = FindStrClick
+    end
   end
   object Out: TMemo
     Left = 604
     Top = 27
-    Width = 283
+    Width = 268
     Height = 634
     Align = alClient
     Lines.Strings = (
@@ -184,15 +209,13 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
-    ExplicitLeft = 607
-    ExplicitTop = 30
-    ExplicitWidth = 277
-    ExplicitHeight = 628
+    ExplicitLeft = 404
+    ExplicitTop = -6
   end
   object PanelPRO: TPanel
-    Left = 887
+    Left = 872
     Top = 27
-    Width = 215
+    Width = 230
     Height = 634
     Align = alRight
     ShowCaption = False
@@ -201,7 +224,7 @@ object Form1: TForm1
       AlignWithMargins = True
       Left = 3
       Top = 237
-      Width = 209
+      Width = 224
       Height = 394
       Margins.Left = 2
       Margins.Top = 1
@@ -225,6 +248,18 @@ object Form1: TForm1
         TabOrder = 24
         OnClick = PrepareEClick
       end
+      object ExportBtn: TButton
+        Left = 145
+        Top = 0
+        Width = 58
+        Height = 25
+        Hint = 'Export selected records'
+        Caption = 'Export'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 8
+        OnClick = ExportBtnClick
+      end
       object PrepareGame: TButton
         Left = 0
         Top = 25
@@ -237,17 +272,18 @@ object Form1: TForm1
         TabOrder = 25
         OnClick = PrepareGameClick
       end
-      object ExportBtn: TButton
+      object FindNext: TButton
         Left = 136
         Top = 25
-        Width = 58
+        Width = 75
         Height = 25
-        Hint = 'Export selected records'
-        Caption = 'Export'
+        Hint = 'Find text from string field. Right click is delete.'
+        Caption = 'Find next'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 8
-        OnClick = ExportBtnClick
+        TabOrder = 7
+        OnClick = FindNextClick
+        OnContextPopup = NextTagContextPopup
       end
       object DelTrash: TButton
         Left = 0
@@ -285,34 +321,21 @@ object Form1: TForm1
         TabOrder = 9
         OnClick = DelDialsClick
       end
-      object FindNext: TButton
-        Left = 0
-        Top = 100
-        Width = 75
+      object NextCell: TButton
+        Left = 145
+        Top = 75
+        Width = 71
         Height = 25
-        Hint = 'Find text from string field. Right click is delete.'
-        Caption = 'Find next'
+        Hint = 'Next CELL LAND PGRD'
+        Caption = 'Next Cell'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 7
-        OnClick = FindNextClick
-        OnContextPopup = NextTagContextPopup
-      end
-      object ExportSPEL: TButton
-        Left = 75
-        Top = 100
-        Width = 96
-        Height = 25
-        Hint = 'Export selected SPEL'
-        Caption = 'Export SPEL'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 6
-        OnClick = ExportSPELClick
+        TabOrder = 20
+        OnClick = NextCellClick
       end
       object CheckConflicts: TButton
         Left = 0
-        Top = 125
+        Top = 100
         Width = 113
         Height = 25
         Hint = 'Check plugin same identifiers'
@@ -324,7 +347,7 @@ object Form1: TForm1
       end
       object setlocaleBtn: TButton
         Left = 113
-        Top = 125
+        Top = 100
         Width = 75
         Height = 25
         Hint = 'setlocale for Localized. '#39'Find'#39' field is locale page'
@@ -336,7 +359,7 @@ object Form1: TForm1
       end
       object FindinList2: TButton
         Left = 0
-        Top = 150
+        Top = 125
         Width = 113
         Height = 25
         Hint = 'Find in List 2'
@@ -347,8 +370,8 @@ object Form1: TForm1
         OnClick = FindinList2Click
       end
       object DelDatas: TButton
-        Left = 0
-        Top = 175
+        Left = 113
+        Top = 125
         Width = 99
         Height = 25
         Hint = 'Find and delete Headers with Data'#39's from Memo strings.'
@@ -358,35 +381,19 @@ object Form1: TForm1
         TabOrder = 3
         OnClick = DelDatasClick
       end
-      object Sel: TButton
-        Left = 99
-        Top = 175
-        Width = 53
-        Height = 25
-        Hint = 'Start clicking on the selected rows in List1'
-        Caption = 'Select'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 16
-        Visible = False
-        OnClick = SelClick
-      end
-      object NextCell: TButton
+      object ExportScriptsBtn: TButton
         Left = 0
-        Top = 200
-        Width = 71
+        Top = 150
+        Width = 107
         Height = 25
-        Hint = 'Next CELL LAND PGRD'
-        Caption = 'Next Cell'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 20
-        OnClick = NextCellClick
+        Caption = 'Export scripts'
+        TabOrder = 26
+        OnClick = ExportScriptsBtnClick
       end
       object Wordwap: TCheckBox
         AlignWithMargins = True
-        Left = 73
-        Top = 203
+        Left = 109
+        Top = 153
         Width = 95
         Height = 17
         Margins.Left = 2
@@ -397,18 +404,9 @@ object Form1: TForm1
         TabOrder = 12
         OnClick = WordwapClick
       end
-      object ExportScriptsBtn: TButton
-        Left = 0
-        Top = 225
-        Width = 107
-        Height = 25
-        Caption = 'Export scripts'
-        TabOrder = 26
-        OnClick = ExportScriptsBtnClick
-      end
       object DeleteExtraData: TButton
         Left = 0
-        Top = 250
+        Top = 175
         Width = 133
         Height = 25
         Hint = 
@@ -421,9 +419,46 @@ object Form1: TForm1
         TabOrder = 15
         OnClick = DeleteExtraDataClick
       end
+      object Sel: TButton
+        Left = 133
+        Top = 175
+        Width = 53
+        Height = 25
+        Hint = 'Start clicking on the selected rows in List1'
+        Caption = 'Select'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 16
+        Visible = False
+        OnClick = SelClick
+      end
+      object ExportSPEL: TButton
+        Left = 0
+        Top = 200
+        Width = 96
+        Height = 25
+        Hint = 'Export selected SPEL'
+        Caption = 'Export SPEL'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 6
+        OnClick = ExportSPELClick
+      end
+      object DelOffsets: TButton
+        Left = 96
+        Top = 200
+        Width = 105
+        Height = 25
+        Hint = 'Delete INVERTED offsets from memo'
+        Caption = 'Delete offsets'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 27
+        OnClick = DelOffsetsClick
+      end
       object FindinSublists: TButton
         Left = 0
-        Top = 275
+        Top = 225
         Width = 137
         Height = 25
         Hint = 'Find in all list and sublists'
@@ -435,7 +470,7 @@ object Form1: TForm1
       end
       object CheckCoord: TButton
         Left = 0
-        Top = 300
+        Top = 250
         Width = 131
         Height = 25
         Hint = 'max min of Z of selected CELL'
@@ -446,9 +481,18 @@ object Form1: TForm1
         OnClick = CheckCoordClick
         OnContextPopup = CheckCoordContextPopup
       end
+      object LoadCells: TButton
+        Left = 131
+        Top = 250
+        Width = 81
+        Height = 25
+        Caption = 'Load Cells'
+        TabOrder = 28
+        OnClick = LoadCellsClick
+      end
       object AddMainFields: TButton
         Left = 0
-        Top = 325
+        Top = 275
         Width = 121
         Height = 25
         Hint = 'To add bytes after the size'
@@ -458,21 +502,20 @@ object Form1: TForm1
         TabOrder = 18
         OnClick = AddMainFieldsClick
       end
-      object DelOffsets: TButton
-        Left = 0
-        Top = 350
-        Width = 105
+      object TES3Read: TButton
+        Left = 121
+        Top = 275
+        Width = 50
         Height = 25
-        Hint = 'Delete offsets from memo'
-        Caption = 'Delete offsets'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 27
-        OnClick = DelOffsetsClick
+        Hint = 'read TES3 header'
+        Caption = 'TES3'
+        Enabled = False
+        TabOrder = 0
+        OnClick = TES3ReadClick
       end
       object PushCoord: TButton
         Left = 0
-        Top = 375
+        Top = 300
         Width = 134
         Height = 25
         Hint = 
@@ -484,20 +527,9 @@ object Form1: TForm1
         TabOrder = 11
         OnClick = PushCoordClick
       end
-      object TES3Read: TButton
-        Left = 134
-        Top = 375
-        Width = 50
-        Height = 25
-        Hint = 'read TES3 header'
-        Caption = 'TES3'
-        Enabled = False
-        TabOrder = 0
-        OnClick = TES3ReadClick
-      end
       object CellRead: TButton
-        Left = 0
-        Top = 400
+        Left = 134
+        Top = 300
         Width = 50
         Height = 25
         Caption = 'CELL'
@@ -505,8 +537,8 @@ object Form1: TForm1
         OnClick = CellReadClick
       end
       object GMDTRead: TButton
-        Left = 50
-        Top = 400
+        Left = 0
+        Top = 325
         Width = 50
         Height = 25
         Caption = 'sGMDT'
@@ -515,8 +547,8 @@ object Form1: TForm1
         OnClick = GMDTReadClick
       end
       object TestP: TButton
-        Left = 100
-        Top = 400
+        Left = 50
+        Top = 325
         Width = 49
         Height = 25
         Caption = 'TestP'
@@ -525,8 +557,8 @@ object Form1: TForm1
         OnClick = TestPClick
       end
       object SPELread: TButton
-        Left = 149
-        Top = 400
+        Left = 99
+        Top = 325
         Width = 50
         Height = 25
         Caption = 'SPEL'
@@ -535,8 +567,8 @@ object Form1: TForm1
         OnClick = SPELreadClick
       end
       object SPLMread: TButton
-        Left = 0
-        Top = 425
+        Left = 149
+        Top = 325
         Width = 49
         Height = 25
         Caption = 'SPLM'
@@ -544,21 +576,12 @@ object Form1: TForm1
         Visible = False
         OnClick = SPLMreadClick
       end
-      object LoadCells: TButton
-        Left = 49
-        Top = 425
-        Width = 81
-        Height = 25
-        Caption = 'Load Cells'
-        TabOrder = 28
-        OnClick = LoadCellsClick
-      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 209
+      Width = 224
       Height = 232
       Margins.Left = 2
       Margins.Top = 2
@@ -574,7 +597,7 @@ object Form1: TForm1
         AlignWithMargins = True
         Left = 4
         Top = 25
-        Width = 198
+        Width = 213
         Height = 19
         Margins.Left = 4
         Margins.Top = 0
@@ -587,7 +610,7 @@ object Form1: TForm1
         AlignWithMargins = True
         Left = 3
         Top = 47
-        Width = 199
+        Width = 214
         Height = 160
         Margins.Bottom = 1
         Align = alTop
@@ -620,7 +643,7 @@ object Form1: TForm1
         AlignWithMargins = True
         Left = 6
         Top = 208
-        Width = 196
+        Width = 211
         Height = 17
         Margins.Left = 6
         Margins.Top = 0
@@ -639,7 +662,7 @@ object Form1: TForm1
         AlignWithMargins = True
         Left = 3
         Top = 2
-        Width = 199
+        Width = 214
         Height = 22
         Margins.Top = 2
         Margins.Bottom = 1
@@ -767,8 +790,6 @@ object Form1: TForm1
       OnSectionResize = HeaderControl1SectionResize
       ParentFont = False
       OnResize = HeaderControl1Resize
-      ExplicitLeft = 2
-      ExplicitTop = 38
     end
     object List: TStringGrid
       Left = 1
@@ -792,10 +813,9 @@ object Form1: TForm1
       ParentFont = False
       ScrollBars = ssVertical
       TabOrder = 2
+      OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
-      ExplicitTop = 58
-      ExplicitHeight = 575
     end
   end
   object PanelList2: TPanel
@@ -858,9 +878,6 @@ object Form1: TForm1
       OnSectionResize = HeaderControl2SectionResize
       ParentFont = False
       OnResize = HeaderControl2Resize
-      ExplicitLeft = 4
-      ExplicitTop = 4
-      ExplicitWidth = 285
     end
     object List2: TStringGrid
       Left = 1
@@ -884,10 +901,9 @@ object Form1: TForm1
       PopupMenu = PopupMenu1
       ScrollBars = ssVertical
       TabOrder = 1
+      OnEnter = List2Enter
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
-      ExplicitTop = 18
-      ExplicitHeight = 589
     end
     object SubDescript: TEdit
       Left = 1
@@ -919,52 +935,88 @@ object Form1: TForm1
       Caption = 'Find in Sublist'
       OnClick = FindinList2Click
     end
-    object FindHeader1: TMenuItem
-      Caption = 'Find Header'
-      OnClick = FindHeader1Click
-    end
     object TestMenu: TMenuItem
-      Caption = 'test'
+      Caption = 'Test'
+      GroupIndex = 1
       OnClick = TestMenuClick
     end
     object NList2: TMenuItem
       AutoCheck = True
       Caption = 'Enable Sublist'
       Checked = True
+      GroupIndex = 1
       OnClick = NList2Click
     end
     object ClearOut: TMenuItem
       AutoCheck = True
       Caption = 'Clearing out'
+      GroupIndex = 1
       OnClick = ClearOutClick
     end
     object EnableLsit2Delete1: TMenuItem
       AutoCheck = True
       Caption = 'Enable Subheader Delete'
       Enabled = False
+      GroupIndex = 1
       OnClick = EnableLsit2Delete1Click
     end
     object Rewrites: TMenuItem
       AutoCheck = True
       Caption = 'Rewrites'
+      GroupIndex = 1
       OnClick = RewritesClick
     end
     object ShowData1: TMenuItem
       AutoCheck = True
       Caption = 'Show Data'
       Checked = True
+      GroupIndex = 1
     end
     object BreakIf0Len: TMenuItem
       AutoCheck = True
       Caption = 'BreakIf0Len'
       Checked = True
+      GroupIndex = 1
+    end
+    object N1: TMenuItem
+      Caption = '-'
+      GroupIndex = 1
+    end
+    object FindHeader1: TMenuItem
+      AutoCheck = True
+      Caption = 'Search in Header'
+      GroupIndex = 1
+      RadioItem = True
+      OnClick = FindHeader1Click
+    end
+    object SearchinData: TMenuItem
+      AutoCheck = True
+      Caption = 'Search in Data'
+      Checked = True
+      GroupIndex = 1
+      RadioItem = True
+      OnClick = SearchinDataClick
+    end
+    object SearchinOffset1: TMenuItem
+      AutoCheck = True
+      Caption = 'Search in Offset'
+      GroupIndex = 1
+      RadioItem = True
+      OnClick = SearchinOffset1Click
+    end
+    object SearchinSize1: TMenuItem
+      AutoCheck = True
+      Caption = 'Search in Size'
+      GroupIndex = 1
+      RadioItem = True
+      OnClick = SearchinSize1Click
     end
   end
   object ImageList1: TImageList
     Left = 96
     Top = 128
     Bitmap = {
-      494C010104000A00A80010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00C00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -974,24 +1026,32 @@ object Form1: TForm1
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000C4C4
+      C400000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000000000000000002F2F2F000000
+      0000808080000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000515151003535
+      350002020200A4A4A40000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000005353
+      53004646460000000000A4A4A400000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -999,87 +1059,79 @@ object Form1: TForm1
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      0000636363003D3C3C0042424200D1D2D300DAD1CA00D9C7B900D9C8BA00D8D1
+      CC00D4D5D6000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000A2A2A300B1B2B200E3CEBD00E1C9B400EDDDCD00EAD6C300DDC0
+      A800DFCEC000D4D6D60000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000E2E3E400E3D1C300E7D1C000FDF9F500FAF1E800F8EADD00F6E6
+      D600E1C4AB00DCCFC50000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000CBCAC900DEC4AF00F8EEE400F8EDE300F6E8DA00F5E5D500F6E9
+      DD00F5E8DE00E0C9B600CDCDCD00000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000CAC7C400E0C5AE00F7E9DD00F5E5D700F5E6D700F7EBE000F7ED
+      E400F9F2EC00E1C9B600C9C8C700000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000CECECD00DEC3AE00F2E1D100F5E4D400F5E8DD00F7EDE300F9F2
+      EB00F8F1EB00E1CCBC00CECECE00000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000DCDDDE00DFCFC400E2C5AC00F7E9DB00FAF3EB00FBF6F000FCF9
+      F700E9D5C500DDD2C90000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      000000000000FAFAFA00D2D3D300DCCABC00E0C6B000ECDCCD00EEDED200E4CE
+      BC00DDD0C500D2D3D40000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000FBFBFB00D5D7D800D7D1CD00D6C7BC00D6C7BC00D6D1
+      CD00D8D9DA00FEFEFE0000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000000000E0E1E200E1E2E3000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1224,11 +1276,11 @@ object Form1: TForm1
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00424D3E000000000000003E000000
       2800000040000000200000000100010000000000000100000000000000000000
-      000000000000000000000000FFFFFF0000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000F8FF8001FFFF8001E0FF0000FFF70000
+      000000000000000000000000FFFFFF00FFFF000000000000EFFF000000000000
+      C7FF000000000000C3FF000000000000E1FF000000000000F007000000000000
+      F803000000000000F803000000000000F801000000000000F801000000000000
+      F801000000000000F803000000000000F803000000000000FC03000000000000
+      FF9F000000000000FFFF000000000000F8FF8001FFFF8001E0FF0000FFF70000
       C0030000FFE30000C0010000FFC30000C0010000FF870000C0010000E00F0000
       C0010000C01F0000C0010000C01F0000C0010000801F0000C0010000801F0000
       C0030000801F0000C0030000C01F0000C0030000C01F0000C0030000C03F0000
