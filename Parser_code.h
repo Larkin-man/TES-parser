@@ -113,6 +113,7 @@ __published:	// IDE-managed Components
 	TMenuItem *SearchinSize1;
 	TMenuItem *N1;
 	TButton *Button1;
+	TButton *MVRF;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -402,6 +403,7 @@ public:		// User declarations
 	int SearchingIn2;
 	int *SearchingIn;
 	TStringGrid *SearchList;
+	bool ShowAll;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
