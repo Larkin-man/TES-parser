@@ -137,8 +137,6 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 3
       OnClick = FindStrClick
-      ExplicitLeft = 442
-      ExplicitTop = 0
     end
     object ProModeCK: TCheckBox
       AlignWithMargins = True
@@ -152,7 +150,6 @@ object Form1: TForm1
       State = cbChecked
       TabOrder = 4
       OnClick = ProModeCKClick
-      ExplicitLeft = 517
     end
     object Save2: TButton
       Left = 129
@@ -200,7 +197,7 @@ object Form1: TForm1
   object Out: TMemo
     Left = 604
     Top = 27
-    Width = 268
+    Width = 286
     Height = 634
     Align = alClient
     Lines.Strings = (
@@ -209,13 +206,12 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
-    ExplicitLeft = 404
-    ExplicitTop = -6
+    ExplicitWidth = 268
   end
   object PanelPRO: TPanel
-    Left = 872
+    Left = 890
     Top = 27
-    Width = 230
+    Width = 212
     Height = 634
     Align = alRight
     ShowCaption = False
@@ -224,7 +220,7 @@ object Form1: TForm1
       AlignWithMargins = True
       Left = 3
       Top = 237
-      Width = 224
+      Width = 206
       Height = 394
       Margins.Left = 2
       Margins.Top = 1
@@ -236,6 +232,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
+      ExplicitWidth = 224
       object PrepareE: TButton
         Left = 0
         Top = 0
@@ -247,18 +244,6 @@ object Form1: TForm1
         ShowHint = True
         TabOrder = 24
         OnClick = PrepareEClick
-      end
-      object ExportBtn: TButton
-        Left = 145
-        Top = 0
-        Width = 58
-        Height = 25
-        Hint = 'Export selected records'
-        Caption = 'Export'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 8
-        OnClick = ExportBtnClick
       end
       object PrepareGame: TButton
         Left = 0
@@ -272,9 +257,33 @@ object Form1: TForm1
         TabOrder = 25
         OnClick = PrepareGameClick
       end
-      object FindNext: TButton
+      object ExportBtn: TButton
         Left = 136
         Top = 25
+        Width = 58
+        Height = 25
+        Hint = 'Export selected records'
+        Caption = 'Export'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 8
+        OnClick = ExportBtnClick
+      end
+      object DelTrash: TButton
+        Left = 0
+        Top = 50
+        Width = 100
+        Height = 25
+        Hint = 'Auto delete trash CELL'
+        Caption = 'Delete Trash'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 13
+        OnClick = DelTrashClick
+      end
+      object FindNext: TButton
+        Left = 100
+        Top = 50
         Width = 75
         Height = 25
         Hint = 'Find text from string field. Right click is delete.'
@@ -285,21 +294,21 @@ object Form1: TForm1
         OnClick = FindNextClick
         OnContextPopup = NextTagContextPopup
       end
-      object DelTrash: TButton
+      object NextCell: TButton
         Left = 0
-        Top = 50
-        Width = 97
+        Top = 75
+        Width = 72
         Height = 25
-        Hint = 'Auto delete trash CELL'
-        Caption = 'Delete Trash'
+        Hint = 'Next CELL LAND PGRD'
+        Caption = 'Next Cell'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 13
-        OnClick = DelTrashClick
+        TabOrder = 20
+        OnClick = NextCellClick
       end
       object Replace: TButton
-        Left = 97
-        Top = 50
+        Left = 72
+        Top = 75
         Width = 94
         Height = 25
         Hint = 'Replace @# to {} from clipboard'
@@ -311,7 +320,7 @@ object Form1: TForm1
       end
       object DelDials: TButton
         Left = 0
-        Top = 75
+        Top = 100
         Width = 145
         Height = 25
         Hint = 'Delete DIAL'#39's without INFO'
@@ -321,21 +330,9 @@ object Form1: TForm1
         TabOrder = 9
         OnClick = DelDialsClick
       end
-      object NextCell: TButton
-        Left = 145
-        Top = 75
-        Width = 71
-        Height = 25
-        Hint = 'Next CELL LAND PGRD'
-        Caption = 'Next Cell'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 20
-        OnClick = NextCellClick
-      end
       object CheckConflicts: TButton
         Left = 0
-        Top = 100
+        Top = 125
         Width = 113
         Height = 25
         Hint = 'Check plugin same identifiers'
@@ -345,21 +342,9 @@ object Form1: TForm1
         TabOrder = 23
         OnClick = CheckConflictsClick
       end
-      object setlocaleBtn: TButton
-        Left = 113
-        Top = 100
-        Width = 75
-        Height = 25
-        Hint = 'setlocale for Localized. '#39'Find'#39' field is locale page'
-        Caption = 'setlocale'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 19
-        OnClick = setlocaleBtnClick
-      end
       object FindinList2: TButton
         Left = 0
-        Top = 125
+        Top = 150
         Width = 113
         Height = 25
         Hint = 'Find in List 2'
@@ -369,9 +354,47 @@ object Form1: TForm1
         TabOrder = 14
         OnClick = FindinList2Click
       end
-      object DelDatas: TButton
+      object setlocaleBtn: TButton
         Left = 113
-        Top = 125
+        Top = 150
+        Width = 75
+        Height = 25
+        Hint = 'setlocale for Localized. '#39'Find'#39' field is locale page'
+        Caption = 'setlocale'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 19
+        OnClick = setlocaleBtnClick
+      end
+      object FindinSublists: TButton
+        Left = 0
+        Top = 175
+        Width = 137
+        Height = 25
+        Hint = 'Find in all list and sublists'
+        Caption = 'Find in &all sublists'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 21
+        OnClick = FindinSublistsClick
+      end
+      object Wordwap: TCheckBox
+        AlignWithMargins = True
+        Left = 2
+        Top = 203
+        Width = 95
+        Height = 17
+        Margins.Left = 2
+        Margins.Right = 1
+        Caption = 'Word wrap'
+        Checked = True
+        State = cbChecked
+        TabOrder = 12
+        OnClick = WordwapClick
+      end
+      object DelDatas: TButton
+        Left = 98
+        Top = 200
         Width = 99
         Height = 25
         Hint = 'Find and delete Headers with Data'#39's from Memo strings.'
@@ -383,30 +406,41 @@ object Form1: TForm1
       end
       object ExportScriptsBtn: TButton
         Left = 0
-        Top = 150
-        Width = 107
+        Top = 225
+        Width = 104
         Height = 25
         Caption = 'Export scripts'
         TabOrder = 26
         OnClick = ExportScriptsBtnClick
       end
-      object Wordwap: TCheckBox
-        AlignWithMargins = True
-        Left = 109
-        Top = 153
-        Width = 95
-        Height = 17
-        Margins.Left = 2
-        Margins.Right = 1
-        Caption = 'Word wrap'
-        Checked = True
-        State = cbChecked
-        TabOrder = 12
-        OnClick = WordwapClick
+      object ExportSPEL: TButton
+        Left = 104
+        Top = 225
+        Width = 97
+        Height = 25
+        Hint = 'Export selected SPEL'
+        Caption = 'Export SPEL'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 6
+        OnClick = ExportSPELClick
+      end
+      object Sel: TButton
+        Left = 0
+        Top = 250
+        Width = 53
+        Height = 25
+        Hint = 'Start clicking on the selected rows in List1'
+        Caption = 'Select'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 16
+        Visible = False
+        OnClick = SelClick
       end
       object DeleteExtraData: TButton
-        Left = 0
-        Top = 175
+        Left = 53
+        Top = 250
         Width = 133
         Height = 25
         Hint = 
@@ -419,34 +453,9 @@ object Form1: TForm1
         TabOrder = 15
         OnClick = DeleteExtraDataClick
       end
-      object Sel: TButton
-        Left = 133
-        Top = 175
-        Width = 53
-        Height = 25
-        Hint = 'Start clicking on the selected rows in List1'
-        Caption = 'Select'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 16
-        Visible = False
-        OnClick = SelClick
-      end
-      object ExportSPEL: TButton
-        Left = 0
-        Top = 200
-        Width = 96
-        Height = 25
-        Hint = 'Export selected SPEL'
-        Caption = 'Export SPEL'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 6
-        OnClick = ExportSPELClick
-      end
       object DelOffsets: TButton
-        Left = 96
-        Top = 200
+        Left = 0
+        Top = 275
         Width = 105
         Height = 25
         Hint = 'Delete INVERTED offsets from memo'
@@ -456,21 +465,18 @@ object Form1: TForm1
         TabOrder = 27
         OnClick = DelOffsetsClick
       end
-      object FindinSublists: TButton
-        Left = 0
-        Top = 225
-        Width = 137
+      object LoadCells: TButton
+        Left = 105
+        Top = 275
+        Width = 81
         Height = 25
-        Hint = 'Find in all list and sublists'
-        Caption = 'Find in all sublists'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 21
-        OnClick = FindinSublistsClick
+        Caption = 'Load Cells'
+        TabOrder = 28
+        OnClick = LoadCellsClick
       end
       object CheckCoord: TButton
         Left = 0
-        Top = 250
+        Top = 300
         Width = 131
         Height = 25
         Hint = 'max min of Z of selected CELL'
@@ -481,18 +487,20 @@ object Form1: TForm1
         OnClick = CheckCoordClick
         OnContextPopup = CheckCoordContextPopup
       end
-      object LoadCells: TButton
+      object TES3Read: TButton
         Left = 131
-        Top = 250
-        Width = 81
+        Top = 300
+        Width = 50
         Height = 25
-        Caption = 'Load Cells'
-        TabOrder = 28
-        OnClick = LoadCellsClick
+        Hint = 'read TES3 header'
+        Caption = 'TES3'
+        Enabled = False
+        TabOrder = 0
+        OnClick = TES3ReadClick
       end
       object AddMainFields: TButton
         Left = 0
-        Top = 275
+        Top = 325
         Width = 121
         Height = 25
         Hint = 'To add bytes after the size'
@@ -502,20 +510,18 @@ object Form1: TForm1
         TabOrder = 18
         OnClick = AddMainFieldsClick
       end
-      object TES3Read: TButton
+      object CellRead: TButton
         Left = 121
-        Top = 275
+        Top = 325
         Width = 50
         Height = 25
-        Hint = 'read TES3 header'
-        Caption = 'TES3'
-        Enabled = False
-        TabOrder = 0
-        OnClick = TES3ReadClick
+        Caption = 'CELL'
+        TabOrder = 1
+        OnClick = CellReadClick
       end
       object PushCoord: TButton
         Left = 0
-        Top = 300
+        Top = 350
         Width = 134
         Height = 25
         Hint = 
@@ -527,18 +533,9 @@ object Form1: TForm1
         TabOrder = 11
         OnClick = PushCoordClick
       end
-      object CellRead: TButton
-        Left = 134
-        Top = 300
-        Width = 50
-        Height = 25
-        Caption = 'CELL'
-        TabOrder = 1
-        OnClick = CellReadClick
-      end
       object GMDTRead: TButton
-        Left = 0
-        Top = 325
+        Left = 134
+        Top = 350
         Width = 50
         Height = 25
         Caption = 'sGMDT'
@@ -547,8 +544,8 @@ object Form1: TForm1
         OnClick = GMDTReadClick
       end
       object TestP: TButton
-        Left = 50
-        Top = 325
+        Left = 0
+        Top = 375
         Width = 49
         Height = 25
         Caption = 'TestP'
@@ -557,8 +554,8 @@ object Form1: TForm1
         OnClick = TestPClick
       end
       object SPELread: TButton
-        Left = 99
-        Top = 325
+        Left = 49
+        Top = 375
         Width = 50
         Height = 25
         Caption = 'SPEL'
@@ -567,8 +564,8 @@ object Form1: TForm1
         OnClick = SPELreadClick
       end
       object SPLMread: TButton
-        Left = 149
-        Top = 325
+        Left = 99
+        Top = 375
         Width = 49
         Height = 25
         Caption = 'SPLM'
@@ -576,12 +573,20 @@ object Form1: TForm1
         Visible = False
         OnClick = SPLMreadClick
       end
+      object MVRF: TButton
+        Left = 148
+        Top = 375
+        Width = 53
+        Height = 25
+        Caption = 'MVRF'
+        TabOrder = 29
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 224
+      Width = 206
       Height = 232
       Margins.Left = 2
       Margins.Top = 2
@@ -593,11 +598,12 @@ object Form1: TForm1
       Caption = 'PanelSubRead'
       ShowCaption = False
       TabOrder = 1
+      ExplicitWidth = 200
       object Label1: TLabel
         AlignWithMargins = True
         Left = 4
         Top = 25
-        Width = 213
+        Width = 195
         Height = 19
         Margins.Left = 4
         Margins.Top = 0
@@ -610,7 +616,7 @@ object Form1: TForm1
         AlignWithMargins = True
         Left = 3
         Top = 47
-        Width = 214
+        Width = 196
         Height = 160
         Margins.Bottom = 1
         Align = alTop
@@ -638,12 +644,13 @@ object Form1: TForm1
           end>
         TabOrder = 0
         OnButtonClicked = ButtonGroup1ButtonClicked
+        ExplicitWidth = 214
       end
       object Reinter: TCheckBox
         AlignWithMargins = True
         Left = 6
         Top = 208
-        Width = 211
+        Width = 193
         Height = 17
         Margins.Left = 6
         Margins.Top = 0
@@ -657,12 +664,13 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitWidth = 211
       end
       object NextS: TStaticText
         AlignWithMargins = True
         Left = 3
         Top = 2
-        Width = 214
+        Width = 196
         Height = 22
         Margins.Top = 2
         Margins.Bottom = 1
@@ -679,6 +687,7 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
+        ExplicitWidth = 214
       end
     end
   end
@@ -1016,7 +1025,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00C00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00CC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
