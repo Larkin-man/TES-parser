@@ -181,6 +181,7 @@ __published:	// IDE-managed Components
 	void __fastcall SearchinSize1Click(TObject *Sender);
 	void __fastcall List2Enter(TObject *Sender);
 	void __fastcall ListEnter(TObject *Sender);
+	void __fastcall MVRFClick(TObject *Sender);
 
 
 private:	// User declarations

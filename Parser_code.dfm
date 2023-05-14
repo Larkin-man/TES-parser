@@ -209,8 +209,11 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
+<<<<<<< Updated upstream
     ExplicitLeft = 404
     ExplicitTop = -6
+=======
+>>>>>>> Stashed changes
   end
   object PanelPRO: TPanel
     Left = 872
@@ -576,6 +579,18 @@ object Form1: TForm1
         Visible = False
         OnClick = SPLMreadClick
       end
+<<<<<<< Updated upstream
+=======
+      object MVRF: TButton
+        Left = 148
+        Top = 375
+        Width = 53
+        Height = 25
+        Caption = 'MVRF'
+        TabOrder = 29
+        OnClick = MVRFClick
+      end
+>>>>>>> Stashed changes
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -1016,7 +1031,11 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
+<<<<<<< Updated upstream
       494C010105000A00C00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+=======
+      494C010105000A00D40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+>>>>>>> Stashed changes
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

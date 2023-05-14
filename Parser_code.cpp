@@ -2717,19 +2717,14 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 			{
 				cn++;
 				HasMvrf = true;
-				//List->Row = i;
-				//List2->Row = Row;
-				//ShowAll= true;
-				//NextSClick(Sender);
-				//return;
 				Out->Lines->Append("");
 				Out->Lines->Add(List->Cells[CDATA][i]+"\t"+List2->Cells[CDATA2][Row]);
 				continue;
 			}
-			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("CNDT") == 0)
-			{
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("NAME") == 0)
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
-         }
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("CNDT") == 0)
+				Out->Lines->Add(List2->Cells[CDATA2][Row]);
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DELE") == 0)
 			{
 				//Out->Lines->Add(List2->Cells[CHEADER][Row]);
@@ -2738,10 +2733,10 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 			}
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DATA") == 0)
 			{
+				Out->Lines->Add(List2->Cells[CDATA2][Row]);
 				fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
 				float z;
 				fread(&z, sizeof(float), 1, file);
-				Out->Lines->Add(z);
 				z += 1000.0;
 				fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
 				fwrite(&z, sizeof(float), 1, file);
