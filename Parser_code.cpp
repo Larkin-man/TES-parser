@@ -77,7 +77,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	Univ.Capacity = 0;
 	PanelPRO->Visible = ProModeCK->Checked;
 	SortingColumn = CSTART;
-	SearchinDataClick(NULL);
+	NSearchinDataClick(NULL);
 	ListEnter(NULL);
 	ShowAll = true;
 }
@@ -92,7 +92,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		fclose(file);
       Ready(false);
 	}
-	if (Rewrites->Checked)
+	if (NRewrites->Checked)
 	{
 		file = _wfopen(OpenDialog1->FileName.c_str(), L"r+b");
 		Save->Enabled = true;
@@ -242,18 +242,18 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		List->RowCount = AddedRow;
 	fseek(file, POSNRECORDS, SEEK_SET);
 	fread(&RecordCount, 4, 1, file);
-	if (ShowData1->Checked)
+	if (NShowData->Checked)
 	{
 		if (List->RowCount >= 1)
 			List->Cells[CDATA][0] = "Number of records: "+IntToStr(RecordCount);
 		RefreshData(file, 1);
-		ShowData1->Tag = 1;
+		NShowData->Tag = 1;
 	}
 	else
 	{
-		if (ShowData1->Tag == 1)
+		if (NShowData->Tag == 1)
       {
-			ShowData1->Tag = 0;
+			NShowData->Tag = 0;
 			for (int i = 0; i < List->RowCount; i++)
 				List->Cells[CDATA][i] = "";
 		}
@@ -266,11 +266,11 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	//fal 3 wrong
 	Ready(true);
 	SortingColumn = CSTART;
-	if (Rewrites->Checked)
-		Rewrites->Enabled = false;
+	if (NRewrites->Checked)
+		NRewrites->Enabled = false;
 	else
-		Rewrites->Visible = false;
-	if (ClearOut->Checked)
+		NRewrites->Visible = false;
+	if (NClearOut->Checked)
 		Out->Lines->Clear();
 	Opening = false;
 }
@@ -502,7 +502,7 @@ void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 
 void __fastcall TForm1::DeleteClick(TObject *Sender)
 {
-	if (EnableLsit2Delete1->Checked == false)
+	if (NEnableList2Delete->Checked == false)
 	{
 		if (List->Row != -1)
 			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
@@ -531,8 +531,8 @@ void TForm1::DeleteRecord(int Row)
 			LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
 			LDele->Visible = true;
 			Save->Enabled = true;
-			EnableLsit2Delete1->Enabled = false;
-			EnableLsit2Delete1->Checked = false;
+			NEnableList2Delete->Enabled = false;
+			NEnableList2Delete->Checked = false;
 			if (CheckCoord->Tag == 1)
 				Out->Lines->Add("DELETE:"+List->Cells[CDATA][Row]);
 		}
@@ -1237,7 +1237,7 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 
 void __fastcall TForm1::TestPClick(TObject *Sender)
 {
-	TestMenuClick(Sender);
+	NTestMenuClick(Sender);
 	for (int i = 0; i < nTypes; ++i)
 		Out->Lines->Add(String(TagTypes[i].Name) +"\t"+ String(TagTypes[i].Type));
 }
@@ -1821,7 +1821,7 @@ void __fastcall TForm1::WordwapClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::TestMenuClick(TObject *Sender)
+void __fastcall TForm1::NTestMenuClick(TObject *Sender)
 {
 	int Count = 0;
 	if (List->Row != -1)
@@ -1837,20 +1837,20 @@ void __fastcall TForm1::TestMenuClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::NList2Click(TObject *Sender)
+void __fastcall TForm1::NEnableSublistClick(TObject *Sender)
 {
-	PanelList2->Visible = NList2->Checked;
-	Splitter2->Visible = NList2->Checked;
-	PanelSubRead->Visible = NList2->Checked;
-	FindinList2->Enabled = NList2->Checked;
-	FindinSublists->Enabled = NList2->Checked;
-	PushCoord->Enabled = NList2->Checked;
-	DeleteExtraData->Enabled = NList2->Checked && EnableLsit2Delete1->Checked;
-	CheckCoord->Enabled = NList2->Checked;
+	PanelList2->Visible = NEnableSublist->Checked;
+	Splitter2->Visible = NEnableSublist->Checked;
+	PanelSubRead->Visible = NEnableSublist->Checked;
+	FindinList2->Enabled = NEnableSublist->Checked;
+	FindinSublists->Enabled = NEnableSublist->Checked;
+	PushCoord->Enabled = NEnableSublist->Checked;
+	DeleteExtraData->Enabled = NEnableSublist->Checked && NEnableList2Delete->Checked;
+	CheckCoord->Enabled = NEnableSublist->Checked;
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::ClearOutClick(TObject *Sender)
+void __fastcall TForm1::NClearOutClick(TObject *Sender)
 {
 	Out->Lines->Clear();
 }
@@ -1898,20 +1898,20 @@ void __fastcall TForm1::ListKeyUp(TObject *Sender, WORD &Key, TShiftState Shift)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::EnableLsit2Delete1Click(TObject *Sender)
+void __fastcall TForm1::NEnableList2DeleteClick(TObject *Sender)
 {
 	static bool mWarning = true;
 	if (mWarning)	ShowMessage("This can lead to a problem.");
 	mWarning = false;
-	Save2->Visible = EnableLsit2Delete1->Checked;
-	Save->Visible = !EnableLsit2Delete1->Checked;
+	Save2->Visible = NEnableList2Delete->Checked;
+	Save->Visible = !NEnableList2Delete->Checked;
 	DeleteExtraData->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::List2KeyUp(TObject *Sender, WORD &Key, TShiftState Shift)
 {
-	if (EnableLsit2Delete1->Checked&& Key == VK_DELETE)
+	if (NEnableList2Delete->Checked&& Key == VK_DELETE)
 	{
 		if (List2->Row >= 0)
 			for (int i = List2->Selection.Top; i <= List2->Selection.Bottom; ++i)
@@ -2321,10 +2321,10 @@ void __fastcall TForm1::ReplaceClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::RewritesClick(TObject *Sender)
+void __fastcall TForm1::NRewritesClick(TObject *Sender)
 {
-	PushCoord->Visible = Rewrites->Checked;
-	MVRF->Visible = Rewrites->Checked;
+	PushCoord->Visible = NRewrites->Checked;
+	MVRF->Visible = NRewrites->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -2354,7 +2354,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	dele = (Application->MessageBoxA(L"Delete conflicts?", L"Option", MB_YESNO) == ID_YES);
 	Opening = true;
 	TES3Read->Enabled = true;
-	if (ClearOut->Checked)
+	if (NClearOut->Checked)
 		Out->Lines->Clear();
 	Out->Lines->Add("Check conflicts for " + PluginName);
 	Out->Lines->Add("Size="+IntToStr(EoC));
@@ -2385,7 +2385,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	//fseek(conf, POSNRECORDS, SEEK_SET);
 	//fread(&RecordCount, 4, 1, conf);
 	fseek(conf, 0, SEEK_SET);
-	if (ShowData1->Checked && Hard==ID_NO)
+	if (NShowData->Checked && Hard==ID_NO)
 		RefreshData(conf, StartCon);
 	if (List->RowCount > AddedRow)
 		List->RowCount = AddedRow;
@@ -2463,7 +2463,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	else
 		Out->Lines->Add("--------"+IntToStr(nConf)+" conflicts.");
 	DoUpdateList(false);
-	EnableLsit2Delete1->Enabled = false;
+	NEnableList2Delete->Enabled = false;
 	Save2->Visible = false;
 	Save->Visible = false;
 	Delete->Enabled = false;
@@ -2651,26 +2651,26 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::FindHeader1Click(TObject *Sender)
+void __fastcall TForm1::NFindHeaderClick(TObject *Sender)
 {
 	SearchingIn1 = SearchingIn2 = CHEADER;
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::SearchinDataClick(TObject *Sender)
+void __fastcall TForm1::NSearchinDataClick(TObject *Sender)
 {
 	SearchingIn1 = CDATA;
 	SearchingIn2 = CDATA2;
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::SearchinOffset1Click(TObject *Sender)
+void __fastcall TForm1::NSearchinOffsetClick(TObject *Sender)
 {
 	SearchingIn1 = SearchingIn2 = CSTART;
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::SearchinSize1Click(TObject *Sender)
+void __fastcall TForm1::NSearchinSizeClick(TObject *Sender)
 {
 	SearchingIn1 = SearchingIn2 = CSIZE;
 }
@@ -2699,21 +2699,22 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 	static int cn = 0;
 	ShowAll = false;
 	bool CanSelect = true;
-	String find("MVRF");
+	String tcell("CELL"); String tmvrf("MVRF");
+
 	for (int i = 0; i < List->RowCount; ++i)
 	{
-		if (cn > 555)
+		if (cn > 90)
 		{
 			cn = 0;
 			return;
 		}
-		if (List->Cells[CHEADER][i].Compare("CELL") != 0)
+		if (List->Cells[CHEADER][i].Compare(tcell) != 0)
 			continue;
 		ListSelectCell(Sender, 0, i, CanSelect);
 		bool HasMvrf = false;
 		for (int Row = 0; Row < List2->RowCount; ++Row)
 		{
-			if	(List2->Cells[CHEADER][Row].Compare(find) == 0)
+			if	(List2->Cells[CHEADER][Row].Compare(tmvrf) == 0)
 			{
 				cn++;
 				HasMvrf = true;
@@ -2729,6 +2730,8 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 			{
 				//Out->Lines->Add(List2->Cells[CHEADER][Row]);
 				HasMvrf = false;
+				if (NEnableList2Delete->Checked)
+					Delete2(Row);
 				continue;
 			}
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DATA") == 0)
@@ -2747,6 +2750,8 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		}
 	}
 	ShowAll = true;
+
+
 }
 //---------------------------------------------------------------------------
 

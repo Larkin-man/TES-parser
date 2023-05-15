@@ -78,12 +78,12 @@ __published:	// IDE-managed Components
 	TButton *PushCoord;
 	TCheckBox *Wordwap;
 	TPopupMenu *PopupMenu1;
-	TMenuItem *TestMenu;
-	TMenuItem *NList2;
-	TMenuItem *ClearOut;
+	TMenuItem *NTestMenu;
+	TMenuItem *NEnableSublist;
+	TMenuItem *NClearOut;
 	TButton *DelTrash;
 	TButton *Sel;
-	TMenuItem *EnableLsit2Delete1;
+	TMenuItem *NEnableList2Delete;
 	TButton *FindinList2;
 	TButton *DeleteExtraData;
 	TButton *Save2;
@@ -96,10 +96,10 @@ __published:	// IDE-managed Components
 	TButton *Replace;
 	TLabel *Secr;
 	TMenuItem *NFindSub;
-	TMenuItem *FindHeader1;
-	TMenuItem *Rewrites;
+	TMenuItem *NFindHeader;
+	TMenuItem *NRewrites;
 	TPanel *PanelSubRead;
-	TMenuItem *ShowData1;
+	TMenuItem *NShowData;
 	TButton *CheckConflicts;
 	TStaticText *NextS;
 	TMenuItem *BreakIf0Len;
@@ -108,9 +108,9 @@ __published:	// IDE-managed Components
 	TButton *ExportScriptsBtn;
 	TButton *DelOffsets;
 	TButton *LoadCells;
-	TMenuItem *SearchinData;
-	TMenuItem *SearchinOffset1;
-	TMenuItem *SearchinSize1;
+	TMenuItem *NSearchinData;
+	TMenuItem *NSearchinOffset;
+	TMenuItem *NSearchinSize;
 	TMenuItem *N1;
 	TButton *Button1;
 	TButton *MVRF;
@@ -144,14 +144,14 @@ __published:	// IDE-managed Components
 	void __fastcall PushCoordClick(TObject *Sender);
 	void __fastcall CloseClick(TObject *Sender);
 	void __fastcall WordwapClick(TObject *Sender);
-	void __fastcall TestMenuClick(TObject *Sender);
-	void __fastcall NList2Click(TObject *Sender);
-	void __fastcall ClearOutClick(TObject *Sender);
+	void __fastcall NTestMenuClick(TObject *Sender);
+	void __fastcall NEnableSublistClick(TObject *Sender);
+	void __fastcall NClearOutClick(TObject *Sender);
 	void __fastcall DelTrashClick(TObject *Sender);
 	void __fastcall SelClick(TObject *Sender);
 	void __fastcall FindNextContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
 	void __fastcall ListKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
-	void __fastcall EnableLsit2Delete1Click(TObject *Sender);
+	void __fastcall NEnableList2DeleteClick(TObject *Sender);
 	void __fastcall List2KeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
 	void __fastcall Save2Click(TObject *Sender);
 	void __fastcall FindinList2Click(TObject *Sender);
@@ -168,8 +168,8 @@ __published:	// IDE-managed Components
 	void __fastcall NextCellClick(TObject *Sender);
 	void __fastcall FindinSublistsClick(TObject *Sender);
 	void __fastcall ReplaceClick(TObject *Sender);
-	void __fastcall FindHeader1Click(TObject *Sender);
-	void __fastcall RewritesClick(TObject *Sender);
+	void __fastcall NFindHeaderClick(TObject *Sender);
+	void __fastcall NRewritesClick(TObject *Sender);
 	void __fastcall CheckConflictsClick(TObject *Sender);
 	bool __fastcall FormHelp(WORD Command, int Data, bool &CallHelp);
 	void __fastcall PrepareEClick(TObject *Sender);
@@ -177,9 +177,9 @@ __published:	// IDE-managed Components
 	void __fastcall ExportScriptsBtnClick(TObject *Sender);
 	void __fastcall DelOffsetsClick(TObject *Sender);
 	void __fastcall LoadCellsClick(TObject *Sender);
-	void __fastcall SearchinDataClick(TObject *Sender);
-	void __fastcall SearchinOffset1Click(TObject *Sender);
-	void __fastcall SearchinSize1Click(TObject *Sender);
+	void __fastcall NSearchinDataClick(TObject *Sender);
+	void __fastcall NSearchinOffsetClick(TObject *Sender);
+	void __fastcall NSearchinSizeClick(TObject *Sender);
 	void __fastcall List2Enter(TObject *Sender);
 	void __fastcall ListEnter(TObject *Sender);
 	void __fastcall MVRFClick(TObject *Sender);
@@ -323,7 +323,7 @@ public:		// User declarations
 		List->Enabled = ready;
 		Panel4->Enabled = ready;
 		List2->Enabled = ready;
-		EnableLsit2Delete1->Enabled = ready;
+		NEnableList2Delete->Enabled = ready;
 	}
 	struct TAGTYPES
 	{
