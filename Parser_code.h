@@ -357,6 +357,7 @@ public:		// User declarations
 	bool BlockList2Sel;
 	int Indextt;
 	void Delete2(int Row2);
+	void DeleteSublist(int Row2, int MainRow);
 	int FindIdx;
 	String OpenedFileName;
 	//TStringList *FindList;

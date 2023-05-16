@@ -1925,33 +1925,35 @@ void __fastcall TForm1::List2KeyUp(TObject *Sender, WORD &Key, TShiftState Shift
 
 void TForm1::Delete2(int Row2)
 {
+	List2->Cells[CSIZE][Row2] = "-X-";
+   LDele->Visible = true;
+	Save2->Enabled = true;
+	return DeleteSublist(Row2, List->Row);
+}
+//---------------------------------------------------------------------------
+
+void TForm1::DeleteSublist(int Row2, int MainRow)
+{
 	int Offset = List2->Cells[CSTART][Row2].ToInt();
 	if	(Deleted.find(Offset) == Deleted.end())
-	//if (List->Cells[CSIZE][List->Row] != "-X-")
 	{
 		Deleted.insert(Offset);
 		int del = List2->Cells[CSIZE][Row2].ToIntDef(0);
 		del += SLENSIZE;
 		del += 4;
 		DeletedSize += del;
-		List2->Cells[CSIZE][Row2] = "-X-";
 		LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
-		LDele->Visible = true;
-		Save2->Enabled = true;
-		//NEW
-		int MainLenOffset = List->Cells[CSTART][List->Row].ToInt() + 4;//char4
-		int MainLen = List->Cells[CSIZE][List->Row].ToInt();
-		//for (int i = 0; i < SpellList->Count; ++i)
-		//	if (BlackListSpells->Find(SpellList->Items->Strings[i], Idx) == true)
-		//Out->Lines->Add(SpellList->Items->Strings[i]+IntToStr(int(SpellList->Items->Objects[i])));
+		int MainLenOffset = List->Cells[CSTART][MainRow].ToInt() + 4;//char4
+		int MainLen = List->Cells[CSIZE][MainRow].ToInt();
+		if (!ShowAll)
+			tolog(IntToStr(Offset)+":DELE in:"+List->Cells[CDATA][MainRow]);
 		SubDelete.push_back(DeleteItem(MainLenOffset, MainLen, Offset, del));
-
-		//запишем ка размер header
-		if (List->Cells[CHEADER][List->Row].ToIntDef(-1) == -1) //first del
-			List->Cells[CHEADER][List->Row] = List->Cells[CSIZE][List->Row].ToInt() - del;
+		//запишем размер header
+		if (List->Cells[CHEADER][MainRow].ToIntDef(-1) == -1) //first del
+			List->Cells[CHEADER][MainRow] = List->Cells[CSIZE][MainRow].ToInt() - del;
 		else
-			List->Cells[CHEADER][List->Row] = List->Cells[CHEADER][List->Row].ToInt() - del;
-		//List->Cells[CHEADER][List->Row] = List->Cells[CSIZE][List->Row]; //костыль
+			List->Cells[CHEADER][MainRow] = List->Cells[CHEADER][MainRow].ToInt() - del;
+		//List->Cells[CHEADER][MainRow] = List->Cells[CSIZE][MainRow]; //костыль
 	}
 }
 //---------------------------------------------------------------------------
@@ -2703,7 +2705,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 
 	for (int i = 0; i < List->RowCount; ++i)
 	{
-		if (cn > 90)
+		if (cn > 11)
 		{
 			cn = 0;
 			return;
