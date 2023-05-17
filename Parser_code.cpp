@@ -237,7 +237,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		}
 	}
 	if (ftell(file) != EoF)
-		Out->Lines->Add("End on "+IntToStr((int)ftell(file))+". File must be bad.");
+		Out->Lines->Add("End on "+IntToStr((int)ftell(file))+". This file may be corrupt.");
 	if (List->RowCount > AddedRow)
 		List->RowCount = AddedRow;
 	fseek(file, POSNRECORDS, SEEK_SET);
@@ -278,12 +278,12 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 
 void TForm1::RefreshData(FILE* &file, int Start)
 {
+   const int MAXSIZE = 64;
+	static char DATA[MAXSIZE+1];
 	for (int i = Start; i < List->RowCount; ++i)
 	{
 		int start = List->Cells[CSTART][i].ToInt();
 		fseek(file, start, SEEK_SET);
-		const int MAXSIZE = 64;
-		static char DATA[MAXSIZE+1];
 		String Header = List->Cells[CHEADER][i];
 		if (Header == "GRUP")
 		{
@@ -345,7 +345,7 @@ void TForm1::RefreshData(FILE* &file, int Start)
 			fread(Data, 4, 3, file);
 			fread(Dat, 2, 2, file);
 			List->Cells[CDATA][i] = "("+IntToStr(Data[1])+","+IntToStr(Data[2])+")"+IntToStr((int)Dat[0])+":"+IntToStr((int)Dat[1]);
-		}
+		} else
 //		if (Tes3==false && Header == "NPC_")
 //		{
 //			fseek(file, 4+SLENSIZE, SEEK_CUR); //20
@@ -354,16 +354,21 @@ void TForm1::RefreshData(FILE* &file, int Start)
 //			List->Cells[CDATA][i] = IntToStr((int)Data[0])+","+IntToStr((int)Data[1])+","+IntToStr((int)Data[2])+","
 //				+IntToStr((int)Data[3])+","+IntToStr((int)Data[4])+","+IntToStr((int)Data[5])+","+IntToStr((int)Data[6])
 //				+","+IntToStr((int)Data[7])+","+IntToStr((int)Data[8])+","+IntToStr((int)Data[9])+","+IntToStr((int)Data[10]);
-//
 //		}
+		if (Header == "SKIL" || Header == "MGEF")
+		{
+			fseek(file, MNAMETOSUBLEN + SLENSIZE, SEEK_CUR);
+			int INDX;
+			fread(&INDX, SLENSIZE, 1, file);
+			List->Cells[CDATA][i] = INDX;
+      }
 		else
 		{
 			fseek(file, MNAMETOSUBLEN, SEEK_CUR);
 			int Len = 0;
 			fread(&Len, SLENSIZE, 1, file);
 			CheckLot(Len, MAXSIZE);
-			fread(DATA, MAXSIZE, 1, file);
-			//if (Header == "GMST")
+			fread(DATA, Len, 1, file);
 			DATA[Len] = 0;
 			List->Cells[CDATA][i] = DATA;
 		}
@@ -1447,27 +1452,18 @@ void __fastcall TForm1::FindStrClick(TObject *Sender)
 	if (SearchList->Row <= 0)
 	{
 		row = SearchList->Cols[*SearchingIn]->IndexOf(find);
-		if (row > -1)
-		{
-			EndFind(row);
-			return;
-		}
+		if (row >= 0)
+			return EndFind(row);
 		row = 0;
 	}
 	else
 		row = SearchList->Row+1;
 	for (int i = row; i < SearchList->RowCount; ++i)
 		if (SearchList->Cols[*SearchingIn]->Strings[i].Pos(find) == 1)
-		{
-			EndFind(i);
-			return;
-		}
-	for (int i = row; i > 0; --i)
+			return EndFind(i);
+	for (int i = 0; i < row; ++i)
 		if (SearchList->Cols[*SearchingIn]->Strings[i].Pos(find) == 1)
-		{
-			EndFind(i);
-			return;
-		}
+			return EndFind(i);
 }
 //---------------------------------------------------------------------------
 
@@ -1925,9 +1921,6 @@ void __fastcall TForm1::List2KeyUp(TObject *Sender, WORD &Key, TShiftState Shift
 
 void TForm1::Delete2(int Row2)
 {
-	List2->Cells[CSIZE][Row2] = "-X-";
-   LDele->Visible = true;
-	Save2->Enabled = true;
 	return DeleteSublist(Row2, List->Row);
 }
 //---------------------------------------------------------------------------
@@ -1935,18 +1928,22 @@ void TForm1::Delete2(int Row2)
 void TForm1::DeleteSublist(int Row2, int MainRow)
 {
 	int Offset = List2->Cells[CSTART][Row2].ToInt();
-	if	(Deleted.find(Offset) == Deleted.end())
+	if (Deleted.find(Offset) == Deleted.end())
 	{
 		Deleted.insert(Offset);
 		int del = List2->Cells[CSIZE][Row2].ToIntDef(0);
 		del += SLENSIZE;
 		del += 4;
 		DeletedSize += del;
+		LDele->Visible = true;
+		Save2->Enabled = true;
 		LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
 		int MainLenOffset = List->Cells[CSTART][MainRow].ToInt() + 4;//char4
 		int MainLen = List->Cells[CSIZE][MainRow].ToInt();
 		if (!ShowAll)
 			tolog(IntToStr(Offset)+":DELE in:"+List->Cells[CDATA][MainRow]);
+		else
+			List2->Cells[CSIZE][Row2] = "-X-";
 		SubDelete.push_back(DeleteItem(MainLenOffset, MainLen, Offset, del));
 		//запишем размер header
 		if (List->Cells[CHEADER][MainRow].ToIntDef(-1) == -1) //first del
@@ -1989,8 +1986,8 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 		else
 			Offset = el->Offset;
 	//
-	//for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
-	//	Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
+	for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
+		Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
 	fseek(file, 0, SEEK_SET);
 	int MemSize = 0;
 	byte *Mem = NULL;
@@ -2705,7 +2702,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 
 	for (int i = 0; i < List->RowCount; ++i)
 	{
-		if (cn > 11)
+		if (cn > 999)
 		{
 			cn = 0;
 			return;
@@ -2730,10 +2727,9 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DELE") == 0)
 			{
-				//Out->Lines->Add(List2->Cells[CHEADER][Row]);
 				HasMvrf = false;
 				if (NEnableList2Delete->Checked)
-					Delete2(Row);
+					DeleteSublist(Row, i);
 				continue;
 			}
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DATA") == 0)
@@ -2752,8 +2748,12 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		}
 	}
 	ShowAll = true;
-
-
+	if (NEnableList2Delete->Checked)
+	{
+		LDele->Visible = true;
+		Save2->Enabled = true;
+	}
 }
 //---------------------------------------------------------------------------
+
 
