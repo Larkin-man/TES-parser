@@ -114,6 +114,7 @@ __published:	// IDE-managed Components
 	TMenuItem *N1;
 	TButton *Button1;
 	TButton *MVRF;
+	TButton *Button2;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -183,6 +184,7 @@ __published:	// IDE-managed Components
 	void __fastcall List2Enter(TObject *Sender);
 	void __fastcall ListEnter(TObject *Sender);
 	void __fastcall MVRFClick(TObject *Sender);
+	void __fastcall Button2Click(TObject *Sender);
 
 
 private:	// User declarations

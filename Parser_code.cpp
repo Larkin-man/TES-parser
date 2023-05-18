@@ -1987,7 +1987,12 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 			Offset = el->Offset;
 	//
 	for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
+	{
+		//char *ado = new char[-el->Size];
+		char ado[13];
+		memcpy(ado, el->Addon, -el->Size);
 		Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
+	}
 	fseek(file, 0, SEEK_SET);
 	int MemSize = 0;
 	byte *Mem = NULL;
@@ -2008,7 +2013,10 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 			fread (Mem, GoodSize, 1, file);
 			fwrite(Mem, GoodSize, 1, save);
 		}
-		fseek(file, el->Size, SEEK_CUR); //к началу слудующего блока
+		if (el->Addon == NULL)
+			fseek(file, el->Size, SEEK_CUR); //к началу слудующего блока
+		else
+			fwrite(el->Addon, -(el->Size), 1, save);
 	}
 	//Перепишем размеры main
 	int AllDeletedSize = 0;
@@ -2642,14 +2650,6 @@ void __fastcall TForm1::DelOffsetsClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::LoadCellsClick(TObject *Sender)
-{
-	//
-	//basecel.LoadFromFile("BASECELLS.txt");
-
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::NFindHeaderClick(TObject *Sender)
 {
 	SearchingIn1 = SearchingIn2 = CHEADER;
@@ -2756,4 +2756,58 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TForm1::Button2Click(TObject *Sender)
+{
+	char Data[13] = "NAMYklmnPAST\0";
+	char Datab[2][13];
+	//Data[0] = "NAMY";
+	((int*)Data)[1] = 5;
+	//Data[8] = "PAST\0";
+
+	//DeleteItem(int m, int ml, int o, int s)
+	DeleteItem ea(8776, 254, 8840, -13);
+	//ea.Addon = new byte[13];
+	//memcpy(ea.Addon, Data, 13);
+	SubDelete.push_back(ea);
+	SubDelete.back().Addon = new byte[13];
+	memcpy(SubDelete.back().Addon, Data, 13);
+
+	//SubDelete.push_back(ea);
+	ea.Offset = 9000;
+	SubDelete.push_back(ea);
+	SubDelete.back().Addon = new byte[13];
+	Data[3] = 'A'; Data[10] = 'N';
+	memcpy(SubDelete.back().Addon, Data, 13);
+
+	DeletedSize += -13;
+	LDele->Visible = true;
+	Save2->Enabled = true;
+	Save2->Visible = true;
+	Save->Visible = false;
+	DeleteExtraData->Enabled = true;
+	//std::vector<DeleteItem>::iterator el=SubDelete.begin();
+	//memcpy(Datab[0], el->Addon, -(el->Size));
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::LoadCellsClick(TObject *Sender)
+{
+	//basecel.LoadFromFile("BASECELLS.txt");
+	char Datab[2][13];
+	int da = 0;
+	for (std::vector<DeleteItem>::iterator el=SubDelete.begin(); el != SubDelete.end(); ++el)
+	{
+		Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset)
+			+" g="+IntToStr(el->Size));
+		memcpy(Datab[da], el->Addon, -(el->Size));
+//		for (int i = 0; i < 13; i++)
+//		{  Datab[da][i] = el->Addon[i];
+//			//tolog(((char)));
+//		}
+		da++;
+	}
+	tolog(Datab[0]);
+	tolog(Datab[1]);
+}
+//---------------------------------------------------------------------------
 
