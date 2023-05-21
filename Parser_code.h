@@ -231,6 +231,9 @@ public:		// User declarations
 	BITS bit, *pbit;
 	void ClearDele()
 	{
+		for (std::vector<DeleteItem>::iterator el = SubDelete.begin(); el != SubDelete.end(); ++el)
+			if (el->Addon)
+				delete [] el->Addon;
 		Deleted.clear();
 		DeletedSize = 0;
 		LogUp = true;

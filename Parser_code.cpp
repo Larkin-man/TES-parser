@@ -385,6 +385,7 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 	Expo->SaveToFile("Expo.txt");
 	delete Expo;
 	delete Export;
+
 }
 //---------------------------------------------------------------------------
 
@@ -1987,12 +1988,7 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 			Offset = el->Offset;
 	//
 	for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
-	{
-		//char *ado = new char[-el->Size];
-		char ado[13];
-		memcpy(ado, el->Addon, -el->Size);
 		Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
-	}
 	fseek(file, 0, SEEK_SET);
 	int MemSize = 0;
 	byte *Mem = NULL;
@@ -2766,18 +2762,25 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 
 	//DeleteItem(int m, int ml, int o, int s)
 	DeleteItem ea(8776, 254, 8840, -13);
-	//ea.Addon = new byte[13];
-	//memcpy(ea.Addon, Data, 13);
-	SubDelete.push_back(ea);
-	SubDelete.back().Addon = new byte[13];
-	memcpy(SubDelete.back().Addon, Data, 13);
 
-	//SubDelete.push_back(ea);
-	ea.Offset = 9000;
+	byte *store = new byte[13];
+	memcpy(store, Data, 13);
+	ea.Addon = store;
 	SubDelete.push_back(ea);
-	SubDelete.back().Addon = new byte[13];
+
+	ea.Offset = 9000;
 	Data[3] = 'A'; Data[10] = 'N';
-	memcpy(SubDelete.back().Addon, Data, 13);
+	byte *store2 = new byte[13];
+	memcpy(store2, Data, 13);
+	ea.Addon = store2;
+	SubDelete.push_back(ea);
+
+	ea.Offset = 9042;
+	Data[3] = 'B'; Data[10] = 'M';
+	byte *store3 = new byte[13];
+	memcpy(store3, Data, 13);
+	ea.Addon = store3;
+	SubDelete.push_back(ea);
 
 	DeletedSize += -13;
 	LDele->Visible = true;
