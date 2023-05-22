@@ -123,9 +123,9 @@ union Interpret
 struct DeleteItem
 {    //DeleteItem ti(AI_W->Cells[1][0].ToInt(),AI_W->Cells[1][1].ToInt());
 		//DeletingSubheaders.push_back(ti);
-	DeleteItem(int m, int ml, int o, int s)
+	DeleteItem(int mlo, int ml, int o, int s)
 	{
-		MainLenOffset = m;
+		MainLenOffset = mlo;
 		MainLen = ml;
 		Offset = o;
 		Size = s;

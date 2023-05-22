@@ -2695,10 +2695,11 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 	ShowAll = false;
 	bool CanSelect = true;
 	String tcell("CELL"); String tmvrf("MVRF");
+	int cndt[2];
 
 	for (int i = 0; i < List->RowCount; ++i)
 	{
-		if (cn > 999)
+		if (cn > 5)
 		{
 			cn = 0;
 			return;
@@ -2720,14 +2721,33 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("NAME") == 0)
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("CNDT") == 0)
-				Out->Lines->Add(List2->Cells[CDATA2][Row]);
+			{
+				cndt[0] = List2->Cells[CDATA2][Row].Pos(' ');
+				cndt[1] = List2->Cells[CDATA2][Row].SubString(cndt[0]+1, List2->Cells[CDATA2][Row].Length()-cndt[0]);
+				cndt[0] = List2->Cells[CDATA2][Row].SubString(1, cndt[0]-1);
+				//Out->Lines->Add(List2->Cells[CDATA2][Row]);
+			}
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DELE") == 0)
 			{
 				HasMvrf = false;
 				if (NEnableList2Delete->Checked)
-					DeleteSublist(Row, i);
+					if (Reinter->Checked)
+					{
+						static char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
+						((int*)Data)[1] = 32;
+						((int*)Data)[4] = 8192;
+						DeleteItem ea(8776, 254, 8840, -13); //int mlo, int ml, int o, int s)
+						byte *store = new byte[13];
+						memcpy(store, Data, 13);
+						ea.Addon = store;
+						SubDelete.push_back(ea);
+					}
+					else
+					{
+						DeleteSublist(Row, i);
+					}
 				continue;
-			}
+			} else
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DATA") == 0)
 			{
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
