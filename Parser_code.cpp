@@ -2695,7 +2695,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 	ShowAll = false;
 	bool CanSelect = true;
 	String tcell("CELL"); String tmvrf("MVRF");
-	int cndt[2];
+	int grid[2];
 
 	for (int i = 0; i < List->RowCount; ++i)
 	{
@@ -2706,6 +2706,16 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		}
 		if (List->Cells[CHEADER][i].Compare(tcell) != 0)
 			continue;
+		grid[0] = List->Cells[CDATA][i].Pos('(');
+		if (grid[0] == 0)
+			continue; //interior
+		String mdata = List->Cells[CDATA][i].SubString(grid[0]+1, 128);
+		grid[1] = mdata.Pos(',');
+		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
+		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
+		//Out->Lines->Add(IntToStr(grid[0])+" "+IntToStr(grid[1]));
+		grid[0] = grid[0] * 8192 + 4096; //crednee
+		grid[1] = grid[1] * 8192 + 4096;
 		ListSelectCell(Sender, 0, i, CanSelect);
 		bool HasMvrf = false;
 		for (int Row = 0; Row < List2->RowCount; ++Row)
@@ -2721,24 +2731,22 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("NAME") == 0)
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("CNDT") == 0)
-			{
-				cndt[0] = List2->Cells[CDATA2][Row].Pos(' ');
-				cndt[1] = List2->Cells[CDATA2][Row].SubString(cndt[0]+1, List2->Cells[CDATA2][Row].Length()-cndt[0]);
-				cndt[0] = List2->Cells[CDATA2][Row].SubString(1, cndt[0]-1);
-				//Out->Lines->Add(List2->Cells[CDATA2][Row]);
-			}
+				Out->Lines->Add(List2->Cells[CDATA2][Row]);
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DELE") == 0)
 			{
 				HasMvrf = false;
 				if (NEnableList2Delete->Checked)
 					if (Reinter->Checked)
 					{
-						static char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
+						char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
 						((int*)Data)[1] = 32;
 						((int*)Data)[4] = 8192;
-						DeleteItem ea(8776, 254, 8840, -13); //int mlo, int ml, int o, int s)
-						byte *store = new byte[13];
-						memcpy(store, Data, 13);
+						((int*)Data)[2] = grid[0];
+						((int*)Data)[3] = grid[1];
+						DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
+							, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
+						byte *store = new byte[32];
+						memcpy(store, Data, 32);
 						ea.Addon = store;
 						SubDelete.push_back(ea);
 					}

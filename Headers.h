@@ -121,8 +121,12 @@ union Interpret
 } ;
 
 struct DeleteItem
-{    //DeleteItem ti(AI_W->Cells[1][0].ToInt(),AI_W->Cells[1][1].ToInt());
-		//DeletingSubheaders.push_back(ti);
+{
+	int MainLenOffset;
+	int MainLen;
+	int Offset;
+	int Size; //size of deleting block
+	byte *Addon;
 	DeleteItem(int mlo, int ml, int o, int s)
 	{
 		MainLenOffset = mlo;
@@ -131,12 +135,6 @@ struct DeleteItem
 		Size = s;
 		Addon = NULL;
 	}
-	int MainLenOffset;
-	int MainLen;
-	int Offset;
-	int Size; //size of deleting block
-	byte *Addon;
-	//~DeleteItem()	{	}
 };
 
 #endif
