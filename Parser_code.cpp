@@ -2012,7 +2012,11 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 		if (el->Addon == NULL)
 			fseek(file, el->Size, SEEK_CUR); //к началу слудующего блока
 		else
+		{
+			char test[32];
+			memcpy(test, el->Addon, 32);
 			fwrite(el->Addon, -(el->Size), 1, save);
+		}
 	}
 	//Перепишем размеры main
 	int AllDeletedSize = 0;
@@ -2695,11 +2699,31 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 	ShowAll = false;
 	bool CanSelect = true;
 	String tcell("CELL"); String tmvrf("MVRF");
-	int grid[2];
+	static float rand[2] = { -512.0, -512.0 };
+	float grid[2];
+	tolog("Construct Exteriors ...");
 
+	std::vector<DeleteItem> Cells;
 	for (int i = 0; i < List->RowCount; ++i)
 	{
-		if (cn > 5)
+    	if (List->Cells[CHEADER][i].Compare(tcell) != 0)
+			continue;
+		grid[0] = List->Cells[CDATA][i].Pos('(');
+		if (grid[0] == 0)
+			continue; //interior
+		String mdata = List->Cells[CDATA][i].SubString(grid[0]+1, 128);
+		grid[1] = mdata.Pos(',');
+		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
+		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
+		ListSelectCell(Sender, 0, i, CanSelect);
+		DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
+			, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
+	}
+
+	tolog("Deleting MVRF & CNDT ...");
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+		if (cn > 999)
 		{
 			cn = 0;
 			return;
@@ -2732,17 +2756,24 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("CNDT") == 0)
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
+
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DELE") == 0)
 			{
-				HasMvrf = false;
 				if (NEnableList2Delete->Checked)
 					if (Reinter->Checked)
 					{
-						char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
-						((int*)Data)[1] = 32;
-						((int*)Data)[4] = 8192;
-						((int*)Data)[2] = grid[0];
-						((int*)Data)[3] = grid[1];
+						static char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
+						((int*)Data)[1] = 24;
+						((float*)Data)[2] = grid[0] + rand[0];
+						((float*)Data)[3] = grid[1] + rand[1];
+						((float*)Data)[4] = 8192.0 + float(cn*2);
+						((float*)Data)[5] = 0.0;
+						((float*)Data)[6] = 0.0;
+						((float*)Data)[7] = 0.0;
+						rand[1] += Row*4;
+						if (rand[1] > 512) rand[1] = -512+Row;
+						rand[0] += 64;
+						if (rand[0] > 512) rand[1] = -512;
 						DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
 							, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
 						byte *store = new byte[32];
@@ -2751,20 +2782,24 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 						SubDelete.push_back(ea);
 					}
 					else
-					{
 						DeleteSublist(Row, i);
-					}
+				HasMvrf = false;
 				continue;
 			} else
 			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DATA") == 0)
 			{
+				if (NShowData->Checked == false)
+					continue;
 				Out->Lines->Add(List2->Cells[CDATA2][Row]);
-				fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
-				float z;
-				fread(&z, sizeof(float), 1, file);
-				z += 1000.0;
-				fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
-				fwrite(&z, sizeof(float), 1, file);
+				if (NEnableList2Delete->Checked) //у CNDT z+=1000
+				{
+					fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
+					float z;
+					fread(&z, sizeof(float), 1, file);
+					z += 1000.0;
+					fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
+					fwrite(&z, sizeof(float), 1, file);
+				}
 				HasMvrf = false;
 				continue;
 			}
