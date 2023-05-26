@@ -1971,21 +1971,25 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 	if (!save) return ShowMessage( "Cannot open binary file.");
 	fseek(file, 0, SEEK_END);
 	EoF = ftell(file);
+	//if (NClearOut->Checked == false)
 	std::sort(SubDelete.begin(),SubDelete.end(), Compa);
 	SubDelete.push_back(DeleteItem(EoF, 0, EoF, 0));
 	std::vector<DeleteItem>::iterator el;
 	//удаление дубликатов
-	el = SubDelete.begin();
-	int Offset = el->Offset;
-	for (el++; el != SubDelete.end(); ++el)
-		if (el->Offset == Offset)
-		{
-			SubDelete.erase(el);
-			el = SubDelete.begin();
-			Offset = el->Offset;
-		}
-		else
-			Offset = el->Offset;
+	if (NClearOut->Checked == false)
+	{
+		el = SubDelete.begin();
+		int Offset = el->Offset;
+		for (el++; el != SubDelete.end(); ++el)
+			if (el->Offset == Offset)
+			{
+				SubDelete.erase(el);
+				el = SubDelete.begin();
+				Offset = el->Offset;
+			}
+			else
+				Offset = el->Offset;
+	}
 	//
 	for (el=SubDelete.begin(); el != SubDelete.end(); ++el)
 		Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset));
@@ -2701,26 +2705,11 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 	String tcell("CELL"); String tmvrf("MVRF");
 	static float rand[2] = { -512.0, -512.0 };
 	float grid[2];
-	tolog("Construct Exteriors ...");
+	tolog("Finding MVRF & CNDT ...");
 
-	std::vector<DeleteItem> Cells;
-	for (int i = 0; i < List->RowCount; ++i)
-	{
-    	if (List->Cells[CHEADER][i].Compare(tcell) != 0)
-			continue;
-		grid[0] = List->Cells[CDATA][i].Pos('(');
-		if (grid[0] == 0)
-			continue; //interior
-		String mdata = List->Cells[CDATA][i].SubString(grid[0]+1, 128);
-		grid[1] = mdata.Pos(',');
-		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
-		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
-		ListSelectCell(Sender, 0, i, CanSelect);
-		DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
-			, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
-	}
+	std::vector<Exterior> Locs;
+	//loc.back()
 
-	tolog("Deleting MVRF & CNDT ...");
 	for (int i = 0; i < List->RowCount; ++i)
 	{
 		if (cn > 999)
@@ -2737,6 +2726,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		grid[1] = mdata.Pos(',');
 		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
 		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
+
 		//Out->Lines->Add(IntToStr(grid[0])+" "+IntToStr(grid[1]));
 		grid[0] = grid[0] * 8192 + 4096; //crednee
 		grid[1] = grid[1] * 8192 + 4096;
@@ -2806,6 +2796,28 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 
 		}
 	}
+   tolog("Construct Exteriors ...");
+
+	std::vector<DeleteItem> Cells;
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+		if (List->Cells[CHEADER][i].Compare(tcell) != 0)
+			continue;
+		grid[0] = List->Cells[CDATA][i].Pos('(');
+		if (grid[0] == 0)
+			continue; //interior
+		String mdata = List->Cells[CDATA][i].SubString(grid[0]+1, 128);
+		grid[1] = mdata.Pos(',');
+		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
+		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
+		ListSelectCell(Sender, 0, i, CanSelect);
+		DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
+			, List2->Cells[CSTART][  0   ].ToInt(), -32); //int mlo, int ml, int o, int s)
+	}
+
+
+
+
 	ShowAll = true;
 	if (NEnableList2Delete->Checked)
 	{
@@ -2817,29 +2829,28 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 
 void __fastcall TForm1::Button2Click(TObject *Sender)
 {
-	char Data[13] = "NAMYklmnPAST\0";
+	char Data[13] = "NAMAklmnPAST\0";
 	char Datab[2][13];
 	//Data[0] = "NAMY";
 	((int*)Data)[1] = 5;
 	//Data[8] = "PAST\0";
-
 	//DeleteItem(int m, int ml, int o, int s)
-	DeleteItem ea(8776, 254, 8840, -13);
+	DeleteItem ea(8776, 254, 9000, -13);
 
 	byte *store = new byte[13];
 	memcpy(store, Data, 13);
 	ea.Addon = store;
 	SubDelete.push_back(ea);
 
-	ea.Offset = 9000;
-	Data[3] = 'A'; Data[10] = 'N';
+	ea.Offset = 9042;
+	Data[3] = 'B'; Data[10] = 'N';
 	byte *store2 = new byte[13];
 	memcpy(store2, Data, 13);
 	ea.Addon = store2;
 	SubDelete.push_back(ea);
 
-	ea.Offset = 9042;
-	Data[3] = 'B'; Data[10] = 'M';
+	ea.Offset = 9000;
+	Data[3] = 'C'; Data[10] = 'M';
 	byte *store3 = new byte[13];
 	memcpy(store3, Data, 13);
 	ea.Addon = store3;
@@ -2851,8 +2862,6 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 	Save2->Visible = true;
 	Save->Visible = false;
 	DeleteExtraData->Enabled = true;
-	//std::vector<DeleteItem>::iterator el=SubDelete.begin();
-	//memcpy(Datab[0], el->Addon, -(el->Size));
 }
 //---------------------------------------------------------------------------
 

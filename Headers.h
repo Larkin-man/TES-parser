@@ -137,4 +137,12 @@ struct DeleteItem
 	}
 };
 
+struct Exterior
+{
+	int X,Y;
+	int MainLenOffset;
+	int MainLen;
+	int Offset;
+};
+
 #endif
