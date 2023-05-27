@@ -2699,44 +2699,54 @@ void __fastcall TForm1::ListEnter(TObject *Sender)
 
 void __fastcall TForm1::MVRFClick(TObject *Sender)
 {
-	static int cn = 0;
+	int ende = 0;
 	ShowAll = false;
 	bool CanSelect = true;
 	String tcell("CELL"); String tmvrf("MVRF");
-	static float rand[2] = { -512.0, -512.0 };
-	float grid[2];
+			//static float rand[2] = { -512.0, -512.0 };
+			//float grid[2];
 	tolog("Finding MVRF & CNDT ...");
 
 	std::vector<Exterior> Locs;
-	//loc.back()
-
+	Exterior Curr;
+	Locs.reserve(16);
 	for (int i = 0; i < List->RowCount; ++i)
 	{
-		if (cn > 999)
-		{
-			cn = 0;
+		if (ende > 999)
 			return;
-		}
 		if (List->Cells[CHEADER][i].Compare(tcell) != 0)
 			continue;
-		grid[0] = List->Cells[CDATA][i].Pos('(');
-		if (grid[0] == 0)
+		Curr.X = List->Cells[CDATA][i].Pos('(');
+		if (Curr.X == 0)
 			continue; //interior
-		String mdata = List->Cells[CDATA][i].SubString(grid[0]+1, 128);
-		grid[1] = mdata.Pos(',');
-		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
-		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
-
+		String mdata = List->Cells[CDATA][i].SubString(Curr.X+1, 128);
+		Curr.X = mdata.Pos(',');
+		Curr.X = mdata.SubString(1, Curr.Y-1).ToInt();
+		Curr.Y = mdata.SubString(Curr.Y+1, mdata.Pos(')')-Curr.Y-1).ToInt();
 		//Out->Lines->Add(IntToStr(grid[0])+" "+IntToStr(grid[1]));
-		grid[0] = grid[0] * 8192 + 4096; //crednee
-		grid[1] = grid[1] * 8192 + 4096;
+		//grid[0] = grid[0] * 8192 + 4096; //crednee
+		//grid[1] = grid[1] * 8192 + 4096;
+		Curr.MainLenOffset = List->Cells[CSTART][i].ToInt()+4;
+		Curr.MainLen = List->Cells[CSIZE][i].ToInt();
+		Curr.PasteOffset = -1;
 		ListSelectCell(Sender, 0, i, CanSelect);
 		bool HasMvrf = false;
 		for (int Row = 0; Row < List2->RowCount; ++Row)
 		{
+			if (Curr.PasteOffset == -1 && List2->Cells[CHEADER][Row].Compare("RGNN") == 0)
+				if (List2->RowCount > Row+1)
+				{
+					if (List2->Cells[CHEADER][Row+1].Compare("NAM0") == 0)
+						Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row+1].ToInt()+List2->Cells[CSIZE][Row+1].ToInt();
+					else
+						Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+				}
+				else
+					Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+			continue;
 			if	(List2->Cells[CHEADER][Row].Compare(tmvrf) == 0)
 			{
-				cn++;
+				ende++;
 				HasMvrf = true;
 				Out->Lines->Append("");
 				Out->Lines->Add(List->Cells[CDATA][i]+"\t"+List2->Cells[CDATA2][Row]);
@@ -2752,24 +2762,24 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 				if (NEnableList2Delete->Checked)
 					if (Reinter->Checked)
 					{
-						static char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
-						((int*)Data)[1] = 24;
-						((float*)Data)[2] = grid[0] + rand[0];
-						((float*)Data)[3] = grid[1] + rand[1];
-						((float*)Data)[4] = 8192.0 + float(cn*2);
-						((float*)Data)[5] = 0.0;
-						((float*)Data)[6] = 0.0;
-						((float*)Data)[7] = 0.0;
-						rand[1] += Row*4;
-						if (rand[1] > 512) rand[1] = -512+Row;
-						rand[0] += 64;
-						if (rand[0] > 512) rand[1] = -512;
-						DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
-							, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
-						byte *store = new byte[32];
-						memcpy(store, Data, 32);
-						ea.Addon = store;
-						SubDelete.push_back(ea);
+//						static char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
+//						((int*)Data)[1] = 24;
+//						((float*)Data)[2] = grid[0] + rand[0];
+//						((float*)Data)[3] = grid[1] + rand[1];
+//						((float*)Data)[4] = 8192.0 + float(cn*2);
+//						((float*)Data)[5] = 0.0;
+//						((float*)Data)[6] = 0.0;
+//						((float*)Data)[7] = 0.0;
+//						rand[1] += Row*4;
+//						if (rand[1] > 512) rand[1] = -512+Row;
+//						rand[0] += 64;
+//						if (rand[0] > 512) rand[1] = -512;
+//						DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
+//							, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
+//						byte *store = new byte[32];
+//						memcpy(store, Data, 32);
+//						ea.Addon = store;
+//						SubDelete.push_back(ea);
 					}
 					else
 						DeleteSublist(Row, i);
@@ -2795,29 +2805,31 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 			}
 
 		}
+		if (Curr.PasteOffset == -1)
+			tolog("Error in CELL, no RGNN:" + List->Cells[CDATA][i]);
+		else
+			Locs.push_back(Curr);
 	}
+	for (std::vector<Exterior>::iterator el = Locs.begin(); el != Locs.end(); ++el)
+		tolog(StrToInt(el->X)+" "+StrToInt(el->Y)+" "+StrToInt(el->MainLenOffset)+" "
+			+StrToInt(el->MainLen)+" "+StrToInt(el->PasteOffset));
    tolog("Construct Exteriors ...");
 
-	std::vector<DeleteItem> Cells;
-	for (int i = 0; i < List->RowCount; ++i)
-	{
-		if (List->Cells[CHEADER][i].Compare(tcell) != 0)
-			continue;
-		grid[0] = List->Cells[CDATA][i].Pos('(');
-		if (grid[0] == 0)
-			continue; //interior
-		String mdata = List->Cells[CDATA][i].SubString(grid[0]+1, 128);
-		grid[1] = mdata.Pos(',');
-		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
-		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
-		ListSelectCell(Sender, 0, i, CanSelect);
-		DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
-			, List2->Cells[CSTART][  0   ].ToInt(), -32); //int mlo, int ml, int o, int s)
-	}
-
-
-
-
+//	for (int i = 0; i < List->RowCount; ++i)
+//	{
+//		if (List->Cells[CHEADER][i].Compare(tcell) != 0)
+//			continue;
+//		grid[0] = List->Cells[CDATA][i].Pos('(');
+//		if (grid[0] == 0)
+//			continue; //interior
+//		String mdata = List->Cells[CDATA][i].SubString(grid[0]+1, 128);
+//		grid[1] = mdata.Pos(',');
+//		grid[0] = mdata.SubString(1, grid[1]-1).ToInt();
+//		grid[1] = mdata.SubString(grid[1]+1, mdata.Pos(')')-grid[1]-1).ToInt();
+//		ListSelectCell(Sender, 0, i, CanSelect);
+//		DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
+//			, List2->Cells[CSTART][  0   ].ToInt(), -32); //int mlo, int ml, int o, int s)
+//	}
 	ShowAll = true;
 	if (NEnableList2Delete->Checked)
 	{

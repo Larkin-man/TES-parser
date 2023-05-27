@@ -142,7 +142,7 @@ struct Exterior
 	int X,Y;
 	int MainLenOffset;
 	int MainLen;
-	int Offset;
+	int PasteOffset;
 };
 
 #endif
