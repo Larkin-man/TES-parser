@@ -115,6 +115,7 @@ __published:	// IDE-managed Components
 	TButton *Button1;
 	TButton *MVRF;
 	TButton *Button2;
+	TButton *Deletemasssubheaders;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -185,6 +186,8 @@ __published:	// IDE-managed Components
 	void __fastcall ListEnter(TObject *Sender);
 	void __fastcall MVRFClick(TObject *Sender);
 	void __fastcall Button2Click(TObject *Sender);
+	void __fastcall DeletemasssubheadersClick(TObject *Sender);
+
 
 
 private:	// User declarations
@@ -411,6 +414,7 @@ public:		// User declarations
 	int *SearchingIn;
 	TStringGrid *SearchList;
 	bool ShowAll;
+	void RetMes();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

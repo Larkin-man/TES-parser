@@ -23,6 +23,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 {
 	Tes3 = true;
 	file = NULL;
+
 	save = NULL;      //ShowMessage
 	Out->Clear();
 	Setup(4, 12, 320); //TES3
@@ -2720,7 +2721,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		if (Curr.X == 0)
 			continue; //interior
 		String mdata = List->Cells[CDATA][i].SubString(Curr.X+1, 128);
-		Curr.X = mdata.Pos(',');
+		Curr.Y = mdata.Pos(',');
 		Curr.X = mdata.SubString(1, Curr.Y-1).ToInt();
 		Curr.Y = mdata.SubString(Curr.Y+1, mdata.Pos(')')-Curr.Y-1).ToInt();
 		//Out->Lines->Add(IntToStr(grid[0])+" "+IntToStr(grid[1]));
@@ -2734,15 +2735,28 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		for (int Row = 0; Row < List2->RowCount; ++Row)
 		{
 			if (Curr.PasteOffset == -1 && List2->Cells[CHEADER][Row].Compare("RGNN") == 0)
+			{
 				if (List2->RowCount > Row+1)
 				{
+					if (List2->Cells[CHEADER][Row+1].Compare("NAM5") == 0)
+					{
+						Row++;
+						if (List2->RowCount <= Row+1)
+						{
+                   	Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+							continue;
+                  }
+					}
 					if (List2->Cells[CHEADER][Row+1].Compare("NAM0") == 0)
+					{
 						Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row+1].ToInt()+List2->Cells[CSIZE][Row+1].ToInt();
-					else
-						Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+						continue;
+					}
 				}
-				else
-					Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+				Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+				continue;
+			}
+
 			continue;
 			if	(List2->Cells[CHEADER][Row].Compare(tmvrf) == 0)
 			{
@@ -2762,18 +2776,9 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 				if (NEnableList2Delete->Checked)
 					if (Reinter->Checked)
 					{
-//						static char Data[32] = "DATA----XXXXYYYYZZZZ000000000000";
-//						((int*)Data)[1] = 24;
-//						((float*)Data)[2] = grid[0] + rand[0];
-//						((float*)Data)[3] = grid[1] + rand[1];
-//						((float*)Data)[4] = 8192.0 + float(cn*2);
-//						((float*)Data)[5] = 0.0;
-//						((float*)Data)[6] = 0.0;
-//						((float*)Data)[7] = 0.0;
-//						rand[1] += Row*4;
-//						if (rand[1] > 512) rand[1] = -512+Row;
-//						rand[0] += 64;
-//						if (rand[0] > 512) rand[1] = -512;
+
+//						DeleteItem ea(-1,-1,-1,0);
+
 //						DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
 //							, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
 //						byte *store = new byte[32];
@@ -2811,8 +2816,8 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 			Locs.push_back(Curr);
 	}
 	for (std::vector<Exterior>::iterator el = Locs.begin(); el != Locs.end(); ++el)
-		tolog(StrToInt(el->X)+" "+StrToInt(el->Y)+" "+StrToInt(el->MainLenOffset)+" "
-			+StrToInt(el->MainLen)+" "+StrToInt(el->PasteOffset));
+		tolog(IntToStr(el->X)+" "+IntToStr(el->Y)+" "+IntToStr(el->MainLenOffset)+" "
+			+IntToStr(el->MainLen)+" "+IntToStr(el->PasteOffset));
    tolog("Construct Exteriors ...");
 
 //	for (int i = 0; i < List->RowCount; ++i)
@@ -2895,6 +2900,17 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 	}
 	tolog(Datab[0]);
 	tolog(Datab[1]);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::DeletemasssubheadersClick(TObject *Sender)
+{
+
+//	Out->
+//	if (Out->)
+//	{
+//
+//	}
 }
 //---------------------------------------------------------------------------
 
