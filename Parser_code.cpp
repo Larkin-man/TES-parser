@@ -23,7 +23,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 {
 	Tes3 = true;
 	file = NULL;
-
 	save = NULL;      //ShowMessage
 	Out->Clear();
 	Setup(4, 12, 320); //TES3
@@ -2902,15 +2901,61 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 	tolog(Datab[1]);
 }
 //---------------------------------------------------------------------------
-
+void TForm1::RetMes()
+{
+	ShowMessage("firs");
+}
+//---------------------------------------------------------------------------
 void __fastcall TForm1::DeletemasssubheadersClick(TObject *Sender)
 {
+	if (Out->Lines->Count < 3)
+		return ShowMessage("1");
 
-//	Out->
-//	if (Out->)
-//	{
+	for (int i = 0; i < 3; i++)
+	{
+		if (Out->Lines->Strings[i].Length() % 5 != 4)
+			return ShowMessage("2");
+		//for (int j = 5; j < Out->Lines->Strings[i].Length(); j+=5)
+		//	if (Out->Lines->Strings[i][j] != ' ')
+		//		return ShowMessage("3");
+	}
+	char **header[3];
+	int count[3];
+	for (int i = 0; i < 3; i++)
+	{
+		count[i] = Out->Lines->Strings[i].Length() / 5 + 1;
+		header[i] = new char*[count[i]];
+
+   }
+
+
+	//char **hFind, **hStart, **hEnd;
+	//int cf, cs, ce;
+
+//	header[0] = hFind;
+//	header[1] = hStart;
+//	header[2] = hEnd;
+//	count[0] = cf;
+//	count[1] = cs;
+//	count[2] = ce;
 //
-//	}
+//	char &** gg = &hFind;
+//	int cf = Out->Lines->Strings[0].Length() / 5 + 1;
+//	int cs = Out->Lines->Strings[1].Length() / 5 + 1;
+//	int ce = Out->Lines->Strings[2].Length() / 5 + 1;
+//	hFind = new char*[cf];
+//	hStart = new char*[cs];
+//	hEnd = new char*[ce];
+	for (int i = 0; i < cf; i++)
+	{
+		hFind[i] = new char[4];
+
+	}
+
+
+
+
+
 }
 //---------------------------------------------------------------------------
 
