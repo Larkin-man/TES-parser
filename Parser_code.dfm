@@ -589,14 +589,14 @@ object Form1: TForm1
         TabOrder = 29
         OnClick = MVRFClick
       end
-      object Deletemasssubheaders: TButton
+      object DeleteAllSubhead: TButton
         Left = 0
         Top = 400
         Width = 75
         Height = 25
         Caption = 'Delete mass subheaders'
         TabOrder = 31
-        OnClick = DeletemasssubheadersClick
+        OnClick = DeleteAllSubheadClick
       end
     end
     object PanelSubRead: TPanel
@@ -701,7 +701,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 100
       end
     end
   end

@@ -2906,7 +2906,15 @@ void TForm1::RetMes()
 	ShowMessage("firs");
 }
 //---------------------------------------------------------------------------
-void __fastcall TForm1::DeletemasssubheadersClick(TObject *Sender)
+bool TForm1::StringsIdent(String left, String* &right, int rightcount)
+{
+	for (int i = 0; i < rightcount; ++i)
+		if (left.Compare(right[i]) == 0)
+			return true;
+	return false;
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 {
 	if (Out->Lines->Count < 3)
 		return ShowMessage("1");
@@ -2919,43 +2927,41 @@ void __fastcall TForm1::DeletemasssubheadersClick(TObject *Sender)
 		//	if (Out->Lines->Strings[i][j] != ' ')
 		//		return ShowMessage("3");
 	}
-	char **header[3];
+	String *header[3];
 	int count[3];
+	bool CanSelect = true;
 	for (int i = 0; i < 3; i++)
 	{
 		count[i] = Out->Lines->Strings[i].Length() / 5 + 1;
-		header[i] = new char*[count[i]];
-
-   }
-
-
-	//char **hFind, **hStart, **hEnd;
-	//int cf, cs, ce;
-
-//	header[0] = hFind;
-//	header[1] = hStart;
-//	header[2] = hEnd;
-//	count[0] = cf;
-//	count[1] = cs;
-//	count[2] = ce;
-//
-//	char &** gg = &hFind;
-//	int cf = Out->Lines->Strings[0].Length() / 5 + 1;
-//	int cs = Out->Lines->Strings[1].Length() / 5 + 1;
-//	int ce = Out->Lines->Strings[2].Length() / 5 + 1;
-//	hFind = new char*[cf];
-//	hStart = new char*[cs];
-//	hEnd = new char*[ce];
-	for (int i = 0; i < cf; i++)
-	{
-		hFind[i] = new char[4];
-
+		header[i] = new String[count[i]];
+		for (int j = 0; j < count[i]; j++)
+			header[i][j] = Out->Lines->Strings[i].SubString(j*5+1, 4);
 	}
 
-
-
-
-
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+		if (StringsIdent(List->Cells[CHEADER][i], header[0], count[0]) == false)
+			continue;
+		ListSelectCell(Sender, 0, i, CanSelect);
+		bool HasStart = false;
+		for (int Row = 0; Row < List2->RowCount; ++Row)
+		{
+			if (StringsIdent(List2->Cells[CHEADER][Row], header[1], count[1]))
+			{
+				HasStart = true;
+			}
+			if (HasStart)
+			{
+				DeleteSublist(Row, i);
+			}
+			if (StringsIdent(List2->Cells[CHEADER][Row], header[2], count[2]))
+			{
+				HasStart = false;
+			}
+      }
+	}
+	for (int i = 0; i < 3; i++)
+		delete [] header[i];
 }
 //---------------------------------------------------------------------------
 
