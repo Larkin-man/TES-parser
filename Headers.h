@@ -145,4 +145,24 @@ struct Exterior
 	int PasteOffset;
 };
 
+struct Basecell
+{
+	int* n;
+	String* Cell;
+	String* Subheader;
+	int* Size;
+	char* Type;
+	String* Data;
+};
+
+struct Coords
+{
+	float x;
+	float y;
+	float z;
+	float rx;
+	float ry;
+	float rz;
+};
+
 #endif

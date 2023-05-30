@@ -2883,22 +2883,42 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 
 void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 {
-	//basecel.LoadFromFile("BASECELLS.txt");
-	char Datab[2][13];
-	int da = 0;
+	basecel.IgnoreFirstString = true;
+	//¹	!Header!	Name	Subheader	Size	Type	Data
+	basecel.LoadFromFile("BASECELLS.txt", "i0ssicsI", &Mor.n, &Mor.Cell, &Mor.Subheader
+		, &Mor.Size, &Mor.Type, &Mor.Data, &Mor.CoordRef);
+	tolog(Mor.Cell[32]); tolog(Mor.Subheader[32]); tolog(Mor.Data[32]); tolog(Mor.Size[32]);
+	Coords.clear();
+	Coord xyz;
+	float *co[6] = {&xyz.x, &xyz.y, &xyz.z, &xyz.rx, &xyz.ry, &xyz.rz};
+
+	for (int i = 0; i < basecel.RowCount; i++)
+	{
+		Mor.CoordRef[i] = -1;
+		if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
+		{
+			String str = Mor.Data[i];
+			int p = 1;
+			for (int j = 0; j < 6; j++)
+         {
+
+			}
+		}
+	}
+
+	return;
+
 	for (std::vector<DeleteItem>::iterator el=SubDelete.begin(); el != SubDelete.end(); ++el)
 	{
 		Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset)
 			+" g="+IntToStr(el->Size));
-		memcpy(Datab[da], el->Addon, -(el->Size));
+
 //		for (int i = 0; i < 13; i++)
 //		{  Datab[da][i] = el->Addon[i];
 //			//tolog(((char)));
 //		}
-		da++;
 	}
-	tolog(Datab[0]);
-	tolog(Datab[1]);
+
 }
 //---------------------------------------------------------------------------
 void TForm1::RetMes()
@@ -2918,7 +2938,6 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 {
 	if (Out->Lines->Count < 3)
 		return ShowMessage("1");
-
 	for (int i = 0; i < 3; i++)
 	{
 		if (Out->Lines->Strings[i].Length() % 5 != 4)
@@ -2937,7 +2956,6 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 		for (int j = 0; j < count[i]; j++)
 			header[i][j] = Out->Lines->Strings[i].SubString(j*5+1, 4);
 	}
-
 	for (int i = 0; i < List->RowCount; ++i)
 	{
 		if (StringsIdent(List->Cells[CHEADER][i], header[0], count[0]) == false)
@@ -2947,16 +2965,12 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 		for (int Row = 0; Row < List2->RowCount; ++Row)
 		{
 			if (StringsIdent(List2->Cells[CHEADER][Row], header[1], count[1]))
-			{
 				HasStart = true;
-			}
 			if (HasStart)
 			{
 				DeleteSublist(Row, i);
-			}
-			if (StringsIdent(List2->Cells[CHEADER][Row], header[2], count[2]))
-			{
-				HasStart = false;
+				if (StringsIdent(List2->Cells[CHEADER][Row], header[2], count[2]))
+					HasStart = false;
 			}
       }
 	}

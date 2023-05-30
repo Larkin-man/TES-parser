@@ -408,7 +408,6 @@ public:		// User declarations
 	std::vector<long> RefEnds;
 	void PrepareFor(char SYMBS[4]);
 	bool PrepareForEdit;
-	TableLoader basecel;
 	int SearchingIn1;
 	int SearchingIn2;
 	int *SearchingIn;
@@ -416,6 +415,9 @@ public:		// User declarations
 	bool ShowAll;
 	void RetMes();
 	bool StringsIdent(String left, String* &right, int rightcount);
+	TableLoader basecel;
+	//¹	Header	Name	Subheader	Size	Type	Data
+   Basecell Mor;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
