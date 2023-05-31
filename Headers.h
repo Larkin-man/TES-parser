@@ -147,22 +147,30 @@ struct Exterior
 
 struct Basecell
 {
-	int* n;
-	String* Cell;
+	int* N;
+	String* Name;
 	String* Subheader;
 	int* Size;
 	char* Type;
 	String* Data;
+	int* CoordRef;
 };
 
-struct Coords
+struct Coord
 {
-	float x;
-	float y;
-	float z;
-	float rx;
-	float ry;
-	float rz;
+	float &x;
+	float &y;
+	float &z;
+	float &rx;
+	float &ry;
+	float &rz;
+	float all[6];
+	Coord::Coord() : x(all[0]), y(all[1]), z(all[2])
+		, rx(all[3]), ry(all[4]), rz(all[5]) {	}  '
+	Coord& operator=(Coord i)
+	{
+      return i;
+   }
 };
 
 #endif

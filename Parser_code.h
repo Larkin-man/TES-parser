@@ -116,6 +116,7 @@ __published:	// IDE-managed Components
 	TButton *MVRF;
 	TButton *Button2;
 	TButton *DeleteAllSubhead;
+	TButton *CheckCELL;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -187,6 +188,7 @@ __published:	// IDE-managed Components
 	void __fastcall MVRFClick(TObject *Sender);
 	void __fastcall Button2Click(TObject *Sender);
 	void __fastcall DeleteAllSubheadClick(TObject *Sender);
+	void __fastcall CheckCELLClick(TObject *Sender);
 
 
 
@@ -417,7 +419,26 @@ public:		// User declarations
 	bool StringsIdent(String left, String* &right, int rightcount);
 	TableLoader basecel;
 	//¹	Header	Name	Subheader	Size	Type	Data
-   Basecell Mor;
+	Basecell Mor;
+	std::vector<Coord> Coords;
+	Coord TextToFloat6(String &str)//, float** &mas)
+	{
+		Coord xyz;
+		int st = 1;
+		int coi = 0;
+    	for (int j = 2; j <= str.Length(); j++)
+		{
+			if (str[j] == ' ')
+			{
+				xyz.all[coi] = str.SubString(st, j-st).ToDouble();
+				st = j+1;
+				coi++;
+			}
+		}
+		xyz.rz = str.SubString(st, str.Length()-st+1).ToDouble();
+		return xyz;
+	}
+
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

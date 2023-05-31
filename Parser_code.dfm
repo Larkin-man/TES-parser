@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parser'
-  ClientHeight = 659
+  ClientHeight = 717
   ClientWidth = 1102
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object Form1: TForm1
   object Splitter1: TSplitter
     Left = 601
     Top = 27
-    Height = 632
+    Height = 690
     ExplicitLeft = 546
     ExplicitTop = 32
     ExplicitHeight = 547
@@ -27,7 +27,7 @@ object Form1: TForm1
   object Splitter2: TSplitter
     Left = 305
     Top = 27
-    Height = 632
+    Height = 690
     ExplicitLeft = 276
     ExplicitTop = -3
     ExplicitHeight = 498
@@ -198,7 +198,7 @@ object Form1: TForm1
     Left = 604
     Top = 27
     Width = 286
-    Height = 632
+    Height = 690
     Align = alClient
     Lines.Strings = (
       'List'
@@ -206,23 +206,21 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
-    ExplicitHeight = 634
   end
   object PanelPRO: TPanel
     Left = 890
     Top = 27
     Width = 212
-    Height = 632
+    Height = 690
     Align = alRight
     ShowCaption = False
     TabOrder = 4
-    ExplicitHeight = 634
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 3
       Top = 237
       Width = 206
-      Height = 392
+      Height = 450
       Margins.Left = 2
       Margins.Top = 1
       Margins.Right = 2
@@ -233,7 +231,6 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      ExplicitHeight = 394
       object PrepareE: TButton
         Left = 0
         Top = 0
@@ -601,6 +598,15 @@ object Form1: TForm1
         TabOrder = 31
         OnClick = DeleteAllSubheadClick
       end
+      object CheckCELL: TButton
+        Left = 0
+        Top = 425
+        Width = 89
+        Height = 25
+        Caption = 'Chec&kCELL'
+        TabOrder = 32
+        OnClick = CheckCELLClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -711,12 +717,11 @@ object Form1: TForm1
     Left = 0
     Top = 27
     Width = 305
-    Height = 632
+    Height = 690
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
-    ExplicitHeight = 634
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -821,7 +826,7 @@ object Form1: TForm1
       Left = 1
       Top = 59
       Width = 303
-      Height = 572
+      Height = 630
       Align = alClient
       BorderStyle = bsNone
       ColCount = 4
@@ -842,19 +847,17 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
-      ExplicitHeight = 574
     end
   end
   object PanelList2: TPanel
     Left = 308
     Top = 27
     Width = 293
-    Height = 632
+    Height = 690
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
-    ExplicitHeight = 634
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 1
@@ -911,7 +914,7 @@ object Form1: TForm1
       Left = 1
       Top = 19
       Width = 291
-      Height = 586
+      Height = 644
       Align = alClient
       BorderStyle = bsNone
       DefaultColWidth = 50
@@ -932,11 +935,10 @@ object Form1: TForm1
       OnEnter = List2Enter
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
-      ExplicitHeight = 588
     end
     object SubDescript: TEdit
       Left = 1
-      Top = 605
+      Top = 663
       Width = 291
       Height = 26
       Align = alBottom
@@ -950,7 +952,6 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
-      ExplicitTop = 607
     end
   end
   object OpenDialog1: TOpenDialog
@@ -1046,7 +1047,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00000110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A000C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
