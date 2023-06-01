@@ -1831,6 +1831,14 @@ void __fastcall TForm1::NTestMenuClick(TObject *Sender)
 	SPELread->Visible = true;
 	SPLMread->Visible = true;
 	Sel->Visible = true;
+	Coord xyz;
+//	xyz.x = 6666; Coords.push_back(xyz);
+//   xyz.x = 7777; Coords.push_back(xyz);
+//	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
+//	{
+//		Out->Lines->Add(FloatToStr(el->x)+"=main offset="+FloatToStr(el->y)
+//			+" g="+FloatToStr(el->rz)+" d="+FloatToStr(el->all[0]));
+//	}
 }
 //---------------------------------------------------------------------------
 
@@ -2880,47 +2888,6 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 	DeleteExtraData->Enabled = true;
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TForm1::LoadCellsClick(TObject *Sender)
-{
-	basecel.IgnoreFirstString = true;
-	//є	!Header!	Name	Subheader	Size	Type	Data
-	basecel.LoadFromFile("BASECELLS.txt", "i0ssicsI", &Mor.n, &Mor.Cell, &Mor.Subheader
-		, &Mor.Size, &Mor.Type, &Mor.Data, &Mor.CoordRef);
-	tolog(Mor.Cell[32]); tolog(Mor.Subheader[32]); tolog(Mor.Data[32]); tolog(Mor.Size[32]);
-	Coords.clear();
-	Coord xyz;
-	float *co[6] = {&xyz.x, &xyz.y, &xyz.z, &xyz.rx, &xyz.ry, &xyz.rz};
-
-	for (int i = 0; i < basecel.RowCount; i++)
-	{
-		Mor.CoordRef[i] = -1;
-		if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
-		{
-			String str = Mor.Data[i];
-			int p = 1;
-			for (int j = 0; j < 6; j++)
-         {
-
-			}
-		}
-	}
-
-	return;
-
-	for (std::vector<DeleteItem>::iterator el=SubDelete.begin(); el != SubDelete.end(); ++el)
-	{
-		Out->Lines->Add(IntToStr(el->MainLenOffset)+"=main offset="+IntToStr(el->Offset)
-			+" g="+IntToStr(el->Size));
-
-//		for (int i = 0; i < 13; i++)
-//		{  Datab[da][i] = el->Addon[i];
-//			//tolog(((char)));
-//		}
-	}
-
-}
-//---------------------------------------------------------------------------
 void TForm1::RetMes()
 {
 	ShowMessage("firs");
@@ -2976,6 +2943,113 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 	}
 	for (int i = 0; i < 3; i++)
 		delete [] header[i];
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::LoadCellsClick(TObject *Sender)
+{
+	basecel.IgnoreFirstString = true;
+	//є	!Header!	Name	Subheader	Size	Type	Data
+	basecel.LoadFromFile("BASECELLS.txt", "i0ssicsI", &Mor.N, &Mor.Name, &Mor.Subheader
+		, &Mor.Size, &Mor.Type, &Mor.Data, &Mor.CoordRef);
+	//tolog(Mor.Cell[32]); tolog(Mor.Subheader[32]); tolog(Mor.Data[32]); tolog(Mor.Size[32]);
+	Coords.clear();
+	Coords.reserve(basecel.RowCount / 5);
+	Coord curr;
+	///float *co[6] = {&xyz.x, &xyz.y, &xyz.z, &xyz.rx, &xyz.ry, &xyz.rz};
+	int CurIdx = 0;
+	int StartCell;
+	for (int i = 0; i < basecel.RowCount; i++)
+	{
+		Mor.CoordRef[i] = -1;
+		if (Mor.N[i] != CurIdx)
+		{
+			if ( (StartCell=Mor.Name[i].Pos(')')) > 0 )
+				Mor.Name[i].SetLength(StartCell);
+			CurIdx = Mor.N[i];
+		}
+		if (Mor.Size[i] == 4 & Mor.Subheader[i].Compare("FRMR") == 0)
+		{
+			curr.FRMR = Mor.Data[i].SubString(1, Mor.Data[i].Pos(' ')-1).ToInt();
+		} else
+		if (Mor.Subheader[i].Compare("NAME") == 0)
+		{
+			curr.Name = Mor.Data[i];
+		} else
+		if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
+		{
+			TextToFloat6(Mor.Data[i], curr);
+			Coords.push_back(curr);
+			Mor.CoordRef[i] = Coords.size();
+		}
+	}
+//	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
+//	{
+//		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
+//		//	+" g="+FloatToStr(el->rz));
+//	}
+	//Out->Lines->Add(FloatToStr(Coords[4].x));
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CheckCELLClick(TObject *Sender)
+{//
+	if (List->Row < 0)
+		return;
+	if (List->Cells[CHEADER][List->Row].Compare("CELL") != 0)
+		return;
+	String CellName = List->Cells[CDATA][List->Row];
+	int Idx;
+	if ((Idx=CellName.Pos(')')) > 0)
+		CellName.SetLength(Idx);
+	Idx = 0;
+	int Start = 0;
+	int End = basecel.RowCount;
+	for (int i = 0; i < basecel.RowCount; i++)
+	{
+		if (Mor.N[i] != Idx) //нашел первую строку новой €чеки
+		{
+			Idx = Mor.N[i];
+			if (Mor.Name[i].Compare(CellName) == 0) //ее название совпало
+			{
+				Start = i;
+				i++;
+				for (; i < basecel.RowCount; i++)
+					if (Mor.N[i] != Idx)
+					{
+						End = i;
+						break;
+					}
+				break;
+
+			}
+		}
+	}
+	tolog(IntToStr(Start)+" "+IntToStr(End));
+	Coord curr;
+	for (int Row = 2; Row < List2->RowCount; Row++)
+	{
+		if (List2->Cells[CHEADER][Row].Compare("FRMR") == 0)
+		{
+			curr.FRMR = List2->Cells[CDATA2][Row].SubString(1, List2->Cells[CDATA2][Row].Pos(' ')-1).ToInt();
+		} else
+		if (List2->Cells[CHEADER][Row].Compare("NAME") == 0)
+		{
+			curr.Name = List2->Cells[CDATA2][Row];
+		} else
+		if (List2->Cells[CHEADER][Row].Compare("DATA") == 0)
+		{
+			TextToFloat6(List2->Cells[CDATA2][Row], curr);
+			Coords.push_back(curr);
+			Mor.CoordRef[i] = Coords.size();
+		}
+   }
+
+//	if (Mor.Subheader[i].Compare("FRMR") == 0)
+//					{
+//						tolog(IntToStr(i)+Mor.Data[i]);
+//					}
+//					i++;
 }
 //---------------------------------------------------------------------------
 

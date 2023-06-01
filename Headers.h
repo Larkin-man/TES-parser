@@ -158,6 +158,8 @@ struct Basecell
 
 struct Coord
 {
+	int FRMR;
+	String Name;
 	float &x;
 	float &y;
 	float &z;
@@ -165,12 +167,25 @@ struct Coord
 	float &ry;
 	float &rz;
 	float all[6];
+
 	Coord::Coord() : x(all[0]), y(all[1]), z(all[2])
-		, rx(all[3]), ry(all[4]), rz(all[5]) {	}  '
-	Coord& operator=(Coord i)
+		, rx(all[3]), ry(all[4]), rz(all[5]) {	}
+   Coord(const Coord &rhs) : x(all[0]), y(all[1]), z(all[2])
+		, rx(all[3]), ry(all[4]), rz(all[5])
 	{
-      return i;
-   }
+		*this = rhs;
+	}
+
+	Coord& operator=(const Coord &rhs)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			all[i] = rhs.all[i];
+		}
+		FRMR = rhs.FRMR;
+		Name = rhs.Name;
+		return *this;
+	}
 };
 
 #endif

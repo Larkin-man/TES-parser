@@ -421,22 +421,22 @@ public:		// User declarations
 	//¹	Header	Name	Subheader	Size	Type	Data
 	Basecell Mor;
 	std::vector<Coord> Coords;
-	Coord TextToFloat6(String &str)//, float** &mas)
+	//Coord TextToFloat6(String &str)//, float** &mas)
+	void TextToFloat6(String str, Coord &curr)
 	{
-		Coord xyz;
 		int st = 1;
 		int coi = 0;
     	for (int j = 2; j <= str.Length(); j++)
 		{
 			if (str[j] == ' ')
 			{
-				xyz.all[coi] = str.SubString(st, j-st).ToDouble();
+				curr.all[coi] = str.SubString(st, j-st).ToDouble();
 				st = j+1;
 				coi++;
 			}
 		}
-		xyz.rz = str.SubString(st, str.Length()-st+1).ToDouble();
-		return xyz;
+		curr.rz = str.SubString(st, str.Length()-st+1).ToDouble();
+		//return xyz;
 	}
 
 };
