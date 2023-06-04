@@ -2983,11 +2983,11 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 			Mor.CoordRef[i] = Coords.size();
 		}
 	}
-//	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
-//	{
-//		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
-//		//	+" g="+FloatToStr(el->rz));
-//	}
+	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
+	{
+		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
+		//	+" g="+FloatToStr(el->rz));
+	}
 	//Out->Lines->Add(FloatToStr(Coords[4].x));
 }
 //---------------------------------------------------------------------------
@@ -3040,8 +3040,19 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 		if (List2->Cells[CHEADER][Row].Compare("DATA") == 0)
 		{
 			TextToFloat6(List2->Cells[CDATA2][Row], curr);
-			Coords.push_back(curr);
-			Mor.CoordRef[i] = Coords.size();
+			for (int i = Start; i < End; i++)
+			{
+				if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
+				{
+					int pos = Mor.CoordRef[i];
+					if (Coords[pos].FRMR == curr.FRMR)
+					{
+						tolog(IntToStr(curr.FRMR)+curr.Name);
+					}
+				}
+			}
+			//Coords.push_back(curr);
+			//Mor.CoordRef[i] = Coords.size();
 		}
    }
 
