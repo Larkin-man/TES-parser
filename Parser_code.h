@@ -117,6 +117,7 @@ __published:	// IDE-managed Components
 	TButton *Button2;
 	TButton *DeleteAllSubhead;
 	TButton *CheckCELL;
+	TMenuItem *NAutoFind;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -189,6 +190,9 @@ __published:	// IDE-managed Components
 	void __fastcall Button2Click(TObject *Sender);
 	void __fastcall DeleteAllSubheadClick(TObject *Sender);
 	void __fastcall CheckCELLClick(TObject *Sender);
+	void __fastcall OutDblClick(TObject *Sender);
+	void __fastcall List2MouseDown(TObject *Sender, TMouseButton Button,
+          TShiftState Shift, int X, int Y);
 
 
 

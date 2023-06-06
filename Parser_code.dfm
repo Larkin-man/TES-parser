@@ -206,6 +206,7 @@ object Form1: TForm1
       'Out')
     ScrollBars = ssVertical
     TabOrder = 3
+    OnDblClick = OutDblClick
   end
   object PanelPRO: TPanel
     Left = 890
@@ -710,7 +711,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 100
       end
     end
   end
@@ -935,6 +935,7 @@ object Form1: TForm1
       TabOrder = 1
       OnEnter = List2Enter
       OnKeyUp = List2KeyUp
+      OnMouseDown = List2MouseDown
       OnSelectCell = List2SelectCell
     end
     object SubDescript: TEdit
@@ -1008,6 +1009,11 @@ object Form1: TForm1
       AutoCheck = True
       Caption = 'Break If 0 Len'
       Checked = True
+      GroupIndex = 1
+    end
+    object NAutoFind: TMenuItem
+      AutoCheck = True
+      Caption = 'AutoFind'
       GroupIndex = 1
     end
     object N1: TMenuItem

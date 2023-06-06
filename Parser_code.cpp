@@ -617,7 +617,6 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 	if (FindIdx >= Out->Lines->Count)
 		FindIdx = -1;
 	FindIdx++;
-	FindNext->Caption = "Find "+IntToStr(FindIdx);
 	if (Out->SelLength <= 0)
 	{
 		for (; FindIdx < Out->Lines->Count; ++FindIdx)
@@ -626,6 +625,7 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 				{
 					EFinds->Text = Out->Lines->Strings[FindIdx];
 					List->Row = row;
+					FindNext->Caption = "Find "+IntToStr(FindIdx);
 					return;
 				}
 	}
@@ -635,6 +635,7 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 		if (row > -1)
 		{
 			List->Row = row;
+			FindNext->Caption = "Find "+IntToStr(FindIdx);
 			return;
 		}
 	}
@@ -2979,16 +2980,15 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 		if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
 		{
 			TextToFloat6(Mor.Data[i], curr);
-			Coords.push_back(curr);
 			Mor.CoordRef[i] = Coords.size();
+			Coords.push_back(curr);
 		}
 	}
-	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
-	{
-		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
-		//	+" g="+FloatToStr(el->rz));
-	}
-	//Out->Lines->Add(FloatToStr(Coords[4].x));
+	tolog("Total "+IntToStr(basecel.RowCount)+" loaded.");
+	tolog("FRMR count = "+IntToStr((int)Coords.size()));
+
+//	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
+//		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
 }
 //---------------------------------------------------------------------------
 
@@ -3003,7 +3003,7 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 	if ((Idx=CellName.Pos(')')) > 0)
 		CellName.SetLength(Idx);
 	Idx = 0;
-	int Start = 0;
+	int Start = -1;
 	int End = basecel.RowCount;
 	for (int i = 0; i < basecel.RowCount; i++)
 	{
@@ -3025,7 +3025,13 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 			}
 		}
 	}
-	tolog(IntToStr(Start)+" "+IntToStr(End));
+	if (Start == -1)
+	{
+		tolog("Nothing");
+		return;
+	}
+	tolog("\t"+CellName);
+	tolog("\t"+IntToStr(Start)+" do "+IntToStr(End));
 	Coord curr;
 	for (int Row = 2; Row < List2->RowCount; Row++)
 	{
@@ -3044,23 +3050,55 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 			{
 				if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
 				{
-					int pos = Mor.CoordRef[i];
-					if (Coords[pos].FRMR == curr.FRMR)
+					//int pos = Mor.CoordRef[i];
+					//Coord fff = Coords[pos];
+					if (Coords[Mor.CoordRef[i]].FRMR == curr.FRMR)
 					{
-						tolog(IntToStr(curr.FRMR)+curr.Name);
+						String str = IntToStr(curr.FRMR)+" "+curr.Name;
+						float sum = 0;
+						for (int co = 0; co < 6; co++)
+						{
+							curr.all[co] -= Coords[Mor.CoordRef[i]].all[co];
+							str += " " + FloatToStrF(curr.all[co], ffGeneral, 7, 7);
+							if (co >= 3)
+								curr.all[co] * 180 / 3.141593;
+							sum += (curr.all[co] >= 0 ? curr.all[co] : -curr.all[co]);
+						}
+						if (sum < 0.2)
+							tolog("NO CHANGED\t"+ str);
+						else if (sum <= 2.0)
+							tolog("<2.0!\t"+ str);
+						else
+							tolog(">"+FloatToStrF(sum, ffGeneral, 7, 7)+"\t"+ str);
+						if (Coords[Mor.CoordRef[i]].Name != curr.Name)
+							str = "   >>>"+Coords[Mor.CoordRef[i]].Name +" " + str;
 					}
 				}
 			}
-			//Coords.push_back(curr);
-			//Mor.CoordRef[i] = Coords.size();
 		}
-   }
+	}
+}
+//---------------------------------------------------------------------------
 
-//	if (Mor.Subheader[i].Compare("FRMR") == 0)
-//					{
-//						tolog(IntToStr(i)+Mor.Data[i]);
-//					}
-//					i++;
+void __fastcall TForm1::OutDblClick(TObject *Sender)
+{
+	if (NAutoFind->Checked == false)
+		return;
+	EFinds->Text = Out->SelText.TrimRight();
+	List2Enter(Sender);
+	FindStrClick(Sender);
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::List2MouseDown(TObject *Sender, TMouseButton Button,
+          TShiftState Shift, int X, int Y)
+{
+	if (Button == mbMiddle)
+		if (NEnableList2Delete->Checked)
+			if (List2->Row != -1)
+				for (int i = List2->Selection.Top; i <= List2->Selection.Bottom; ++i)
+					Delete2(i);
 }
 //---------------------------------------------------------------------------
 
