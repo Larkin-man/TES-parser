@@ -123,7 +123,7 @@ object Form1: TForm1
       Height = 25
       Hint = 'Find string in Data'
       Align = alLeft
-      Caption = 'Find'
+      Caption = '&Find'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
       Font.Height = -16
@@ -286,7 +286,7 @@ object Form1: TForm1
         Width = 75
         Height = 25
         Hint = 'Find text from string field. Right click is delete.'
-        Caption = 'Find next'
+        Caption = 'Fin&d next'
         ParentShowHint = False
         ShowHint = True
         TabOrder = 7
@@ -1054,7 +1054,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A001C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00200110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

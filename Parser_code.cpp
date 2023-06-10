@@ -610,39 +610,6 @@ void __fastcall TForm1::NextSClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::FindNextClick(TObject *Sender)
-{
-	String Find;
-	int row;
-	if (FindIdx >= Out->Lines->Count)
-		FindIdx = -1;
-	FindIdx++;
-	if (Out->SelLength <= 0)
-	{
-		for (; FindIdx < Out->Lines->Count; ++FindIdx)
-			if (Out->Lines->Strings[FindIdx].Length() > 0)
-				if ( (row = List->Cols[*SearchingIn]->IndexOf(Out->Lines->Strings[FindIdx])) > -1 )
-				{
-					EFinds->Text = Out->Lines->Strings[FindIdx];
-					List->Row = row;
-					FindNext->Caption = "Find "+IntToStr(FindIdx);
-					return;
-				}
-	}
-	else
-	{
-		row = List->Cols[*SearchingIn]->IndexOf(Out->SelText);
-		if (row > -1)
-		{
-			List->Row = row;
-			FindNext->Caption = "Find "+IntToStr(FindIdx);
-			return;
-		}
-	}
-	ShowMessage("No one finded.");
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::GoClick(TObject *Sender)
 {
 	int pos = ToE->Text.ToIntDef(0);
@@ -1444,12 +1411,10 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 	ShowMessage("Saved:"+PluginName+".txt");
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TForm1::FindStrClick(TObject *Sender)
+bool TForm1::Find(String find)
 {
-	String find = EFinds->Text;
-	if (find.Length() <= 0)
-		return;
+ 	if (find.Length() <= 0)
+		return false;
 	int row = 0;
 	if (SearchList->Row <= 0)
 	{
@@ -1466,42 +1431,46 @@ void __fastcall TForm1::FindStrClick(TObject *Sender)
 	for (int i = 0; i < row; ++i)
 		if (SearchList->Cols[*SearchingIn]->Strings[i].Pos(find) == 1)
 			return EndFind(i);
+	return false;
 }
 //---------------------------------------------------------------------------
-
-void Finding()
+void __fastcall TForm1::FindStrClick(TObject *Sender)
 {
-//if (Out->SelLength <= 0)
-//	{
-//		for (; FindIdx < Out->Lines->Count; ++FindIdx)
-//			if (Out->Lines->Strings[FindIdx].Length() > 0)
-//				if ( (row = List->Cols[*SearchingIn]->IndexOf(Out->Lines->Strings[FindIdx])) > -1 )
-//				{
-//					EFinds->Text = Out->Lines->Strings[FindIdx];
-//					List->Row = row;
-//					return;
-//				}
-//	}
-//	else
-//	{
-//		row = List->Cols[*SearchingIn]->IndexOf(Out->SelText);
-//		if (row > -1)
-//		{
-//			List->Row = row;
-//			return;
-//		}
-//	}
-//	ShowMessage("No one finded.");
+	Find(EFinds->Text);
 }
-
 //---------------------------------------------------------------------------
-void TForm1::EndFind(int Row)
+
+void __fastcall TForm1::FindNextClick(TObject *Sender)
+{
+	if (Out->SelLength > 0)
+	{
+		ListEnter(Sender);
+		if (Find(Out->SelText) == false)
+			Out->SelLength = 0;
+		return;
+   }
+	if (FindIdx >= Out->Lines->Count)
+		FindIdx = -1;
+	FindIdx++;
+	for (; FindIdx < Out->Lines->Count; ++FindIdx)
+		if (Out->Lines->Strings[FindIdx].Length() > 0)
+			if (Find(Out->Lines->Strings[FindIdx]))
+			{
+				EFinds->Text = Out->Lines->Strings[FindIdx];
+				FindNext->Caption = "Fin&d "+IntToStr(FindIdx);
+				return;
+			}
+	tolog("No one fonded");
+}
+//---------------------------------------------------------------------------
+bool TForm1::EndFind(int Row)
 {
 	SearchList->Row = Row;
 	if (EFinds->Text.Compare(List->Cells[*SearchingIn][Row]) == 0)
 		EFinds->Font->Color = clBlack;
 	else
 		EFinds->Font->Color = clBlue;
+	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -2699,7 +2668,7 @@ void __fastcall TForm1::List2Enter(TObject *Sender)
 
 void __fastcall TForm1::ListEnter(TObject *Sender)
 {
- 	if (FindStr->ImageIndex == 4)
+	if (FindStr->ImageIndex == 4)
 		FindStr->ImageIndex = 2;
 	SearchingIn = &SearchingIn1;
 	SearchList = List;
@@ -2993,7 +2962,7 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::CheckCELLClick(TObject *Sender)
-{//
+{
 	if (List->Row < 0)
 		return;
 	if (List->Cells[CHEADER][List->Row].Compare("CELL") != 0)
@@ -3065,13 +3034,14 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 							sum += (curr.all[co] >= 0 ? curr.all[co] : -curr.all[co]);
 						}
 						if (sum < 0.2)
-							tolog("NO CHANGED\t"+ str);
+							str = "NO CHANGED\t"+ str;
 						else if (sum <= 2.0)
-							tolog("<2.0!\t"+ str);
+							str = "<2.0!\t"+ str;
 						else
-							tolog(">"+FloatToStrF(sum, ffGeneral, 7, 7)+"\t"+ str);
+							str = ">"+FloatToStrF(sum, ffGeneral, 7, 7)+"\t"+ str;
 						if (Coords[Mor.CoordRef[i]].Name != curr.Name)
 							str = "   >>>"+Coords[Mor.CoordRef[i]].Name +" " + str;
+						tolog(str);
 					}
 				}
 			}

@@ -366,7 +366,8 @@ public:		// User declarations
 	int GetOkrugl(int x);
 	float Check999(float x);
 	bool Opening;
-	void EndFind(int Row);
+	bool Find(String find);
+	bool EndFind(int Row);
 	String SelMainHedr;
 	bool BlockList2Sel;
 	int Indextt;
