@@ -167,6 +167,7 @@ struct Coord
 	float &ry;
 	float &rz;
 	float all[6];
+	String Dodt;
 
 	Coord::Coord() : x(all[0]), y(all[1]), z(all[2])
 		, rx(all[3]), ry(all[4]), rz(all[5]) {	}

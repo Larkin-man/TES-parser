@@ -1835,15 +1835,11 @@ void __fastcall TForm1::DelTrashClick(TObject *Sender)
 {
 	bool Can = false;
 	for (int i = 0; i < List->RowCount; ++i)
-		if (List->Cells[0][i] == "CELL")
+		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
 		{
 			ListSelectCell(Sender, 0, i, Can);
-			for (int j = 0; j < List2->RowCount; ++j)
 			if (List2->RowCount <= 4) //todo: to optimal
-			{
          	DeleteRecord(i);
-				break;
-			}
 		}
 	List->Row = 0;
 }
@@ -2938,19 +2934,30 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 				Mor.Name[i].SetLength(StartCell);
 			CurIdx = Mor.N[i];
 		}
-		if (Mor.Size[i] == 4 & Mor.Subheader[i].Compare("FRMR") == 0)
+		if (Mor.Size[i] == 4 && Mor.Subheader[i].Compare("FRMR") == 0)
 		{
 			curr.FRMR = Mor.Data[i].SubString(1, Mor.Data[i].Pos(' ')-1).ToInt();
+			if (curr.Dodt.Length() > 0)
+				curr.Dodt.SetLength(0);
 		} else
 		if (Mor.Subheader[i].Compare("NAME") == 0)
 		{
 			curr.Name = Mor.Data[i];
 		} else
-		if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
+		if (Mor.Size[i] == 24 && Mor.Subheader[i].Compare("DATA") == 0)
 		{
 			TextToFloat6(Mor.Data[i], curr);
 			Mor.CoordRef[i] = Coords.size();
 			Coords.push_back(curr);
+		} else
+		if (Mor.Size[i] == 24 && Mor.Subheader[i].Compare("DODT") == 0)
+		{
+			curr.Dodt = Mor.Data[i];
+			if (Mor.Subheader[i+1] == "DNAM")
+			{
+				i++;
+				curr.Dodt = curr.Dodt + Mor.Data[i];
+			}
 		}
 	}
 	tolog("Total "+IntToStr(basecel.RowCount)+" loaded.");
@@ -3007,6 +3014,8 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 		if (List2->Cells[CHEADER][Row].Compare("FRMR") == 0)
 		{
 			curr.FRMR = List2->Cells[CDATA2][Row].SubString(1, List2->Cells[CDATA2][Row].Pos(' ')-1).ToInt();
+			if (curr.Dodt.Length() > 0)
+				curr.Dodt.SetLength(0);
 		} else
 		if (List2->Cells[CHEADER][Row].Compare("NAME") == 0)
 		{
@@ -3028,22 +3037,37 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 						for (int co = 0; co < 6; co++)
 						{
 							curr.all[co] -= Coords[Mor.CoordRef[i]].all[co];
-							str += " " + FloatToStrF(curr.all[co], ffGeneral, 7, 7);
+							str += " " + FloatToStrF(curr.all[co], ffGeneral, 6, 6);
 							if (co >= 3)
 								curr.all[co] * 180 / 3.141593;
 							sum += (curr.all[co] >= 0 ? curr.all[co] : -curr.all[co]);
 						}
+
+						if (curr.Dodt.Length() > 0 && Coords[Mor.CoordRef[i]].Dodt != curr.Dodt)
+						{
+							str += Coords[Mor.CoordRef[i]].Dodt;
+							str += curr.Dodt;
+                  }
 						if (sum < 0.2)
 							str = "NO CHANGED\t"+ str;
 						else if (sum <= 2.0)
 							str = "<2.0!\t"+ str;
 						else
-							str = ">"+FloatToStrF(sum, ffGeneral, 7, 7)+"\t"+ str;
+							str = ">"+FloatToStrF(sum, ffGeneral, 6, 6)+"\t"+ str;
 						if (Coords[Mor.CoordRef[i]].Name != curr.Name)
 							str = "   >>>"+Coords[Mor.CoordRef[i]].Name +" " + str;
 						tolog(str);
 					}
 				}
+			}
+		} else
+		if (List2->Cells[CHEADER][Row].Compare("DODT") == 0)
+		{
+			curr.Dodt = List2->Cells[CDATA2][Row];
+			if (List2->Cells[CHEADER][Row+1].Compare("DNAM"))
+			{
+				Row++;
+				curr.Dodt = curr.Dodt + List2->Cells[CDATA2][Row];
 			}
 		}
 	}
