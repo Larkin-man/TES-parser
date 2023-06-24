@@ -892,10 +892,11 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	unsigned char *st = NULL;
 	//void *st = NULL;
 	DebugL2c = 0;
-	if (ARow >= 0)
+	if (ARow < 0)
+		return;
+	if (NShowData->Checked)
 	{
 		//TYPES TABLE найдем HEAD от и до
-
 		HEAD = List->Cells[CHEADER][ARow];
 		if (Tes3==false && HEAD=="NPC_")
 		{
@@ -911,48 +912,52 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 				m2 = t;
 			} else if (m1 != -1)
 				break;
-		//--------------
-		Indextt = ARow;
-		ToE->Text = List->Cells[CSTART][ARow];
-		BlockList2Sel = true;
-		//GoClick(Sender);
-		//Сбросить номер строки
-		if (SelMainHedr.Compare(HEAD) != 0)
+	}
+	//--------------
+	Indextt = ARow;
+	ToE->Text = List->Cells[CSTART][ARow];
+	BlockList2Sel = true;
+	//GoClick(Sender);
+	//Сбросить номер строки
+	if (SelMainHedr.Compare(HEAD) != 0)
+	{
+		List2->Row = 0;
+		SelMainHedr = HEAD;
+	}
+	//long end = ARow + 1 >= List->RowCount ? EoF : List->Cells[CSTART][ARow+1].ToInt();
+	long end;
+	if (List->Cells[CSIZE][ARow] == "-X-")
+	{
+		if (ARow < List->RowCount -1)
+			end = List->Cells[CSTART][ARow+1].ToInt();
+		if (end < Offset)
+			end = Offset + 4;
+	}
+	else
+		end = Offset + List->Cells[CSIZE][ARow].ToInt() + 4 + MAINLENSIZE;
+	if (end > EoF)
+		end = EoF;
+	//Out->Lines->Append(end);
+	//List2->Cols->BeginUpdate();
+	fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
+	//Out->Lines->Append(ftell(file));
+	long Pos = ftell(file);
+	int Row = 0;
+	while (Pos < end)
+	{
+		if (List2->RowCount < Row+1)
+			List2->RowCount++;
+		List2->Cells[CSTART][Row] = Pos;
+		fread(Name, 4, 1, file);
+		fread(&Univ.Length, SLENSIZE, 1, file);
+		List2->Cells[CHEADER][Row] = Name;
+		List2->Cells[CSIZE][Row] = Univ.Length;
+		List2->Cells[CDATA2][Row] = "";
+		List2->Cells[CTYPE][Row] = "";
+		Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
+
+		if (NShowData->Checked)
 		{
-			List2->Row = 0;
-			SelMainHedr = HEAD;
-		}
-		//long end = ARow + 1 >= List->RowCount ? EoF : List->Cells[CSTART][ARow+1].ToInt();
-		long end;
-		if (List->Cells[CSIZE][ARow] == "-X-")
-		{
-			if (ARow < List->RowCount -1)
-				end = List->Cells[CSTART][ARow+1].ToInt();
-			if (end < Offset)
-				end = Offset + 4;
-		}
-		else
-			end = Offset + List->Cells[CSIZE][ARow].ToInt() + 4 + MAINLENSIZE;
-		if (end > EoF)
-			end = EoF;
-		//Out->Lines->Append(end);
-		//List2->Cols->BeginUpdate();
-		fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
-		//Out->Lines->Append(ftell(file));
-		long Pos = ftell(file);
-		int Row = 0;
-		while (Pos < end)
-		{
-			if (List2->RowCount < Row+1)
-				List2->RowCount++;
-			List2->Cells[CSTART][Row] = Pos;
-			fread(Name, 4, 1, file);
-			fread(&Univ.Length, SLENSIZE, 1, file);
-			List2->Cells[CHEADER][Row] = Name;
-			List2->Cells[CSIZE][Row] = Univ.Length;
-			List2->Cells[CDATA2][Row] = "";
-			List2->Cells[CTYPE][Row] = "";
-			Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
 			st = NULL;
 			InterpretStr = "";
 			//1 сначала ищем в TYPES.txt
@@ -1069,24 +1074,24 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 					InterpretStr += IntToStr(*(byte*)&st[i])+" ";
 				List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
 			}
-
-			fseek(file, Univ.Length, SEEK_CUR);
-			Pos = ftell(file);
-			Row++;
-		}
-		List2->RowCount = Row;
-		//fseek(file, ToE->Text.ToIntDef(0) - ftell(file), SEEK_CUR);
-		BlockList2Sel = false;
-		if (CheckCoord->Tag == 1)
-		{
-			int p = List->Cells[CDATA][ARow].Pos(')');
-			if (p > 0)
-				CurrCell = List->Cells[CDATA][ARow].SubString(1,p);
-			else
-				CurrCell = List->Cells[CDATA][ARow];
-			Form1->Caption = CurrCell;
-		}
+		} //show data
+		fseek(file, Univ.Length, SEEK_CUR);
+		Pos = ftell(file);
+		Row++;
 	}
+	List2->RowCount = Row;
+	//fseek(file, ToE->Text.ToIntDef(0) - ftell(file), SEEK_CUR);
+	BlockList2Sel = false;
+	if (CheckCoord->Tag == 1)
+	{
+		int p = List->Cells[CDATA][ARow].Pos(')');
+		if (p > 0)
+			CurrCell = List->Cells[CDATA][ARow].SubString(1,p);
+		else
+			CurrCell = List->Cells[CDATA][ARow];
+		Form1->Caption = CurrCell;
+	}
+	//if Arow daje ne 0+
 	//Out->Lines->Append(DebugL2c);
 	//if (Check&&Expo)
 	//	FindNAMEClick(Sender);
@@ -1347,6 +1352,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 	if (type == ID_NO) //Ровная таблица
 	{
 		int num = 1;
+		int count = 1;
 		if (expOff == ID_YES)
 			if (expSize == ID_YES)
 				Export->Append("№\tHeader\tName\tSubheader\tOffset\tSize\tType\tData");
@@ -1373,6 +1379,14 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 					else
 						Export->Append(Head + List2->Cells[0][j]+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
 			num++;
+			count++;
+			if (count >= 250)
+			{
+				Export->SaveToFile(PluginName+IntToStr(i-1)+".txt");
+				Export->Clear();
+				tolog("Saved:"+PluginName+IntToStr(i-1)+".txt");
+				count = 1;
+			}
 		}
 	}
 	else //в строку subheaders
@@ -1448,7 +1462,8 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 		if (Find(Out->SelText) == false)
 			Out->SelLength = 0;
 		return;
-   }
+	}
+	ListEnter(Sender);
 	if (FindIdx >= Out->Lines->Count)
 		FindIdx = -1;
 	FindIdx++;
@@ -1460,7 +1475,6 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 				FindNext->Caption = "Fin&d "+IntToStr(FindIdx);
 				return;
 			}
-	tolog("No one fonded");
 }
 //---------------------------------------------------------------------------
 bool TForm1::EndFind(int Row)
@@ -1834,6 +1848,8 @@ void __fastcall TForm1::NClearOutClick(TObject *Sender)
 void __fastcall TForm1::DelTrashClick(TObject *Sender)
 {
 	bool Can = false;
+	ShowAll = false;
+	NShowData = false;
 	for (int i = 0; i < List->RowCount; ++i)
 		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
 		{
@@ -1841,6 +1857,8 @@ void __fastcall TForm1::DelTrashClick(TObject *Sender)
 			if (List2->RowCount <= 4) //todo: to optimal
          	DeleteRecord(i);
 		}
+	ShowAll = true;
+	NShowData = true;
 	List->Row = 0;
 }
 //---------------------------------------------------------------------------
@@ -2915,6 +2933,7 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 {
 	basecel.IgnoreFirstString = true;
+	basecel.IgnoreDelimitersPack = false;
 	//№	!Header!	Name	Subheader	Size	Type	Data
 	basecel.LoadFromFile("BASECELLS.txt", "i0ssicsI", &Mor.N, &Mor.Name, &Mor.Subheader
 		, &Mor.Size, &Mor.Type, &Mor.Data, &Mor.CoordRef);
@@ -3042,11 +3061,10 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 								curr.all[co] * 180 / 3.141593;
 							sum += (curr.all[co] >= 0 ? curr.all[co] : -curr.all[co]);
 						}
-
 						if (curr.Dodt.Length() > 0 && Coords[Mor.CoordRef[i]].Dodt != curr.Dodt)
 						{
-							str += Coords[Mor.CoordRef[i]].Dodt;
-							str += curr.Dodt;
+							str += "\t"+Coords[Mor.CoordRef[i]].Dodt;
+							str += ";"+curr.Dodt;
                   }
 						if (sum < 0.2)
 							str = "NO CHANGED\t"+ str;
@@ -3064,7 +3082,7 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 		if (List2->Cells[CHEADER][Row].Compare("DODT") == 0)
 		{
 			curr.Dodt = List2->Cells[CDATA2][Row];
-			if (List2->Cells[CHEADER][Row+1].Compare("DNAM"))
+			if (List2->Cells[CHEADER][Row+1].Compare("DNAM") == 0)
 			{
 				Row++;
 				curr.Dodt = curr.Dodt + List2->Cells[CDATA2][Row];
@@ -3095,4 +3113,5 @@ void __fastcall TForm1::List2MouseDown(TObject *Sender, TMouseButton Button,
 					Delete2(i);
 }
 //---------------------------------------------------------------------------
+
 
