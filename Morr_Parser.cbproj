@@ -3,7 +3,7 @@
         <ProjectGuid>{CC42461F-CDCF-4EFA-84D0-8E68975523B8}</ProjectGuid>
         <ProjectVersion>15.1</ProjectVersion>
         <MainSource>Morr_Parser.cpp</MainSource>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
@@ -59,7 +59,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <Icon_MainIcon>Morr_Parser_Icon.ico</Icon_MainIcon>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.4.1.158;InternalName=TES parser;LegalCopyright=Larkin;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.4;Comments=</VerInfo_Keys>
         <VerInfo_MinorVer>4</VerInfo_MinorVer>
@@ -70,7 +69,6 @@
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <LinkPackageStatics>vcl.lib;rtl.lib</LinkPackageStatics>
         <AllPackageLibs>vcl.lib;rtl.lib</AllPackageLibs>
-        <OutputExt>exe</OutputExt>
         <PackageImports>vclx.bpi;vcl.bpi;dbrtl.bpi;Rave76VCL.bpi;bdertl.bpi;rtl.bpi;vclactnband.bpi;xmlrtl.bpi;vclribbon.bpi;bcbie.bpi;vcldb.bpi;vcldbx.bpi;dsnap.bpi;dsnapcon.bpi;vclib.bpi;ibxpress.bpi;adortl.bpi;IndyCore.bpi;IndySystem.bpi;vclie.bpi;webdsnap.bpi;inet.bpi;inetdbbde.bpi;inetdbxpress.bpi;soaprtl.bpi;dbexpress.bpi;DbxCommonDriver.bpi;DataSnapIndy10ServerTransport.bpi;DataSnapProviderClient.bpi;DataSnapServer.bpi;DbxClientDriver.bpi;DBXInterBaseDriver.bpi;DBXMySQLDriver.bpi;dbxcds.bpi;DBXSybaseASEDriver.bpi;DBXSybaseASADriver.bpi;DBXOracleDriver.bpi;DBXMSSQLDriver.bpi;DBXInformixDriver.bpi;DBXDb2Driver.bpi;IndyProtocols.bpi;TeeUI.bpi;TeeDB.bpi;Tee.bpi;intrawebdb_100_120.bpi;Intraweb_100_120.bpi;websnap.bpi;bcbsmp.bpi;$(PackageImports)</PackageImports>
         <Multithreaded>true</Multithreaded>
         <ProjectType>CppVCLApplication</ProjectType>
@@ -81,7 +79,7 @@
         <ILINK_DisplayTime>true</ILINK_DisplayTime>
         <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
         <IncludePath>Release\;Release;$(CG_BOOST_ROOT)\boost\tr1\tr1;$(BDS)\include;$(CG_BOOST_ROOT);$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>Release\;Release;Парсер;$(BDS)\lib\obj;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <ILINK_LibraryPath>Release\;Release;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <BCC_wpar>false</BCC_wpar>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -131,10 +129,14 @@
         <BCC_DisableOptimizations>false</BCC_DisableOptimizations>
         <BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
         <IntermediateOutputDir>Release</IntermediateOutputDir>
-        <ILINK_LibraryPath>$(BDS)\lib\release;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <TASM_Debugging>None</TASM_Debugging>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <VerInfo_Release>0</VerInfo_Release>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Build>3</VerInfo_Build>
+        <VerInfo_MinorVer>0</VerInfo_MinorVer>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <Defines>NDEBUG;$(Defines)</Defines>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
@@ -188,7 +190,7 @@
                     <VersionInfo Name="MajorVer">1</VersionInfo>
                     <VersionInfo Name="MinorVer">3</VersionInfo>
                     <VersionInfo Name="Release">1</VersionInfo>
-                    <VersionInfo Name="Build">158</VersionInfo>
+                    <VersionInfo Name="Build">161</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -200,7 +202,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName"/>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">1.3.1.158</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">1.3.1.161</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName">TES parseer</VersionInfoKeys>
                     <VersionInfoKeys Name="LegalCopyright">Larkin</VersionInfoKeys>
                     <VersionInfoKeys Name="LegalTrademarks"/>
@@ -208,6 +210,29 @@
                     <VersionInfoKeys Name="ProductName"/>
                     <VersionInfoKeys Name="ProductVersion">1.3</VersionInfoKeys>
                     <VersionInfoKeys Name="Comments"/>
+                    <VersionInfoKeys Name="CFBundleName"/>
+                    <VersionInfoKeys Name="CFBundleDisplayName"/>
+                    <VersionInfoKeys Name="UIDeviceFamily"/>
+                    <VersionInfoKeys Name="CFBundleIdentifier"/>
+                    <VersionInfoKeys Name="CFBundleVersion"/>
+                    <VersionInfoKeys Name="CFBundlePackageType"/>
+                    <VersionInfoKeys Name="CFBundleSignature"/>
+                    <VersionInfoKeys Name="CFBundleAllowMixedLocalizations"/>
+                    <VersionInfoKeys Name="UISupportedInterfaceOrientations"/>
+                    <VersionInfoKeys Name="CFBundleExecutable"/>
+                    <VersionInfoKeys Name="CFBundleResourceSpecification"/>
+                    <VersionInfoKeys Name="LSRequiresIPhoneOS"/>
+                    <VersionInfoKeys Name="CFBundleInfoDictionaryVersion"/>
+                    <VersionInfoKeys Name="CFBundleDevelopmentRegion"/>
+                    <VersionInfoKeys Name="package"/>
+                    <VersionInfoKeys Name="label"/>
+                    <VersionInfoKeys Name="versionCode"/>
+                    <VersionInfoKeys Name="versionName"/>
+                    <VersionInfoKeys Name="persistent"/>
+                    <VersionInfoKeys Name="restoreAnyVersion"/>
+                    <VersionInfoKeys Name="installLocation"/>
+                    <VersionInfoKeys Name="largeHeap"/>
+                    <VersionInfoKeys Name="theme"/>
                 </VersionInfoKeys>
                 <Debugging>
                     <Debugging Name="DebugSourceDirs"/>

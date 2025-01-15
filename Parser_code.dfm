@@ -342,15 +342,6 @@ object Form1: TForm1
         TabOrder = 23
         OnClick = CheckConflictsClick
       end
-      object Button2: TButton
-        Left = 113
-        Top = 125
-        Width = 56
-        Height = 25
-        Caption = 'Butt'
-        TabOrder = 30
-        OnClick = Button2Click
-      end
       object FindinList2: TButton
         Left = 0
         Top = 150
@@ -609,6 +600,15 @@ object Form1: TForm1
         TabOrder = 32
         OnClick = CheckCELLClick
       end
+      object Button2: TButton
+        Left = 89
+        Top = 425
+        Width = 56
+        Height = 25
+        Caption = '&Zutt'
+        TabOrder = 30
+        OnClick = Button2Click
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -712,6 +712,7 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
+        ExplicitWidth = 100
       end
     end
   end
@@ -1055,7 +1056,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A002C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A003C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

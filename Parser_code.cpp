@@ -894,6 +894,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	DebugL2c = 0;
 	if (ARow < 0)
 		return;
+	int m1=-1, m2=-2; //определим начало и конец дл€ оптимизации
 	if (NShowData->Checked)
 	{
 		//TYPES TABLE найдем HEAD от и до
@@ -903,7 +904,6 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 			List2->RowCount = 0;
 			return;
 		}
-		int m1=-1, m2=-2; //определим начало и конец дл€ оптимизации
 		for (int t = 0; t < types.RowCount; ++t)
 			if (HEAD.Compare(THeader[t]) == 0)
 			{
@@ -1849,16 +1849,18 @@ void __fastcall TForm1::DelTrashClick(TObject *Sender)
 {
 	bool Can = false;
 	ShowAll = false;
-	NShowData = false;
+	NShowData->Checked = false;
 	for (int i = 0; i < List->RowCount; ++i)
 		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
 		{
 			ListSelectCell(Sender, 0, i, Can);
 			if (List2->RowCount <= 4) //todo: to optimal
-         	DeleteRecord(i);
+				DeleteRecord(i);
+			else if (List2->RowCount == 5)
+				tolog("CELL 5 string:"+List->Cells[CDATA][i]);
 		}
 	ShowAll = true;
-	NShowData = true;
+	NShowData->Checked = true;
 	List->Row = 0;
 }
 //---------------------------------------------------------------------------
@@ -2835,43 +2837,6 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::Button2Click(TObject *Sender)
-{
-	char Data[13] = "NAMAklmnPAST\0";
-	char Datab[2][13];
-	//Data[0] = "NAMY";
-	((int*)Data)[1] = 5;
-	//Data[8] = "PAST\0";
-	//DeleteItem(int m, int ml, int o, int s)
-	DeleteItem ea(8776, 254, 9000, -13);
-
-	byte *store = new byte[13];
-	memcpy(store, Data, 13);
-	ea.Addon = store;
-	SubDelete.push_back(ea);
-
-	ea.Offset = 9042;
-	Data[3] = 'B'; Data[10] = 'N';
-	byte *store2 = new byte[13];
-	memcpy(store2, Data, 13);
-	ea.Addon = store2;
-	SubDelete.push_back(ea);
-
-	ea.Offset = 9000;
-	Data[3] = 'C'; Data[10] = 'M';
-	byte *store3 = new byte[13];
-	memcpy(store3, Data, 13);
-	ea.Addon = store3;
-	SubDelete.push_back(ea);
-
-	DeletedSize += -13;
-	LDele->Visible = true;
-	Save2->Enabled = true;
-	Save2->Visible = true;
-	Save->Visible = false;
-	DeleteExtraData->Enabled = true;
-}
-//---------------------------------------------------------------------------
 void TForm1::RetMes()
 {
 	ShowMessage("firs");
@@ -3064,7 +3029,7 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 						if (curr.Dodt.Length() > 0 && Coords[Mor.CoordRef[i]].Dodt != curr.Dodt)
 						{
 							str += "\t"+Coords[Mor.CoordRef[i]].Dodt;
-							str += ";"+curr.Dodt;
+							str += ";\t\t"+curr.Dodt;
                   }
 						if (sum < 0.2)
 							str = "NO CHANGED\t"+ str;
@@ -3114,4 +3079,19 @@ void __fastcall TForm1::List2MouseDown(TObject *Sender, TMouseButton Button,
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TForm1::Button2Click(TObject *Sender)
+{
+	if (List2->Row != -1)
+	{
+		if (List2->Cells[CHEADER][List2->Row].Compare("FRMR") != 0)
+			return ShowMessage("accuracy");
+		for (int i = List2->Selection.Top; i <= List2->RowCount; ++i)
+		{
+			Delete2(i);
+			if (List2->Cells[CHEADER][i].Compare("DATA") == 0)
+				return;
+		}
+	}
+}
+//---------------------------------------------------------------------------
 
