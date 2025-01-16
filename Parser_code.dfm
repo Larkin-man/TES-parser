@@ -609,6 +609,15 @@ object Form1: TForm1
         TabOrder = 30
         OnClick = Button2Click
       end
+      object Rotate: TButton
+        Left = 0
+        Top = 450
+        Width = 75
+        Height = 25
+        Caption = 'Rotate'
+        TabOrder = 33
+        OnClick = RotateClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -712,7 +721,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 100
       end
     end
   end
@@ -1056,7 +1064,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A003C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00400110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

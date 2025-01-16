@@ -80,6 +80,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	NSearchinDataClick(NULL);
 	ListEnter(NULL);
 	ShowAll = true;
+	what = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -385,7 +386,7 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 	Expo->SaveToFile("Expo.txt");
 	delete Expo;
 	delete Export;
-
+   delete what;
 }
 //---------------------------------------------------------------------------
 
@@ -2330,6 +2331,7 @@ void __fastcall TForm1::NRewritesClick(TObject *Sender)
 {
 	PushCoord->Visible = NRewrites->Checked;
 	MVRF->Visible = NRewrites->Checked;
+	Rotate->Visible = NRewrites->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -3091,6 +3093,124 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			if (List2->Cells[CHEADER][i].Compare("DATA") == 0)
 				return;
 		}
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::RotateClick(TObject *Sender)
+{
+	if (what == NULL)
+	{
+		what = new TStringList;
+		what->LoadFromFile("torotate.txt");
+		what->Sorted = true;
+	}
+   bool finded = false;
+	float Data[3];
+	float &x = Data[0];
+	float &y = Data[1];
+	float &z = Data[2];
+	int Length;
+	bool CanSel = false;
+   if (List->Row != -1)
+		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+		{
+			ListSelectCell(Sender, 0, i, CanSel);
+			int count = 0;
+
+	for (int j = 4; j < List2->RowCount; ++j)
+   	if (finded)
+      {
+			if (List2->Cells[CHEADER][j] == "DATA")
+         {
+            finded = false;
+            int Offset = List2->Cells[CSTART][j].ToInt();
+            fseek(file, Offset + 4, SEEK_SET);
+				int Length;
+				fread(&Length, 4, 1, file);
+				fseek(file, 12, SEEK_CUR);
+				fread(Data, 4, 3, file);
+				x = x * 180.0 / 3.14159265358979;
+				y = y * 180.0 / 3.14159265358979;
+				z = z * 180.0 / 3.14159265358979;
+				if (equ(x,0) && equ(y,180)) //flat
+				{
+					y=0;
+					z=180-z;
+				}
+				else if (equ(x,180) && equ(y,0)) //flat
+				{
+					x=0;
+					z=180-z;
+				}
+				else if (equ(y,180) && (equ(z,0)||equ(z,180)) )
+				{
+					x+=180;
+				}
+				else if (equ(x,90) && equ(y,270)&& equ(z,0))
+				{
+					x=270;
+					y=90;
+				}
+				else if (equ(y,0) && equ(z,180))
+				{
+					x+=180;
+				}
+				else if (equ(x,270) && equ(y,270) && equ(z,180))
+				{
+					x=0;
+					y=90;
+					z=90;
+				}
+				else if (equ(x,270) && equ(y,90) && equ(z,180))
+				{
+					y+=180;
+					z+=180;
+				}
+				else if (equ(x,0) && ( equ(z,90)||equ(z,270)) )
+				{
+					y+=180;
+				}
+				else if (equ(x,270) && equ(y,180) && equ(z,180))
+				{
+					y+=180;
+					z+=180;
+				}
+				else if ( (equ(x,180)||equ(y,0)) && equ(z,180))
+				{
+					x+=180;
+				}
+				else if (equ(x,90) && equ(y,90) && equ(z,0))
+				{
+					x=0;
+					y=270;
+					z=270;
+				}
+				else
+					y+=180;
+				if (x >= 360) x-=360;
+				if (y >= 360) y-=360;
+				if (z >= 360) z-=360;
+				if (x >= 359) x=0;
+				if (y >= 359) y=0;
+				if (z >= 359) z=0;
+				x = x * 3.14159265358979 / 180.0;
+				y = y * 3.14159265358979 / 180.0;
+				z = z * 3.14159265358979 / 180.0;
+				fseek(file, -12, SEEK_CUR);
+				fwrite(Data, sizeof(float), 3, file);
+				count++;
+				//Sadrith Mora, Telvanni Council House, Entry
+			}
+      }
+      else
+		{
+			if (List2->Cells[CHEADER][j] == "NAME")
+         	if (what->IndexOf(List2->Cells[CDATA2][j]) != -1)
+               finded = true;
+		}
+	if (count > 0)
+		tolog(IntToStr(count)+List->Cells[CDATA][i]);
 	}
 }
 //---------------------------------------------------------------------------

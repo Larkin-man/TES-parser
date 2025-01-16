@@ -445,6 +445,11 @@ public:		// User declarations
 		curr.rz = str.SubString(st, str.Length()-st+1).ToDouble();
 		//return xyz;
 	}
+	TStringList *what;
+	bool equ(float &value, float rhs)
+	{
+		return (value > rhs-3.0 && value < rhs+3.0);
+	}
 
 };
 //---------------------------------------------------------------------------
