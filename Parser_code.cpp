@@ -915,7 +915,6 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 				break;
 	}
 	//--------------
-	Indextt = ARow;
 	ToE->Text = List->Cells[CSTART][ARow];
 	BlockList2Sel = true;
 	//GoClick(Sender);
@@ -2081,76 +2080,82 @@ void __fastcall TForm1::NextTagContextPopup(TObject *Sender, TPoint &MousePos, b
 
 void __fastcall TForm1::CheckCoordClick(TObject *Sender)
 {
-	if (List->Cells[CHEADER][Indextt] != "CELL")
-		return;
 	bool Can = false;
 	int Param[3];
 	bool Ext;
 	float max, min;
-	int maxi=-1, mini;
+	int maxi, mini;
 	String maxs, mins;
 	int isx, isy;
 	float Data[6];
-	Out->Lines->Add("-------"+List->Cells[CDATA][Indextt]);
-	for (int j = 0; j < List2->RowCount; ++j)
-		if (List2->Cells[CHEADER][j] == "DATA")
-		{
-			int Offset = List2->Cells[CSTART][j].ToInt();
-			fseek(file, Offset + 4, SEEK_SET);
-			int Length;
-			fread(&Length, 4, 1, file);
-			if (List2->Cells[CSIZE][j].ToInt() == 12) //locat
+	bool CanSel = false;
+	if (List->Row <= -1)
+		return;
+	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+	{
+		if (List->Cells[CHEADER][i] != "CELL")
+			continue;
+		maxi = -1;
+		ListSelectCell(Sender, 0, i, CanSel);
+		Out->Lines->Add("-------"+List->Cells[CDATA][i]);
+		for (int j = 0; j < List2->RowCount; ++j)
+			if (List2->Cells[CHEADER][j] == "DATA")
 			{
-				fread(Param, 4, 3, file);
-				pbit = reinterpret_cast<BITS*> (&(Param[0]));
-				if ((pbit) && (pbit->b1 == 1)) //interior
-					Ext = false;
+				int Offset = List2->Cells[CSTART][j].ToInt();
+				fseek(file, Offset + 4, SEEK_SET);
+				int Length;
+				fread(&Length, 4, 1, file);
+				if (List2->Cells[CSIZE][j].ToInt() == 12) //location
+				{
+					fread(Param, 4, 3, file);
+					pbit = reinterpret_cast<BITS*> (&(Param[0]));
+					if ((pbit) && (pbit->b1 == 1)) //interior
+						Ext = false;
+					else
+						Ext = true;
+					min = INT_MAX;
+					max = INT_MIN;
+				} //coord
 				else
-					Ext = true;
-				min = INT_MAX;//FLT_MAX;
-				max = INT_MIN;//FLT_MIN;
-				//if (Ext)
-				//	Out->Lines->Add(IntToStr(Param[1])+" "+IntToStr(Param[2]));
-			} //coord
-			else
-			{
-				fread(Data, 4, 6, file);
-				if (Ext)
 				{
-					isx = Data[0] / 8192;
-					if (isx < 0)	isx--;
-					if (isx != Param[1])
-						Out->Lines->Add(IntToStr(isx)+"!!!X:"+List2->Cells[CSTART][j] );
-					isy = Data[1] / 8192;
-					if (isy < 0)	isy--;
-					if (isy != Param[2])
-						Out->Lines->Add(IntToStr(isy)+" !!Y:"+List2->Cells[CSTART][j] );
-				}
-				if (Data[2] > max)
-				{
-					max = Data[2];
-					maxi = List2->Cells[CSTART][j].ToInt();
-					if (List2->Cells[CHEADER][j-1] == "XSCL")
-						maxs = List2->Cells[CDATA2][j-2];
-					else
-						maxs = List2->Cells[CDATA2][j-1];
-				}
-				if (Data[2] < min)
-				{
-					min = Data[2];
-					mini = List2->Cells[CSTART][j].ToInt();
-					if (List2->Cells[CHEADER][j-1] == "XSCL")
-						mins = List2->Cells[CDATA2][j-2];
-					else
-						mins = List2->Cells[CDATA2][j-1];
+					fread(Data, 4, 6, file);
+					if (Ext)
+					{
+						isx = Data[0] / 8192;
+						if (Data[0] < 0)	isx--;
+						if (isx != Param[1])
+							Out->Lines->Add(IntToStr(isx)+"!!!X:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[0]/8192)+"\t"+List2->Cells[CDATA2][j]);
+						isy = Data[1] / 8192;
+						if (Data[1] < 0)	isy--;
+						if (isy != Param[2])
+							Out->Lines->Add(IntToStr(isy)+" !!Y:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[1]/8192)+"\t"+List2->Cells[CDATA2][j]);
+					}
+					if (Data[2] > max)
+					{
+						max = Data[2];
+						maxi = List2->Cells[CSTART][j].ToInt();
+						if (List2->Cells[CHEADER][j-1] == "NAME")
+							maxs = List2->Cells[CDATA2][j-1];
+						else
+							maxs = List2->Cells[CDATA2][j-2];
+					}
+					if (Data[2] < min)
+					{
+						min = Data[2];
+						mini = List2->Cells[CSTART][j].ToInt();
+						if (List2->Cells[CHEADER][j-1] == "NAME")
+							mins = List2->Cells[CDATA2][j-1];
+						else
+							mins = List2->Cells[CDATA2][j-2];
+					}
 				}
 			}
+		if (maxi != -1 && maxi != mini)
+		{
+			Out->Lines->Add(maxs+"\tMax:"+FloatToStr(max)+" in "+IntToStr(maxi));
+			Out->Lines->Add(mins+"\tMin:"+FloatToStr(min)+" in "+IntToStr(mini));
+			Out->Lines->Add("Diff="+IntToStr((int)max-(int)min));
 		}
-	if (maxi != -1 && maxi != mini)
-	{
-		Out->Lines->Add(maxs+"=Max:"+FloatToStr(max)+" in "+IntToStr(maxi));
-		Out->Lines->Add(mins+"=Min:"+FloatToStr(min)+" in "+IntToStr(mini));
-		Out->Lines->Add(max-min);
 	}
 }
 //---------------------------------------------------------------------------
@@ -2946,7 +2951,7 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 			}
 		}
 	}
-	tolog("Total "+IntToStr(basecel.RowCount)+" loaded.");
+	tolog("Total "+IntToStr((int)basecel.RowCount)+" loaded.");
 	tolog("FRMR count = "+IntToStr((int)Coords.size()));
 
 //	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
@@ -3112,105 +3117,75 @@ void __fastcall TForm1::RotateClick(TObject *Sender)
 	float &z = Data[2];
 	int Length;
 	bool CanSel = false;
-   if (List->Row != -1)
-		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-		{
-			ListSelectCell(Sender, 0, i, CanSel);
-			int count = 0;
-
-	for (int j = 4; j < List2->RowCount; ++j)
-   	if (finded)
-      {
-			if (List2->Cells[CHEADER][j] == "DATA")
-         {
-            finded = false;
-            int Offset = List2->Cells[CSTART][j].ToInt();
-            fseek(file, Offset + 4, SEEK_SET);
-				int Length;
-				fread(&Length, 4, 1, file);
-				fseek(file, 12, SEEK_CUR);
-				fread(Data, 4, 3, file);
-				x = x * 180.0 / 3.14159265358979;
-				y = y * 180.0 / 3.14159265358979;
-				z = z * 180.0 / 3.14159265358979;
-				if (equ(x,0) && equ(y,180)) //flat
+	if (List->Row <= -1)
+		return;
+	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+	{
+		ListSelectCell(Sender, 0, i, CanSel);
+		int count = 0;
+		for (int j = 4; j < List2->RowCount; ++j)
+			if (finded)
+			{
+				if (List2->Cells[CHEADER][j] == "DATA")
 				{
-					y=0;
-					z=180-z;
+					finded = false;
+					int Offset = List2->Cells[CSTART][j].ToInt();
+					fseek(file, Offset + 4, SEEK_SET);
+					int Length;
+					fread(&Length, 4, 1, file);
+					fseek(file, 12, SEEK_CUR);
+					fread(Data, 4, 3, file);
+					x = x * 180.0 / 3.14159265358979;
+					y = y * 180.0 / 3.14159265358979;
+					z = z * 180.0 / 3.14159265358979;
+					if (equ(x,0) && equ(y,180)) //flat
+					{
+						y=0;
+						//z=180-z;
+					}
+					else if (equ(x,180) && equ(y,0)) //flat
+					{
+						x=0;
+						//z=180-z;
+					}
+					else if (equ(y,270) && x != 0) //flat
+					{
+						z = z + x;
+						x = 0;
+						//z=180-z;
+					}
+					else if (equ(y,90) && x != 0) //flat
+					{
+						z = 360 - x + z;
+						x = 0;
+						//z=180-z;
+					}
+					if (x < 0) x+=360;
+					if (y < 0) y+=360;
+					if (z < 0) z+=360;
+					if (x >= 360) x-=360;
+					if (y >= 360) y-=360;
+					if (z >= 360) z-=360;
+					if (x >= 359) x=0;
+					if (y >= 359) y=0;
+					if (z >= 359) z=0;
+					x = x * 3.14159265358979 / 180.0;
+					y = y * 3.14159265358979 / 180.0;
+					z = z * 3.14159265358979 / 180.0;
+					fseek(file, -12, SEEK_CUR);
+					fwrite(Data, sizeof(float), 3, file);
+					count++;
+					//Sadrith Mora, Telvanni Council House, Entry
 				}
-				else if (equ(x,180) && equ(y,0)) //flat
-				{
-					x=0;
-					z=180-z;
-				}
-				else if (equ(y,180) && (equ(z,0)||equ(z,180)) )
-				{
-					x+=180;
-				}
-				else if (equ(x,90) && equ(y,270)&& equ(z,0))
-				{
-					x=270;
-					y=90;
-				}
-				else if (equ(y,0) && equ(z,180))
-				{
-					x+=180;
-				}
-				else if (equ(x,270) && equ(y,270) && equ(z,180))
-				{
-					x=0;
-					y=90;
-					z=90;
-				}
-				else if (equ(x,270) && equ(y,90) && equ(z,180))
-				{
-					y+=180;
-					z+=180;
-				}
-				else if (equ(x,0) && ( equ(z,90)||equ(z,270)) )
-				{
-					y+=180;
-				}
-				else if (equ(x,270) && equ(y,180) && equ(z,180))
-				{
-					y+=180;
-					z+=180;
-				}
-				else if ( (equ(x,180)||equ(y,0)) && equ(z,180))
-				{
-					x+=180;
-				}
-				else if (equ(x,90) && equ(y,90) && equ(z,0))
-				{
-					x=0;
-					y=270;
-					z=270;
-				}
-				else
-					y+=180;
-				if (x >= 360) x-=360;
-				if (y >= 360) y-=360;
-				if (z >= 360) z-=360;
-				if (x >= 359) x=0;
-				if (y >= 359) y=0;
-				if (z >= 359) z=0;
-				x = x * 3.14159265358979 / 180.0;
-				y = y * 3.14159265358979 / 180.0;
-				z = z * 3.14159265358979 / 180.0;
-				fseek(file, -12, SEEK_CUR);
-				fwrite(Data, sizeof(float), 3, file);
-				count++;
-				//Sadrith Mora, Telvanni Council House, Entry
 			}
-      }
-      else
-		{
-			if (List2->Cells[CHEADER][j] == "NAME")
-         	if (what->IndexOf(List2->Cells[CDATA2][j]) != -1)
-               finded = true;
-		}
-	if (count > 0)
-		tolog(IntToStr(count)+List->Cells[CDATA][i]);
+			else
+			{
+				if (List2->Cells[CHEADER][j] == "NAME")
+					if (what->IndexOf(List2->Cells[CDATA2][j]) != -1)
+						finded = true;
+			}
+		if (count > 0)
+			tolog(IntToStr(count)+"\t"+List->Cells[CDATA][i]);
 	}
 }
 //---------------------------------------------------------------------------
