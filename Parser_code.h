@@ -76,7 +76,7 @@ __published:	// IDE-managed Components
 	TEdit *SubDescript;
 	TButton *SPLMread;
 	TButton *PushCoord;
-	TCheckBox *Wordwap;
+	TCheckBox *Wordwrap;
 	TPopupMenu *PopupMenu1;
 	TMenuItem *NTestMenu;
 	TMenuItem *NEnableSublist;
@@ -106,7 +106,6 @@ __published:	// IDE-managed Components
 	TButton *PrepareE;
 	TButton *PrepareGame;
 	TButton *ExportScriptsBtn;
-	TButton *DelOffsets;
 	TButton *LoadCells;
 	TMenuItem *NSearchinData;
 	TMenuItem *NSearchinOffset;
@@ -119,6 +118,10 @@ __published:	// IDE-managed Components
 	TButton *CheckCELL;
 	TMenuItem *NAutoFind;
 	TButton *Rotate;
+	TComboBox *WhatFinded;
+	TButton *MassDelete;
+	TButton *FindCELLmast;
+	TButton *Button3;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -148,7 +151,7 @@ __published:	// IDE-managed Components
 	void __fastcall SPLMreadClick(TObject *Sender);
 	void __fastcall PushCoordClick(TObject *Sender);
 	void __fastcall CloseClick(TObject *Sender);
-	void __fastcall WordwapClick(TObject *Sender);
+	void __fastcall WordwrapClick(TObject *Sender);
 	void __fastcall NTestMenuClick(TObject *Sender);
 	void __fastcall NEnableSublistClick(TObject *Sender);
 	void __fastcall NClearOutClick(TObject *Sender);
@@ -180,7 +183,6 @@ __published:	// IDE-managed Components
 	void __fastcall PrepareEClick(TObject *Sender);
 	void __fastcall PrepareGameClick(TObject *Sender);
 	void __fastcall ExportScriptsBtnClick(TObject *Sender);
-	void __fastcall DelOffsetsClick(TObject *Sender);
 	void __fastcall LoadCellsClick(TObject *Sender);
 	void __fastcall NSearchinDataClick(TObject *Sender);
 	void __fastcall NSearchinOffsetClick(TObject *Sender);
@@ -195,6 +197,10 @@ __published:	// IDE-managed Components
           TShiftState Shift, int X, int Y);
 	void __fastcall Button2Click(TObject *Sender);
 	void __fastcall RotateClick(TObject *Sender);
+	void __fastcall WhatFindedChange(TObject *Sender);
+	void __fastcall MassDeleteClick(TObject *Sender);
+	void __fastcall FindCELLmastClick(TObject *Sender);
+	void __fastcall Button3Click(TObject *Sender);
 
 
 
@@ -371,8 +377,7 @@ public:		// User declarations
 	bool Find(String find);
 	bool EndFind(int Row);
 	String SelMainHedr;
-	bool BlockList2Sel;
-	int Indextt;
+	bool BlockList2Sel;  //int Indextt;
 	void Delete2(int Row2);
 	void DeleteSublist(int Row2, int MainRow);
 	int FindIdx;
@@ -450,7 +455,28 @@ public:		// User declarations
 	{
 		return (value > rhs-3.0 && value < rhs+3.0);
 	}
-
+   struct PACK
+   {
+    	TStringList *col[5];
+      PACK()
+      {
+       	col[0] = NULL;
+         col[1] = NULL;
+         col[2] = NULL;
+         col[3] = NULL;
+         col[4] = NULL;
+		}
+      ~PACK()
+      {
+//       	delete col[0];
+//         delete col[1];
+//         delete col[2];
+//         delete col[3];
+//         delete col[4];
+		}
+	};
+   typedef PACK* PPACK;
+   std::map<int, PPACK> ListStore;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

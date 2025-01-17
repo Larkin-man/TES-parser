@@ -3,6 +3,7 @@
 #include <vcl.h>
 #include <stdio.h>
 #include <set>
+#include <map>
 #include <vector>
 #include <algorithm>
 //#include <float.h>
@@ -95,11 +96,11 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	}
 	if (NRewrites->Checked)
 	{
-		file = _wfopen(OpenDialog1->FileName.c_str(), L"r+b");
+		file = _wfopen(OpenDialog1->FileName.w_str(), L"r+b");
 		Save->Enabled = true;
 	}
 	else
-		file = _wfopen(OpenDialog1->FileName.c_str(), L"rb");
+		file = _wfopen(OpenDialog1->FileName.w_str(), L"rb");
 	if (!file)
 		return ShowMessage( "Cannot open binary file.");
 	fseek(file, 0, SEEK_END);
@@ -387,6 +388,15 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 	delete Expo;
 	delete Export;
    delete what;
+   std::map<int, PPACK>::iterator el;
+   for (el = ListStore.begin(); el != ListStore.end(); ++el)
+   {
+//   	delete el->second.col[0];
+//      delete el->second.col[1];
+//      delete el->second.col[2];
+//      delete el->second.col[3];
+//      delete el->second.col[4];
+   }
 }
 //---------------------------------------------------------------------------
 
@@ -724,9 +734,9 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	if (RefStarts.empty() == false || RefEnds.empty() == false)
 	{
 		if (Deleted.empty())
-			curr = _wfopen(Nam.c_str(), L"wb");
+			curr = _wfopen(Nam.w_str(), L"wb");
 		else
-			curr = _wfopen(Nam.c_str(), L"w+b");
+			curr = _wfopen(Nam.w_str(), L"w+b");
 		if (!curr)
 			return ShowMessage( "Cannot open binary file.");
 		Save->Enabled = false;
@@ -771,7 +781,7 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 	else
 		curr = file;
 	Deleted.insert(EoF);
-	save = _wfopen(Nam.c_str(), L"wb");
+	save = _wfopen(Nam.w_str(), L"wb");
 	if (!save)
 		return ShowMessage( "Cannot open binary file.");
 	Save->Enabled = false;
@@ -1701,7 +1711,7 @@ void __fastcall TForm1::PushCoordClick(TObject *Sender)
 						xyz[2] = 0;
 					else
 						xyz[2] = Check999(xyz[2] - z);
-					if (Wordwap->Checked)
+					if (Wordwrap->Checked)
 						Out->Lines->Add(IntToStr(adr)+":"+FloatToStr(xyz[0])+"*"+FloatToStr(xyz[1])+"*"+FloatToStr(xyz[2]));
 					fseek(file, -12, SEEK_CUR);
 					fwrite(xyz, sizeof(float), 3, file);
@@ -1730,7 +1740,7 @@ void __fastcall TForm1::PushCoordClick(TObject *Sender)
 					xyzh[0] = GetOkrugl(xyzh[0]);
 					xyzh[1] = GetOkrugl(xyzh[1]);
 					xyzh[2] = GetOkrugl(xyzh[2]);
-					if (Wordwap->Checked)
+					if (Wordwrap->Checked)
 						Out->Lines->Add(IntToStr(p)+" To "+IntToStr(xyzh[0])+"*"+IntToStr(xyzh[1])+"*"+IntToStr(xyzh[2]));
 					fseek(file, -12, SEEK_CUR);
 					fwrite(xyzh, sizeof(int), 3, file);
@@ -1796,9 +1806,9 @@ float TForm1::Check999(float x)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::WordwapClick(TObject *Sender)
+void __fastcall TForm1::WordwrapClick(TObject *Sender)
 {
-	Out->WordWrap = Wordwap->Checked;
+	Out->WordWrap = Wordwrap->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -1961,7 +1971,7 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 	if (SubDelete.empty())
 		return;
 	String Nam = "DONE_"+PluginName;
-	save = _wfopen(Nam.c_str(), L"wb");
+	save = _wfopen(Nam.w_str(), L"wb");
 	if (!save) return ShowMessage( "Cannot open binary file.");
 	fseek(file, 0, SEEK_END);
 	EoF = ftell(file);
@@ -2154,7 +2164,7 @@ void __fastcall TForm1::CheckCoordClick(TObject *Sender)
 		{
 			Out->Lines->Add(maxs+"\tMax:"+FloatToStr(max)+" in "+IntToStr(maxi));
 			Out->Lines->Add(mins+"\tMin:"+FloatToStr(min)+" in "+IntToStr(mini));
-			Out->Lines->Add("Diff="+IntToStr((int)max-(int)min));
+			Out->Lines->Add("Z Diff="+IntToStr((int)max-(int)min));
 		}
 	}
 }
@@ -2222,7 +2232,7 @@ void __fastcall TForm1::setlocaleBtnClick(TObject *Sender)
 		break;
 	case ID_YES:
 		//setlocale(LC_ALL, AnsiString(EFinds->Text).c_str());
-		_wsetlocale(LC_ALL, EFinds->Text.c_str());
+		_wsetlocale(LC_ALL, EFinds->Text.w_str());
 		localeinstalled = true;
 		break;
 	}
@@ -2345,7 +2355,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	if (OpenDialog1->Execute() != ID_OK)
 		return;
 	FILE* conf = NULL;
-	conf = _wfopen(OpenDialog1->FileName.c_str(), L"rb");
+	conf = _wfopen(OpenDialog1->FileName.w_str(), L"rb");
 	if (!conf)
 		return ShowMessage( "Cannot open binary file.");
 	fseek(conf, 0, SEEK_END);
@@ -2403,7 +2413,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 		List->RowCount = AddedRow;
 	int nConf = 0;
 	Out->WordWrap = false;
-	Wordwap->Checked = false;
+	Wordwrap->Checked = false;
 	if (Hard == ID_YES)
 	{
 		int MainLen;
@@ -2619,7 +2629,7 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 					cap = len;
 					buf = new char[cap];
 				}
-				scpt = _wfopen((List->Cells[CDATA][i]+".txt").c_str(), L"wb");
+				scpt = _wfopen((List->Cells[CDATA][i]+".txt").w_str(), L"wb");
 				fread(buf, len, 1, file);
 				fwrite(buf, len, 1, scpt);
 				fclose(scpt);
@@ -2628,30 +2638,6 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 		}
 	}
 	delete []buf;
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::DelOffsetsClick(TObject *Sender)
-{
-	std::set<int> Ena;
-	Ena.insert(0);
-	Wordwap->Checked = false;
-	Out->WordWrap = false;
-	int def;
-	for (int i = 0; i < Out->Lines->Count; i++)
-	{
-		def = Out->Lines->Strings[i].ToIntDef(0);
-		if (def > 0)
-			Ena.insert(def);
-		else
-		{
-			Out->Lines->Delete(i);
-			i--;
-		}
-	}
-	for (int i = 0; i < List->RowCount; i++)
-		if (Ena.find(List->Cells[CSTART][i].ToInt()) == Ena.end()) //его нет
-			DeleteRecord(i);
 }
 //---------------------------------------------------------------------------
 
@@ -2951,7 +2937,7 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 			}
 		}
 	}
-	tolog("Total "+IntToStr((int)basecel.RowCount)+" loaded.");
+	tolog(L"Total "+IntToStr((int)basecel.RowCount)+L" loaded.");
 	tolog("FRMR count = "+IntToStr((int)Coords.size()));
 
 //	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
@@ -3187,6 +3173,111 @@ void __fastcall TForm1::RotateClick(TObject *Sender)
 		if (count > 0)
 			tolog(IntToStr(count)+"\t"+List->Cells[CDATA][i]);
 	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::WhatFindedChange(TObject *Sender)
+{
+   SearchingIn1 = SearchingIn2 = WhatFinded->ItemIndex;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::MassDeleteClick(TObject *Sender)
+{
+   int type = 0;
+   Wordwrap->Checked = false;
+   std::set<String> heat;
+   String ss(L"To remove all from "+WhatFinded->Text
+   	+L" conterminous with the {"+Out->Lines->CommaText.w_str()+L"}?");
+   if ( (type=Application->MessageBoxA(ss.w_str()
+   	, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))== ID_CANCEL)
+			return;
+   if (type == ID_NO)
+   {
+   	ss = (L"To remove all "+WhatFinded->Text
+   	+L" except for conterminous with the {"+Out->Lines->CommaText.w_str()+L"}?");
+   	if ( (type=Application->MessageBoxA(ss.w_str()
+   	, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))!= ID_YES)
+			return;
+      type = 888;
+    	heat.insert("TES3");
+   }
+   for (int i = 0; i < Out->Lines->Count; i++)
+   	heat.insert(Out->Lines->Strings[i]);
+   if (type != 888)
+   {
+   	for (int i = 0; i < List->RowCount; ++i)
+   		if (heat.find(List->Cells[WhatFinded->ItemIndex][i]) != heat.end())
+       		DeleteRecord(i);
+   }
+   else
+   	for (int i = 0; i < List->RowCount; ++i)
+   		if (heat.find(List->Cells[WhatFinded->ItemIndex][i]) == heat.end())
+       		DeleteRecord(i);
+
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FindCELLmastClick(TObject *Sender)
+{
+	bool CanSelect = true;
+   int p;
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+   	if (List->Cells[CHEADER][i].Compare("CELL") == 0)
+      {
+         ListSelectCell(Sender, 0, i, CanSelect);
+         int Row = 0;
+         for (; Row < List2->RowCount; ++Row)
+            if	(List2->Cells[CHEADER][Row].Compare("FRMR") == 0)
+            {
+            	int p = List2->Cells[CDATA][Row].Pos(' ');
+               int master = List2->Cells[CDATA][Row].SubString(p+1, List2->Cells[CDATA][Row].Length() - p).ToInt();
+            	if (master > 3)
+               {
+               	//break;
+                  tolog(List->Cells[CDATA][i]+List2->Cells[CDATA][Row+1]);
+                  //DeleteRecord(i);
+                  break;
+               }
+            }
+        	//if (Row >= List2->RowCount)
+         //	DeleteRecord(i);
+      } //else
+      //if (List->Cells[CHEADER][i].Compare("TES3") != 0)
+      //	DeleteRecord(i);
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button3Click(TObject *Sender)
+{
+	if (List->Row < 0 || List2->RowCount <= 1)
+   	return;
+   int Offset = List->Cells[CSTART][List->Row].ToInt();
+   std::map<int, PPACK>::iterator el;
+   if ( (el=ListStore.find(Offset)) == ListStore.end())
+   {
+   	PACK f;
+   	f.col[0] = new TStringList;
+   	f.col[1] = new TStringList;
+   	f.col[2] = new TStringList;
+   	f.col[3] = new TStringList;
+      f.col[4] = new TStringList;
+      f.col[0] = List2->Cols[0];
+      f.col[1] = List2->Cols[1];
+      f.col[2] = List2->Cols[2];
+      f.col[3] = List2->Cols[3];
+      f.col[4] = List2->Cols[4];
+      EFinds->Text = f.col[4]->Count;
+      Out->Lines->Assign(f.col[4]);
+   	ListStore.insert(std::pair<int, PPACK> (Offset, &f));
+   }
+   else
+   {
+   	PPACK e = el->second;
+    	Out->Lines = e->col[1];
+   }
 }
 //---------------------------------------------------------------------------
 

@@ -3,40 +3,50 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parser'
-  ClientHeight = 717
-  ClientWidth = 1102
+  ClientHeight = 1057
+  ClientWidth = 1392
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -16
+  Font.Height = -20
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
-  PixelsPerInch = 96
-  TextHeight = 19
+  PixelsPerInch = 120
+  TextHeight = 24
   object Splitter1: TSplitter
-    Left = 601
-    Top = 27
-    Height = 690
-    ExplicitLeft = 546
-    ExplicitTop = 32
-    ExplicitHeight = 547
+    Left = 759
+    Top = 34
+    Width = 4
+    Height = 1023
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
+    ExplicitHeight = 872
   end
   object Splitter2: TSplitter
-    Left = 305
-    Top = 27
-    Height = 690
-    ExplicitLeft = 276
-    ExplicitTop = -3
-    ExplicitHeight = 498
+    Left = 385
+    Top = 34
+    Width = 4
+    Height = 1023
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
+    ExplicitHeight = 872
   end
   object PanelUp: TPanel
     Left = 0
     Top = 0
-    Width = 1102
-    Height = 27
+    Width = 1392
+    Height = 34
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Align = alTop
     Caption = 'PanelUp'
     PopupMenu = PopupMenu1
@@ -44,31 +54,41 @@ object Form1: TForm1
     TabOrder = 0
     object LDele: TLabel
       AlignWithMargins = True
-      Left = 704
-      Top = 4
-      Width = 107
-      Height = 19
+      Left = 1035
+      Top = 5
+      Width = 138
+      Height = 24
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Caption = 'Deleted Size=0'
       Visible = False
-      ExplicitLeft = 693
-      ExplicitTop = 2
+      ExplicitLeft = 890
     end
     object Bevel1: TBevel
-      Left = 193
+      Left = 244
       Top = 1
-      Width = 3
-      Height = 25
+      Width = 4
+      Height = 32
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Shape = bsSpacer
-      ExplicitLeft = 130
     end
     object OpenBtn: TButton
       Left = 1
       Top = 1
-      Width = 64
-      Height = 25
+      Width = 81
+      Height = 32
       Hint = 'Open es*'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Caption = 'Open'
       ImageIndex = 0
@@ -79,10 +99,14 @@ object Form1: TForm1
       OnClick = OpenBtnClick
     end
     object Save: TButton
-      Left = 65
+      Left = 82
       Top = 1
-      Width = 64
-      Height = 25
+      Width = 81
+      Height = 32
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Caption = 'Save'
       Enabled = False
@@ -92,11 +116,15 @@ object Form1: TForm1
       OnClick = SaveClick
     end
     object EFinds: TEdit
-      Left = 196
+      Left = 248
       Top = 1
-      Width = 261
-      Height = 25
+      Width = 329
+      Height = 32
       Hint = 'Search in data'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       ParentCustomHint = False
       Align = alLeft
       BiDiMode = bdLeftToRight
@@ -104,7 +132,7 @@ object Form1: TForm1
       DoubleBuffered = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
-      Font.Height = -16
+      Font.Height = -22
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentBiDiMode = False
@@ -114,19 +142,23 @@ object Form1: TForm1
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
-      ExplicitHeight = 27
+      ExplicitHeight = 35
     end
     object FindStr: TButton
-      Left = 457
+      Left = 577
       Top = 1
-      Width = 57
-      Height = 25
+      Width = 72
+      Height = 32
       Hint = 'Find string in Data'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Caption = '&Find'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
-      Font.Height = -16
+      Font.Height = -22
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Style = []
@@ -140,10 +172,14 @@ object Form1: TForm1
     end
     object ProModeCK: TCheckBox
       AlignWithMargins = True
-      Left = 601
-      Top = 4
-      Width = 97
-      Height = 19
+      Left = 904
+      Top = 5
+      Width = 123
+      Height = 24
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Caption = 'Pro mode'
       Checked = True
@@ -152,15 +188,19 @@ object Form1: TForm1
       OnClick = ProModeCKClick
     end
     object Save2: TButton
-      Left = 129
+      Left = 163
       Top = 1
-      Width = 64
-      Height = 25
+      Width = 81
+      Height = 32
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Caption = 'Save'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 53
-      Font.Height = -16
+      Font.Height = -22
       Font.Name = 'Tahoma'
       Font.Style = []
       ImageIndex = 3
@@ -171,16 +211,20 @@ object Form1: TForm1
       OnClick = Save2Click
     end
     object Button1: TButton
-      Left = 514
+      Left = 649
       Top = 1
-      Width = 84
-      Height = 25
+      Width = 106
+      Height = 32
       Hint = 'Find string in Data'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alLeft
       Caption = 'Sub Find'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
-      Font.Height = -16
+      Font.Height = -22
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Style = []
@@ -193,12 +237,38 @@ object Form1: TForm1
       Visible = False
       OnClick = FindStrClick
     end
+    object WhatFinded: TComboBox
+      Left = 755
+      Top = 1
+      Width = 145
+      Height = 32
+      Hint = 'Search in'
+      Align = alLeft
+      Style = csDropDownList
+      Color = 16053492
+      ItemHeight = 24
+      ItemIndex = 3
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+      Text = 'Data'
+      OnChange = WhatFindedChange
+      Items.Strings = (
+        'Header'
+        'Offset'
+        'Size'
+        'Data')
+    end
   end
   object Out: TMemo
-    Left = 604
-    Top = 27
-    Width = 286
-    Height = 690
+    Left = 763
+    Top = 34
+    Width = 361
+    Height = 1023
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Align = alClient
     Lines.Strings = (
       'List'
@@ -210,23 +280,24 @@ object Form1: TForm1
     OnDblClick = OutDblClick
   end
   object PanelPRO: TPanel
-    Left = 890
-    Top = 27
-    Width = 212
-    Height = 690
+    Left = 1124
+    Top = 34
+    Width = 268
+    Height = 1023
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Align = alRight
     ShowCaption = False
     TabOrder = 4
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
-      Left = 3
-      Top = 237
-      Width = 206
-      Height = 450
-      Margins.Left = 2
+      Left = 4
+      Top = 299
+      Width = 260
+      Height = 720
       Margins.Top = 1
-      Margins.Right = 2
-      Margins.Bottom = 2
       Align = alClient
       BevelKind = bkTile
       BevelOuter = bvNone
@@ -236,9 +307,13 @@ object Form1: TForm1
       object PrepareE: TButton
         Left = 0
         Top = 0
-        Width = 145
-        Height = 25
+        Width = 183
+        Height = 32
         Hint = 'akella\1C. INFO replace @# to {}'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Prepare for editing'
         ParentShowHint = False
         ShowHint = True
@@ -247,10 +322,14 @@ object Form1: TForm1
       end
       object PrepareGame: TButton
         Left = 0
-        Top = 25
-        Width = 136
-        Height = 25
+        Top = 32
+        Width = 172
+        Height = 31
         Hint = 'akella\1C. INFO replace @# to {}'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Prepare for game'
         ParentShowHint = False
         ShowHint = True
@@ -258,11 +337,15 @@ object Form1: TForm1
         OnClick = PrepareGameClick
       end
       object ExportBtn: TButton
-        Left = 136
-        Top = 25
-        Width = 58
-        Height = 25
+        Left = 172
+        Top = 32
+        Width = 73
+        Height = 31
         Hint = 'Export selected records'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Export'
         ParentShowHint = False
         ShowHint = True
@@ -271,10 +354,14 @@ object Form1: TForm1
       end
       object DelTrash: TButton
         Left = 0
-        Top = 50
-        Width = 100
-        Height = 25
+        Top = 63
+        Width = 126
+        Height = 32
         Hint = 'Auto delete trash CELL'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Delete Trash'
         ParentShowHint = False
         ShowHint = True
@@ -282,11 +369,15 @@ object Form1: TForm1
         OnClick = DelTrashClick
       end
       object FindNext: TButton
-        Left = 100
-        Top = 50
-        Width = 75
-        Height = 25
+        Left = 126
+        Top = 63
+        Width = 95
+        Height = 32
         Hint = 'Find text from string field. Right click is delete.'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Fin&d next'
         ParentShowHint = False
         ShowHint = True
@@ -296,10 +387,14 @@ object Form1: TForm1
       end
       object NextCell: TButton
         Left = 0
-        Top = 75
-        Width = 72
-        Height = 25
+        Top = 95
+        Width = 91
+        Height = 31
         Hint = 'Next CELL LAND PGRD'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Next Cell'
         ParentShowHint = False
         ShowHint = True
@@ -307,11 +402,15 @@ object Form1: TForm1
         OnClick = NextCellClick
       end
       object Replace: TButton
-        Left = 72
-        Top = 75
-        Width = 94
-        Height = 25
+        Left = 91
+        Top = 95
+        Width = 119
+        Height = 31
         Hint = 'Replace @# to {} from clipboard'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Replace @#'
         ParentShowHint = False
         ShowHint = True
@@ -320,10 +419,14 @@ object Form1: TForm1
       end
       object DelDials: TButton
         Left = 0
-        Top = 100
-        Width = 145
-        Height = 25
+        Top = 126
+        Width = 183
+        Height = 32
         Hint = 'Delete DIAL'#39's without INFO'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Delete trash DIAL'#39's'
         ParentShowHint = False
         ShowHint = True
@@ -332,10 +435,14 @@ object Form1: TForm1
       end
       object CheckConflicts: TButton
         Left = 0
-        Top = 125
-        Width = 113
-        Height = 25
+        Top = 158
+        Width = 143
+        Height = 31
         Hint = 'Check plugin same identifiers'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Check conflicts'
         ParentShowHint = False
         ShowHint = True
@@ -344,10 +451,14 @@ object Form1: TForm1
       end
       object FindinList2: TButton
         Left = 0
-        Top = 150
-        Width = 113
-        Height = 25
+        Top = 189
+        Width = 143
+        Height = 32
         Hint = 'Find in List 2'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Find in subList'
         ParentShowHint = False
         ShowHint = True
@@ -355,11 +466,15 @@ object Form1: TForm1
         OnClick = FindinList2Click
       end
       object setlocaleBtn: TButton
-        Left = 113
-        Top = 150
-        Width = 75
-        Height = 25
+        Left = 143
+        Top = 189
+        Width = 94
+        Height = 32
         Hint = 'setlocale for Localized. '#39'Find'#39' field is locale page'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'setlocale'
         ParentShowHint = False
         ShowHint = True
@@ -368,36 +483,45 @@ object Form1: TForm1
       end
       object FindinSublists: TButton
         Left = 0
-        Top = 175
-        Width = 137
-        Height = 25
+        Top = 221
+        Width = 173
+        Height = 32
         Hint = 'Find in all list and sublists'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Find in &all sublists'
         ParentShowHint = False
         ShowHint = True
         TabOrder = 21
         OnClick = FindinSublistsClick
       end
-      object Wordwap: TCheckBox
+      object Wordwrap: TCheckBox
         AlignWithMargins = True
-        Left = 2
-        Top = 203
-        Width = 95
-        Height = 17
-        Margins.Left = 2
+        Left = 3
+        Top = 257
+        Width = 120
+        Height = 22
+        Margins.Top = 4
         Margins.Right = 1
+        Margins.Bottom = 4
         Caption = 'Word wrap'
         Checked = True
         State = cbChecked
         TabOrder = 12
-        OnClick = WordwapClick
+        OnClick = WordwrapClick
       end
       object DelDatas: TButton
-        Left = 98
-        Top = 200
-        Width = 99
-        Height = 25
+        Left = 124
+        Top = 253
+        Width = 125
+        Height = 31
         Hint = 'Find and delete Headers with Data'#39's from Memo strings.'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Delete Data'#39's'
         ParentShowHint = False
         ShowHint = True
@@ -406,19 +530,27 @@ object Form1: TForm1
       end
       object ExportScriptsBtn: TButton
         Left = 0
-        Top = 225
-        Width = 104
-        Height = 25
+        Top = 284
+        Width = 131
+        Height = 32
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Export scripts'
         TabOrder = 26
         OnClick = ExportScriptsBtnClick
       end
       object ExportSPEL: TButton
-        Left = 104
-        Top = 225
-        Width = 97
-        Height = 25
+        Left = 131
+        Top = 284
+        Width = 123
+        Height = 32
         Hint = 'Export selected SPEL'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Export SPEL'
         ParentShowHint = False
         ShowHint = True
@@ -427,10 +559,14 @@ object Form1: TForm1
       end
       object Sel: TButton
         Left = 0
-        Top = 250
-        Width = 53
-        Height = 25
+        Top = 316
+        Width = 67
+        Height = 31
         Hint = 'Start clicking on the selected rows in List1'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Select'
         ParentShowHint = False
         ShowHint = True
@@ -439,13 +575,17 @@ object Form1: TForm1
         OnClick = SelClick
       end
       object DeleteExtraData: TButton
-        Left = 53
-        Top = 250
-        Width = 133
-        Height = 25
+        Left = 67
+        Top = 316
+        Width = 168
+        Height = 31
         Hint = 
           'Deletes from a sheet 2 all up to the following heading FRMR NAM0' +
           ' DATA'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Delete '#39'ExtraData'#39
         Enabled = False
         ParentShowHint = False
@@ -453,33 +593,42 @@ object Form1: TForm1
         TabOrder = 15
         OnClick = DeleteExtraDataClick
       end
-      object DelOffsets: TButton
-        Left = 0
-        Top = 275
-        Width = 105
-        Height = 25
-        Hint = 'Delete INVERTED offsets from memo'
-        Caption = 'Delete offsets'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 27
-        OnClick = DelOffsetsClick
-      end
       object LoadCells: TButton
-        Left = 105
-        Top = 275
-        Width = 81
-        Height = 25
+        Left = 0
+        Top = 347
+        Width = 102
+        Height = 32
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Load Cells'
-        TabOrder = 28
+        TabOrder = 27
         OnClick = LoadCellsClick
+      end
+      object MassDelete: TButton
+        Left = 102
+        Top = 347
+        Width = 122
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
+        Caption = 'Mass Delete'
+        TabOrder = 33
+        OnClick = MassDeleteClick
       end
       object CheckCoord: TButton
         Left = 0
-        Top = 300
-        Width = 131
-        Height = 25
+        Top = 379
+        Width = 165
+        Height = 32
         Hint = 'max min of Z of selected CELL'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Check coordinate'
         ParentShowHint = False
         ShowHint = True
@@ -488,11 +637,15 @@ object Form1: TForm1
         OnContextPopup = CheckCoordContextPopup
       end
       object TES3Read: TButton
-        Left = 131
-        Top = 300
-        Width = 50
-        Height = 25
+        Left = 165
+        Top = 379
+        Width = 64
+        Height = 32
         Hint = 'read TES3 header'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'TES3'
         Enabled = False
         TabOrder = 0
@@ -500,10 +653,14 @@ object Form1: TForm1
       end
       object AddMainFields: TButton
         Left = 0
-        Top = 325
-        Width = 121
-        Height = 25
+        Top = 411
+        Width = 153
+        Height = 31
         Hint = 'To add bytes after the size'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Add main fields'
         ParentShowHint = False
         ShowHint = True
@@ -511,22 +668,30 @@ object Form1: TForm1
         OnClick = AddMainFieldsClick
       end
       object CellRead: TButton
-        Left = 121
-        Top = 325
-        Width = 50
-        Height = 25
+        Left = 153
+        Top = 411
+        Width = 63
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'CELL'
         TabOrder = 1
         OnClick = CellReadClick
       end
       object PushCoord: TButton
         Left = 0
-        Top = 350
-        Width = 134
-        Height = 25
+        Top = 442
+        Width = 169
+        Height = 32
         Hint = 
           'For CELL and PGRD subtracts number from coordinates of all objec' +
           'ts'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Swap coordinates'
         ParentShowHint = False
         ShowHint = True
@@ -534,10 +699,14 @@ object Form1: TForm1
         OnClick = PushCoordClick
       end
       object GMDTRead: TButton
-        Left = 134
-        Top = 350
-        Width = 50
-        Height = 25
+        Left = 169
+        Top = 442
+        Width = 72
+        Height = 32
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'sGMDT'
         TabOrder = 2
         Visible = False
@@ -545,90 +714,128 @@ object Form1: TForm1
       end
       object TestP: TButton
         Left = 0
-        Top = 375
-        Width = 49
-        Height = 25
+        Top = 474
+        Width = 62
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'TestP'
         TabOrder = 4
         Visible = False
         OnClick = TestPClick
       end
       object SPELread: TButton
-        Left = 49
-        Top = 375
-        Width = 50
-        Height = 25
+        Left = 62
+        Top = 474
+        Width = 63
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'SPEL'
         TabOrder = 5
         Visible = False
         OnClick = SPELreadClick
       end
       object SPLMread: TButton
-        Left = 99
-        Top = 375
-        Width = 49
-        Height = 25
+        Left = 125
+        Top = 474
+        Width = 62
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'SPLM'
         TabOrder = 10
         Visible = False
         OnClick = SPLMreadClick
       end
       object MVRF: TButton
-        Left = 148
-        Top = 375
-        Width = 53
-        Height = 25
+        Left = 187
+        Top = 474
+        Width = 67
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'MVRF'
-        TabOrder = 29
+        TabOrder = 28
         OnClick = MVRFClick
       end
       object DeleteAllSubhead: TButton
         Left = 0
-        Top = 400
-        Width = 177
-        Height = 25
+        Top = 505
+        Width = 224
+        Height = 32
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Delete mass subheaders'
-        TabOrder = 31
+        TabOrder = 30
         OnClick = DeleteAllSubheadClick
       end
       object CheckCELL: TButton
         Left = 0
-        Top = 425
-        Width = 89
-        Height = 25
+        Top = 537
+        Width = 112
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Chec&kCELL'
-        TabOrder = 32
+        TabOrder = 31
         OnClick = CheckCELLClick
       end
       object Button2: TButton
-        Left = 89
-        Top = 425
-        Width = 56
-        Height = 25
+        Left = 112
+        Top = 537
+        Width = 71
+        Height = 31
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = '&Zutt'
-        TabOrder = 30
+        TabOrder = 29
         OnClick = Button2Click
       end
       object Rotate: TButton
         Left = 0
-        Top = 450
-        Width = 75
-        Height = 25
+        Top = 568
+        Width = 95
+        Height = 32
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Rotate'
-        TabOrder = 33
+        TabOrder = 32
         Visible = False
         OnClick = RotateClick
+      end
+      object FindCELLmast: TButton
+        Left = 0
+        Top = 600
+        Width = 193
+        Height = 31
+        Caption = 'Find CELL with Mast'
+        TabOrder = 34
+        OnClick = FindCELLmastClick
       end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
-      Left = 3
-      Top = 3
-      Width = 206
-      Height = 232
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
+      Left = 4
+      Top = 4
+      Width = 260
+      Height = 293
       Margins.Bottom = 1
       Align = alTop
       BevelKind = bkTile
@@ -638,23 +845,27 @@ object Form1: TForm1
       TabOrder = 1
       object Label1: TLabel
         AlignWithMargins = True
-        Left = 4
-        Top = 25
-        Width = 195
-        Height = 19
-        Margins.Left = 4
+        Left = 5
+        Top = 30
+        Width = 247
+        Height = 24
+        Margins.Left = 5
         Margins.Top = 0
+        Margins.Right = 4
         Margins.Bottom = 0
         Align = alTop
         Caption = 'Read subheader: '
-        ExplicitWidth = 124
+        ExplicitWidth = 157
       end
       object ButtonGroup1: TButtonGroup
         AlignWithMargins = True
-        Left = 3
-        Top = 47
-        Width = 196
-        Height = 160
+        Left = 4
+        Top = 58
+        Width = 248
+        Height = 202
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
         Margins.Bottom = 1
         Align = alTop
         BorderStyle = bsNone
@@ -684,18 +895,18 @@ object Form1: TForm1
       end
       object Reinter: TCheckBox
         AlignWithMargins = True
-        Left = 6
-        Top = 208
-        Width = 193
-        Height = 17
-        Margins.Left = 6
+        Left = 8
+        Top = 261
+        Width = 244
+        Height = 22
+        Margins.Left = 8
         Margins.Top = 0
-        Margins.Bottom = 2
+        Margins.Right = 4
         Align = alTop
         Caption = 'Reinterpet previous'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -15
+        Font.Height = -18
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
@@ -703,11 +914,12 @@ object Form1: TForm1
       end
       object NextS: TStaticText
         AlignWithMargins = True
-        Left = 3
-        Top = 2
-        Width = 196
-        Height = 22
-        Margins.Top = 2
+        Left = 4
+        Top = 3
+        Width = 248
+        Height = 26
+        Margins.Left = 4
+        Margins.Right = 4
         Margins.Bottom = 1
         Align = alTop
         BevelKind = bkTile
@@ -715,7 +927,7 @@ object Form1: TForm1
         Caption = 'Next=TES3[0]'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -15
+        Font.Height = -18
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
@@ -727,9 +939,13 @@ object Form1: TForm1
   end
   object PanelList: TPanel
     Left = 0
-    Top = 27
-    Width = 305
-    Height = 690
+    Top = 34
+    Width = 385
+    Height = 1023
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
@@ -737,8 +953,12 @@ object Form1: TForm1
     object Panel4: TPanel
       Left = 1
       Top = 1
-      Width = 303
-      Height = 40
+      Width = 383
+      Height = 51
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alTop
       BevelKind = bkTile
       BevelOuter = bvNone
@@ -746,20 +966,32 @@ object Form1: TForm1
       ShowCaption = False
       TabOrder = 0
       object Secr: TLabel
-        Left = 243
-        Top = 7
-        Width = 30
-        Height = 19
+        Left = 307
+        Top = 9
+        Width = 38
+        Height = 24
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Secr'
         Visible = False
       end
       object ToE: TLabeledEdit
-        Left = 24
-        Top = 4
-        Width = 107
-        Height = 27
-        EditLabel.Width = 19
-        EditLabel.Height = 19
+        Left = 30
+        Top = 5
+        Width = 135
+        Height = 32
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
+        EditLabel.Width = 23
+        EditLabel.Height = 24
+        EditLabel.Margins.Left = 4
+        EditLabel.Margins.Top = 4
+        EditLabel.Margins.Right = 4
+        EditLabel.Margins.Bottom = 4
         EditLabel.Caption = 'To'
         EditLabel.OnClick = ToESubLabelClick
         LabelPosition = lpLeft
@@ -770,21 +1002,29 @@ object Form1: TForm1
         Text = '0'
       end
       object Go: TButton
-        Left = 137
-        Top = 5
-        Width = 32
-        Height = 25
+        Left = 173
+        Top = 6
+        Width = 40
+        Height = 32
         Hint = 'Go to Offset'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Go'
         TabOrder = 1
         OnClick = GoClick
       end
       object Delete: TButton
-        Left = 177
-        Top = 5
-        Width = 62
-        Height = 25
+        Left = 224
+        Top = 6
+        Width = 78
+        Height = 32
         Hint = 'Delete selected header'
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
         Caption = 'Delete'
         ParentShowHint = False
         ShowHint = True
@@ -795,16 +1035,16 @@ object Form1: TForm1
     object HeaderControl1: THeaderControl
       AlignWithMargins = True
       Left = 1
-      Top = 41
-      Width = 303
-      Height = 17
+      Top = 52
+      Width = 383
+      Height = 21
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
       Margins.Bottom = 1
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -13
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       Sections = <
@@ -827,7 +1067,7 @@ object Form1: TForm1
           AutoSize = True
           ImageIndex = -1
           Text = 'Data'
-          Width = 174
+          Width = 254
         end>
       OnSectionClick = HeaderControl1SectionClick
       OnSectionResize = HeaderControl1SectionResize
@@ -836,9 +1076,13 @@ object Form1: TForm1
     end
     object List: TStringGrid
       Left = 1
-      Top = 59
-      Width = 303
-      Height = 630
+      Top = 74
+      Width = 383
+      Height = 948
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alClient
       BorderStyle = bsNone
       ColCount = 4
@@ -849,7 +1093,7 @@ object Form1: TForm1
       FixedRows = 0
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
+      Font.Height = -15
       Font.Name = 'Tahoma'
       Font.Style = []
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goThumbTracking]
@@ -862,10 +1106,14 @@ object Form1: TForm1
     end
   end
   object PanelList2: TPanel
-    Left = 308
-    Top = 27
-    Width = 293
-    Height = 690
+    Left = 389
+    Top = 34
+    Width = 370
+    Height = 1023
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Align = alLeft
     Caption = 'PanelList'
     ShowCaption = False
@@ -874,15 +1122,15 @@ object Form1: TForm1
       AlignWithMargins = True
       Left = 1
       Top = 1
-      Width = 291
-      Height = 17
+      Width = 368
+      Height = 22
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
       Margins.Bottom = 1
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -13
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       Sections = <
@@ -915,7 +1163,7 @@ object Form1: TForm1
           AutoSize = True
           ImageIndex = -1
           Text = 'Data'
-          Width = 143
+          Width = 220
         end>
       Style = hsFlat
       OnSectionResize = HeaderControl2SectionResize
@@ -924,9 +1172,13 @@ object Form1: TForm1
     end
     object List2: TStringGrid
       Left = 1
-      Top = 19
-      Width = 291
-      Height = 644
+      Top = 24
+      Width = 368
+      Height = 968
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alClient
       BorderStyle = bsNone
       DefaultColWidth = 50
@@ -936,7 +1188,7 @@ object Form1: TForm1
       FixedRows = 0
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
+      Font.Height = -15
       Font.Name = 'Tahoma'
       Font.Style = []
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goThumbTracking]
@@ -951,14 +1203,18 @@ object Form1: TForm1
     end
     object SubDescript: TEdit
       Left = 1
-      Top = 663
-      Width = 291
-      Height = 26
+      Top = 992
+      Width = 368
+      Height = 30
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Align = alBottom
       Color = cl3DLight
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -15
+      Font.Height = -18
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -1065,7 +1321,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00480110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00540110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
