@@ -388,15 +388,15 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 	delete Expo;
 	delete Export;
    delete what;
-   std::map<int, PPACK>::iterator el;
+   std::map<int, PACK>::iterator el;
    for (el = ListStore.begin(); el != ListStore.end(); ++el)
    {
-//   	delete el->second.col[0];
-//      delete el->second.col[1];
-//      delete el->second.col[2];
-//      delete el->second.col[3];
-//      delete el->second.col[4];
-   }
+   	delete el->second.col[0];
+      delete el->second.col[1];
+      delete el->second.col[2];
+      delete el->second.col[3];
+      delete el->second.col[4];
+  }
 }
 //---------------------------------------------------------------------------
 
@@ -877,6 +877,10 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		return;
 	//1 Чекнем секрет поле maina
 	int Offset = List->Cells[CSTART][ARow].ToInt();
+   std::map<int, PACK>::iterator Curr = ListStore.find(Offset);
+//   if (Curr == NULL)
+//
+//   Curr = NULL;
 	if (ShowAll)
 	{
 		fseek(file, Offset + 4 + LENSIZE, SEEK_SET);
@@ -897,19 +901,21 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	if (PanelList2->Visible == false)
 		return;
 	SubDescript->Visible = false;
+
 	char 	Name[5];	Name[4] = '\0';
-	String HEAD, InterpretStr, find;
+	String InterpretStr, find;
 	unsigned int Len;
 	unsigned char *st = NULL;
 	//void *st = NULL;
 	DebugL2c = 0;
 	if (ARow < 0)
 		return;
-	int m1=-1, m2=-2; //определим начало и конец для оптимизации
+   String HEAD = List->Cells[CHEADER][ARow];
+   // TYPES TABLE найдем HEAD от и до
+   // Определим начало и конец для оптимизации
+	int m1=-1, m2=-2;
 	if (NShowData->Checked)
 	{
-		//TYPES TABLE найдем HEAD от и до
-		HEAD = List->Cells[CHEADER][ARow];
 		if (Tes3==false && HEAD=="NPC_")
 		{
 			List2->RowCount = 0;
@@ -928,13 +934,14 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	ToE->Text = List->Cells[CSTART][ARow];
 	BlockList2Sel = true;
 	//GoClick(Sender);
-	//Сбросить номер строки
+	// Сбросить номер строки
 	if (SelMainHedr.Compare(HEAD) != 0)
 	{
 		List2->Row = 0;
 		SelMainHedr = HEAD;
 	}
 	//long end = ARow + 1 >= List->RowCount ? EoF : List->Cells[CSTART][ARow+1].ToInt();
+   // Определим end
 	long end;
 	if (List->Cells[CSIZE][ARow] == "-X-")
 	{
@@ -947,12 +954,26 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		end = Offset + List->Cells[CSIZE][ARow].ToInt() + 4 + MAINLENSIZE;
 	if (end > EoF)
 		end = EoF;
+   // Разюор файла
 	//Out->Lines->Append(end);
 	//List2->Cols->BeginUpdate();
 	fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
 	//Out->Lines->Append(ftell(file));
 	long Pos = ftell(file);
 	int Row = 0;
+   std::map<int, PACK>::iterator el;
+   if ( (el=ListStore.find(Offset)) != ListStore.end())
+   {
+   	int r = el->second.RowCount;
+//      while (List2->RowCount < r)
+//			List2->RowCount++;
+   	List2->RowCount = el->second.RowCount;
+      List2->Cols[0]->Assign(el->second.col[0]);
+      List2->Cols[1]->Assign(el->second.col[1]);
+      List2->Cols[2]->Assign(el->second.col[2]);
+      List2->Cols[3]->Assign(el->second.col[3]);
+      List2->Cols[4]->Assign(el->second.col[4]);
+   } else
 	while (Pos < end)
 	{
 		if (List2->RowCount < Row+1)
@@ -965,7 +986,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		List2->Cells[CDATA2][Row] = "";
 		List2->Cells[CTYPE][Row] = "";
 		Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
-
+      //Интерпретирование данных
 		if (NShowData->Checked)
 		{
 			st = NULL;
@@ -1012,7 +1033,6 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 					}
 					if (InterpretStr.Length() > 0)
 						List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
-
 				}
 			//Не нашли в TYPES.txt
 			if	(List2->Cells[CTYPE][Row] == "")
@@ -1089,8 +1109,36 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		Pos = ftell(file);
 		Row++;
 	}
-	List2->RowCount = Row;
+   if (el == ListStore.end()) //Первый клик
+   {
+   	PACK f;
+      f.RowCount = Row;
+      List2->RowCount = Row;
+   	f.col[0] = new TStringList;
+   	f.col[1] = new TStringList;
+   	f.col[2] = new TStringList;
+   	f.col[3] = new TStringList;
+      f.col[4] = new TStringList;
+      f.col[0]->Assign(List2->Cols[0]);
+      f.col[1]->Assign(List2->Cols[1]);
+      f.col[2]->Assign(List2->Cols[2]);
+      f.col[3]->Assign(List2->Cols[3]);
+      f.col[4]->Assign(List2->Cols[4]);
+      //EFinds->Text = f.col[4]->Count;
+      //Out->Lines->Assign(f.col[4]);
+   	ListStore.insert(std::pair<int, PACK> (Offset, f));
+   }
 	//fseek(file, ToE->Text.ToIntDef(0) - ftell(file), SEEK_CUR);
+   for (Row = 0; Row < List2->RowCount; Row++)
+   {
+      find = List2->Cells[CHEADER][Row];//= List2->Cells[CHEADER][sub];
+      for (int t = m1; t <= m2; ++t)
+         if (find.Compare(TSubHeader[t]) == 0) //нашли
+            if (TDescr[t].Length() > 0)
+               SetDescription(t, Row); //	SubIndexes[Row] = t;
+            else
+               SetDescription(-1, Row);
+   }
 	BlockList2Sel = false;
 	if (CheckCoord->Tag == 1)
 	{
@@ -2937,7 +2985,7 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 			}
 		}
 	}
-	tolog(L"Total "+IntToStr((int)basecel.RowCount)+L" loaded.");
+	tolog("Total "+IntToStr((int)basecel.RowCount)+String(" loaded."));
 	tolog("FRMR count = "+IntToStr((int)Coords.size()));
 
 //	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
@@ -3247,37 +3295,6 @@ void __fastcall TForm1::FindCELLmastClick(TObject *Sender)
       //if (List->Cells[CHEADER][i].Compare("TES3") != 0)
       //	DeleteRecord(i);
 	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::Button3Click(TObject *Sender)
-{
-	if (List->Row < 0 || List2->RowCount <= 1)
-   	return;
-   int Offset = List->Cells[CSTART][List->Row].ToInt();
-   std::map<int, PPACK>::iterator el;
-   if ( (el=ListStore.find(Offset)) == ListStore.end())
-   {
-   	PACK f;
-   	f.col[0] = new TStringList;
-   	f.col[1] = new TStringList;
-   	f.col[2] = new TStringList;
-   	f.col[3] = new TStringList;
-      f.col[4] = new TStringList;
-      f.col[0] = List2->Cols[0];
-      f.col[1] = List2->Cols[1];
-      f.col[2] = List2->Cols[2];
-      f.col[3] = List2->Cols[3];
-      f.col[4] = List2->Cols[4];
-      EFinds->Text = f.col[4]->Count;
-      Out->Lines->Assign(f.col[4]);
-   	ListStore.insert(std::pair<int, PPACK> (Offset, &f));
-   }
-   else
-   {
-   	PPACK e = el->second;
-    	Out->Lines = e->col[1];
-   }
 }
 //---------------------------------------------------------------------------
 

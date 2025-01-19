@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parser'
-  ClientHeight = 1057
+  ClientHeight = 915
   ClientWidth = 1392
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object Form1: TForm1
     Left = 759
     Top = 34
     Width = 4
-    Height = 1023
+    Height = 881
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -31,7 +31,7 @@ object Form1: TForm1
     Left = 385
     Top = 34
     Width = 4
-    Height = 1023
+    Height = 881
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -264,7 +264,7 @@ object Form1: TForm1
     Left = 763
     Top = 34
     Width = 361
-    Height = 1023
+    Height = 881
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -278,12 +278,13 @@ object Form1: TForm1
     TabOrder = 3
     WantTabs = True
     OnDblClick = OutDblClick
+    ExplicitHeight = 1023
   end
   object PanelPRO: TPanel
     Left = 1124
     Top = 34
     Width = 268
-    Height = 1023
+    Height = 881
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -291,12 +292,13 @@ object Form1: TForm1
     Align = alRight
     ShowCaption = False
     TabOrder = 4
+    ExplicitHeight = 1023
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 4
       Top = 299
       Width = 260
-      Height = 720
+      Height = 578
       Margins.Top = 1
       Align = alClient
       BevelKind = bkTile
@@ -304,6 +306,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
+      ExplicitHeight = 720
       object PrepareE: TButton
         Left = 0
         Top = 0
@@ -941,7 +944,7 @@ object Form1: TForm1
     Left = 0
     Top = 34
     Width = 385
-    Height = 1023
+    Height = 881
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -950,6 +953,7 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
+    ExplicitHeight = 1023
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -1078,7 +1082,7 @@ object Form1: TForm1
       Left = 1
       Top = 74
       Width = 383
-      Height = 948
+      Height = 806
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -1103,13 +1107,14 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
+      ExplicitHeight = 948
     end
   end
   object PanelList2: TPanel
     Left = 389
     Top = 34
     Width = 370
-    Height = 1023
+    Height = 881
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -1118,6 +1123,7 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
+    ExplicitHeight = 1023
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 1
@@ -1174,7 +1180,7 @@ object Form1: TForm1
       Left = 1
       Top = 24
       Width = 368
-      Height = 968
+      Height = 826
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -1200,10 +1206,11 @@ object Form1: TForm1
       OnKeyUp = List2KeyUp
       OnMouseDown = List2MouseDown
       OnSelectCell = List2SelectCell
+      ExplicitHeight = 968
     end
     object SubDescript: TEdit
       Left = 1
-      Top = 992
+      Top = 850
       Width = 368
       Height = 30
       Margins.Left = 4
@@ -1221,6 +1228,7 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
+      ExplicitTop = 992
     end
   end
   object OpenDialog1: TOpenDialog
@@ -1321,7 +1329,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00540110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00580110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
