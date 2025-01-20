@@ -122,6 +122,7 @@ __published:	// IDE-managed Components
 	TButton *MassDelete;
 	TButton *FindCELLmast;
 	TButton *FindOwners;
+	TMenuItem *N2;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -201,6 +202,7 @@ __published:	// IDE-managed Components
 	void __fastcall MassDeleteClick(TObject *Sender);
 	void __fastcall FindCELLmastClick(TObject *Sender);
 	void __fastcall FindOwnersClick(TObject *Sender);
+	void __fastcall N2Click(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations

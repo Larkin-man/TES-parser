@@ -180,11 +180,10 @@ struct Coord
 	Coord& operator=(const Coord &rhs)
 	{
 		for (int i = 0; i < 6; i++)
-		{
 			all[i] = rhs.all[i];
-		}
 		FRMR = rhs.FRMR;
 		Name = rhs.Name;
+		Dodt = rhs.Dodt;
 		return *this;
 	}
 };

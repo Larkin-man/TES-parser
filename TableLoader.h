@@ -8,7 +8,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 /******************************************************************\
-* TableLoader - Г‡Г ГЈГ°ГіГ§ГЄГ  ГІГ ГЎГ«ГЁГ¶ ГЁГ§ ГІГҐГЄГ±ГІГ®ГўГ»Гµ ГґГ Г©Г«Г®Гў. Г‚ГҐГ°Г±ГЁГї 1.7    *
+* TableLoader - Загрузка таблиц из текстовых файлов. Версия 1.8    *
 \******************************************************************/
 #ifndef TableLoaderH
 #define TableLoaderH
@@ -16,15 +16,15 @@
 struct TLSection
 {
 	String *Name;
-	int Pos;	//ГЏГ®Г§ГЁГ¶ГЁГї Г±ГҐГЄГ¶ГЁГЁ Г± 0
-	int Size;//ГЉГ®Г«-ГўГ® Г±ГІГ°Г®ГЄ
+	int Pos;	//Позиция секции с 0
+	int Size;//Кол-во строк
 };
 
 class TableLoader
 {
 private:
    char *FFormat;
-	//Mem Г®ГЎГїГ§Г ГІГҐГ«ГјГ­Г® [Count][FRowCount]
+	//Mem обязательно [Count][FRowCount]
 	String **MemStr;
    int **MemInt;
 	Char **MemChar;
@@ -49,17 +49,17 @@ public:
 	__property int SectionCount = {read = FSectionCount};
 	__property TLSection* Sections = {read = FSections};
 	TLSection* FindSection(String SectionName);
-	bool IgnoreFirstString; //Г€ГЈГ­Г®Г°ГЁГ°Г®ГўГ ГІГј ГЇГҐГ°ГўГіГѕ Г±Г°Г®ГЄГі Гў ГґГ Г©Г«ГҐ. defaul=true
-	bool IgnoreDelimitersPack; //Г€ГЈГ­Г®Г°ГЁГ°Г®ГўГ ГІГј Г°Г Г§Г¤ГҐГ«ГЁГІГҐГ«ГЁ, ГЁГ¤ГіГ№ГЁГҐ ГЇГ®Г¤Г°ГїГ¤. defauly=true
-	Char Delimiter;      //ГђГ Г§Г¤ГҐГ«ГЁГІГҐГ«Гј Г±ГІГ®Г«ГЎГ¶Г®Гў (ГІГ ГЎГіГ«ГїГ¶ГЁГї)
+	bool IgnoreFirstString; //Игнорировать первую сроку в файле. default=false
+	bool IgnoreDelimitersPack; //Игнорировать разделители, идущие подряд. default=false
+	Char Delimiter;      //Разделитель столбцов (табуляция)
    String EndMark; 		//"[end]"
-	//Г‡Г ГЈГ°ГіГ§ГЄГ , format: i-int c-Char s-String b-bool, ... Г±ГЇГЁГ±Г®ГЄ Г±Г±Г»Г«Г®ГЄ Г­Г  ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ
+	//Загрузка, format: i-int c-Char s-String b-bool, ... список ссылок на переменные
 	int LoadFromFile(String Filename, const char *format, ...);
 	int LoadFromResource(String ResourceName, const char *format, ...);
 	int LoadFromList(TStrings *list, const char *format, ...);
-	//GetSection: ... ГЅГІГ® Г±ГЇГЁГ±Г®ГЄ Г±Г±Г»Г«Г®ГЄ, ГІГ ГЄГ¦ГҐ ГЄГ ГЄ Гў LoadFrom. Г‚Г®Г§ГўГ°Г Г№Г ГҐГІ ГЄГ®Г«-ГўГ® Г±ГІГ°Г®ГЄ Гў Г±ГҐГЄГ¶ГЁГЁ
+	//GetSection: ... это список ссылок, также как в LoadFrom. Возвращает кол-во строк в секции
 	int GetSection(const String SectionName="", ...);
-	//RegColumn - ГіГ±ГІГ Г­Г ГўГ«ГЁГўГ ГҐГІ Г±Г±Г»Г«ГЄГі Г­Г  Г±ГІГ®Г«ГЎГҐГ¶ Гў Г±ГҐГЄГ¶ГЁГЁ. ColNum - ГЌГ®Г¬ГҐГ° Г±ГІГ®Г«ГЎГ¶Г  Г±Г®Г®ГІГў ГІГЁГЇГ . Г‚Г®Г§ГўГ°Г Г№Г ГҐГІ ГЄГ®Г«-ГўГ® Г±ГІГ°Г®ГЄ Гў Г±ГҐГЄГ¶ГЁГЁ
+	//RegColumn - устанавливает ссылку на столбец в секции. ColNum - Номер столбца соотв типа. Возвращает кол-во строк в секции
 	int RegColumn(int* &Field, int ColNum, const String SectionName = "") const;
 	int RegColumn(Char* &Field, int ColNum, const String SectionName = "") const;
 	int RegColumn(String* &Field, int ColNum, const String SectionName = "") const;

@@ -246,7 +246,7 @@ object Form1: TForm1
       Align = alLeft
       Style = csDropDownList
       Color = 16053492
-      ItemHeight = 0
+      ItemHeight = 24
       ItemIndex = 3
       ParentShowHint = False
       ShowHint = True
@@ -291,7 +291,6 @@ object Form1: TForm1
     Align = alRight
     ShowCaption = False
     TabOrder = 4
-    ExplicitHeight = 881
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 4
@@ -944,7 +943,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 118
       end
     end
   end
@@ -1114,7 +1112,6 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
-      ExplicitHeight = 806
     end
   end
   object PanelList2: TPanel
@@ -1130,7 +1127,6 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
-    ExplicitHeight = 881
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 1
@@ -1213,7 +1209,6 @@ object Form1: TForm1
       OnKeyUp = List2KeyUp
       OnMouseDown = List2MouseDown
       OnSelectCell = List2SelectCell
-      ExplicitHeight = 826
     end
     object SubDescript: TEdit
       Left = 1
@@ -1235,7 +1230,6 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
-      ExplicitTop = 850
     end
   end
   object OpenDialog1: TOpenDialog
@@ -1297,6 +1291,11 @@ object Form1: TForm1
       AutoCheck = True
       Caption = 'AutoFind'
       GroupIndex = 1
+    end
+    object N2: TMenuItem
+      Caption = 'More'
+      GroupIndex = 1
+      OnClick = N2Click
     end
     object N1: TMenuItem
       Caption = '-'

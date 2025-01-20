@@ -3300,7 +3300,7 @@ void __fastcall TForm1::FindCELLmastClick(TObject *Sender)
 
 void __fastcall TForm1::FindOwnersClick(TObject *Sender)
 {
-	if (Out->Lines->Count <= 0)
+	if (NEnableList2Delete->Checked==false && Out->Lines->Count <= 0)
       return;
    Wordwrap->Checked = false;
    if (NEnableList2Delete->Checked)
@@ -3310,7 +3310,7 @@ void __fastcall TForm1::FindOwnersClick(TObject *Sender)
       	for (int i = 0; i < Out->Lines->Count; i++)
    			obj.insert(Out->Lines->Strings[i]);
          Out->Lines->Clear();
-      	Out->Lines->Append("Мы готовы удалять "+IntToStr((int)obj.size())+" объектов. Только укажи локацию.");
+      	ShowMessage("Мы готовы удалять "+IntToStr((int)obj.size())+" объектов. Только укажи локацию.");
        	return;
       }
    }

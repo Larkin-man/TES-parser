@@ -1,14 +1,8 @@
 ﻿[ExportScriptsBtn]
 Coordinates=437,282,99,51
 
-[Rewrites]
-Coordinates=192,269,65,36
-
 [Delete]
 Coordinates=241,10,45,51
-
-[TestMenu]
-Coordinates=113,269,71,36
 
 [FindinList2]
 Coordinates=10,78,69,51
@@ -18,9 +12,6 @@ Coordinates=97,282,95,51
 
 [ExportBtn]
 Coordinates=303,10,64,51
-
-[ClearOut]
-Coordinates=823,78,66,36
 
 [ImageList1]
 Coordinates=823,133,77,36
@@ -83,9 +74,6 @@ Coordinates=10,146,95,51
 [Out]
 Coordinates=400,350,53,51
 
-[NList2]
-Coordinates=823,408,51,36
-
 [HeaderControl2]
 Coordinates=114,486,91,33
 
@@ -137,9 +125,6 @@ Coordinates=60,350,69,51
 
 [SPELread]
 Coordinates=450,10,62,51
-
-[ShowData1]
-Coordinates=306,559,81,36
 
 [Go]
 Coordinates=592,10,41,51
@@ -195,14 +180,8 @@ Coordinates=119,418,95,51
 [CellRead]
 Coordinates=537,146,58,51
 
-[FindHeader1]
-Coordinates=98,559,89,36
-
 [PrepareE]
 Coordinates=498,78,59,51
-
-[EnableLsit2Delete1]
-Coordinates=970,1,126,36
 
 [NFindSub]
 Coordinates=19,559,72,36
@@ -221,4 +200,25 @@ Coordinates=715,155,88,36
 
 [LoadCells]
 Coordinates=715,78,63,51
+
+[NShowData]
+Coordinates=306,559,81,36
+
+[NRewrites]
+Coordinates=192,269,65,36
+
+[NEnableList2Delete]
+Coordinates=970,1,126,36
+
+[NClearOut]
+Coordinates=823,78,66,36
+
+[NEnableSublist]
+Coordinates=823,408,51,36
+
+[NTestMenu]
+Coordinates=113,269,71,36
+
+[NFindHeader]
+Coordinates=98,559,89,36
 
