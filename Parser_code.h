@@ -121,6 +121,7 @@ __published:	// IDE-managed Components
 	TComboBox *WhatFinded;
 	TButton *MassDelete;
 	TButton *FindCELLmast;
+	TButton *FindOwners;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -199,6 +200,7 @@ __published:	// IDE-managed Components
 	void __fastcall WhatFindedChange(TObject *Sender);
 	void __fastcall MassDeleteClick(TObject *Sender);
 	void __fastcall FindCELLmastClick(TObject *Sender);
+	void __fastcall FindOwnersClick(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations
@@ -475,6 +477,7 @@ public:		// User declarations
 	};
    typedef PACK* PPACK;
    std::map<int, PACK> ListStore;
+   std::set<String> obj;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

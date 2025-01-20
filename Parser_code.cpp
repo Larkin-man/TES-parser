@@ -3298,3 +3298,79 @@ void __fastcall TForm1::FindCELLmastClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TForm1::FindOwnersClick(TObject *Sender)
+{
+	if (Out->Lines->Count <= 0)
+      return;
+   Wordwrap->Checked = false;
+   if (NEnableList2Delete->Checked)
+   {
+      if (obj.size() <= 0)
+      {
+      	for (int i = 0; i < Out->Lines->Count; i++)
+   			obj.insert(Out->Lines->Strings[i]);
+         Out->Lines->Clear();
+      	Out->Lines->Append("Мы готовы удалять "+IntToStr((int)obj.size())+" объектов. Только укажи локацию.");
+       	return;
+      }
+   }
+   else
+   {
+      obj.clear();
+      for (int i = 0; i < Out->Lines->Count; i++)
+      	obj.insert(Out->Lines->Strings[i]);
+   }
+   bool CanSelect = true;
+   Out->Lines->BeginUpdate();
+   Out->Lines->Clear();
+   int i = 0;
+   int end = List->RowCount;
+   if (NEnableList2Delete->Checked)
+   {
+      i = List->Row;
+      end = i+1;
+   }
+   //bool FindingName = true;
+   for (; i < end; i++)
+   	if (List->Cells[CHEADER][i].Compare("CELL") == 0)
+      {
+         ListSelectCell(Sender, 0, i,CanSelect);
+         int nameidx = -1;
+         for (int j = 1; j < List2->RowCount; j++)
+         {
+         	if (nameidx < 0)
+            {
+         		if (List2->Cells[CHEADER][j].Compare("NAME") == 0)
+               	if (obj.find(List2->Cells[CDATA2][j]) != obj.end())
+            			nameidx = j;
+            } else
+            if (List2->Cells[CHEADER][j] == "DATA")
+            	nameidx = -2;
+            else
+            {
+              	if (NEnableList2Delete->Checked)
+               {
+               	String Head = List2->Cells[CHEADER][j];
+                  if (Head=="ANAM" || Head=="INTV" || Head=="NAM9"
+                  	|| Head=="CNAM" || Head=="INDX" )
+                     Delete2(j);
+               }
+               else
+                  if ( (List2->Cells[CHEADER][j].Compare("CNAM") == 0)
+                     ||(List2->Cells[CHEADER][j].Compare("ANAM") == 0))
+                  	Out->Lines->Append(List->Cells[CDATA][i]+"\t"
+                     	+List2->Cells[CDATA2][nameidx]);
+            }
+         }
+      }
+   Out->Lines->EndUpdate();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N2Click(TObject *Sender)
+{
+	List->DefaultRowHeight++;
+   List2->DefaultRowHeight++;
+}
+//---------------------------------------------------------------------------
+
