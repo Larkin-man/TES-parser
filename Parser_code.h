@@ -113,7 +113,7 @@ __published:	// IDE-managed Components
 	TMenuItem *N1;
 	TButton *Button1;
 	TButton *MVRF;
-	TButton *Button2;
+	TButton *DelGroupSubheaders;
 	TButton *DeleteAllSubhead;
 	TButton *CheckCELL;
 	TMenuItem *NAutoFind;
@@ -196,7 +196,7 @@ __published:	// IDE-managed Components
 	void __fastcall OutDblClick(TObject *Sender);
 	void __fastcall List2MouseDown(TObject *Sender, TMouseButton Button,
           TShiftState Shift, int X, int Y);
-	void __fastcall Button2Click(TObject *Sender);
+	void __fastcall DelGroupSubheadersClick(TObject *Sender);
 	void __fastcall RotateClick(TObject *Sender);
 	void __fastcall WhatFindedChange(TObject *Sender);
 	void __fastcall MassDeleteClick(TObject *Sender);

@@ -1893,6 +1893,8 @@ void __fastcall TForm1::NEnableSublistClick(TObject *Sender)
 	FindinSublists->Enabled = NEnableSublist->Checked;
 	PushCoord->Enabled = NEnableSublist->Checked;
 	DeleteExtraData->Enabled = NEnableSublist->Checked && NEnableList2Delete->Checked;
+	DelGroupSubheaders->Enabled = NEnableSublist->Checked && NEnableList2Delete->Checked;
+	DeleteAllSubhead->Enabled = NEnableSublist->Checked && NEnableList2Delete->Checked;
 	CheckCoord->Enabled = NEnableSublist->Checked;
 }
 //---------------------------------------------------------------------------
@@ -1955,6 +1957,8 @@ void __fastcall TForm1::NEnableList2DeleteClick(TObject *Sender)
 	Save2->Visible = NEnableList2Delete->Checked;
 	Save->Visible = !NEnableList2Delete->Checked;
 	DeleteExtraData->Enabled = true;
+	DelGroupSubheaders->Enabled = true;
+	DeleteAllSubhead->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
@@ -2639,10 +2643,8 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 {
 	Int8 expAll = ID_YES;
 	if (List->Row != -1 || List->Selection.Bottom - List->Selection.Top + 1 != List->RowCount)
-	{
 		if ( (expAll=Application->MessageBoxA(L"Export all scripts?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
 			return;
-	}
 	int i = ( expAll == ID_YES)? 0 : List->Selection.Top;
 	int end = ( expAll == ID_YES)? List->RowCount : List->Selection.Bottom + 1;
 	//TStringList *out = new TStringList;
@@ -2652,7 +2654,6 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 	FILE *scpt = NULL;
 	int cap = 1024;
 	char *buf = new char[cap];
-
 	for (; i < end; i++)
 	{
 		if (List->Cells[0][i] == "SCPT")
@@ -2682,7 +2683,6 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 				fwrite(buf, len, 1, scpt);
 				fclose(scpt);
 			}
-
 		}
 	}
 	delete []buf;
@@ -2987,7 +2987,6 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 	}
 	tolog("Total "+IntToStr((int)basecel.RowCount)+String(" loaded."));
 	tolog("FRMR count = "+IntToStr((int)Coords.size()));
-
 //	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
 //		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
 }
@@ -3007,7 +3006,6 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 	int Start = -1;
 	int End = basecel.RowCount;
 	for (int i = 0; i < basecel.RowCount; i++)
-	{
 		if (Mor.N[i] != Idx) //нашел первую строку новой €чеки
 		{
 			Idx = Mor.N[i];
@@ -3022,10 +3020,8 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 						break;
 					}
 				break;
-
 			}
 		}
-	}
 	if (Start == -1)
 	{
 		tolog("Nothing");
@@ -3120,19 +3116,17 @@ void __fastcall TForm1::List2MouseDown(TObject *Sender, TMouseButton Button,
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::Button2Click(TObject *Sender)
+void __fastcall TForm1::DelGroupSubheadersClick(TObject *Sender)
 {
-	if (List2->Row != -1)
-	{
-		if (List2->Cells[CHEADER][List2->Row].Compare("FRMR") != 0)
-			return ShowMessage("accuracy");
-		for (int i = List2->Selection.Top; i <= List2->RowCount; ++i)
-		{
+	if (List2->Row < 0)
+		return;
+	String Find = List2->Cells[CHEADER][List2->Row];
+	Delete2(List2->Row);
+	for (int i = List2->Selection.Top + 1; i <= List2->RowCount; ++i)
+		if (List2->Cells[CHEADER][i].Compare(Find) == 0)
+			return;
+		else
 			Delete2(i);
-			if (List2->Cells[CHEADER][i].Compare("DATA") == 0)
-				return;
-		}
-	}
 }
 //---------------------------------------------------------------------------
 
