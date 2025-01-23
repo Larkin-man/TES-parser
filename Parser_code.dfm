@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parser'
-  ClientHeight = 1005
+  ClientHeight = 935
   ClientWidth = 1392
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object Form1: TForm1
     Left = 759
     Top = 34
     Width = 4
-    Height = 971
+    Height = 901
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -31,7 +31,7 @@ object Form1: TForm1
     Left = 385
     Top = 34
     Width = 4
-    Height = 971
+    Height = 901
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -264,7 +264,7 @@ object Form1: TForm1
     Left = 763
     Top = 34
     Width = 361
-    Height = 971
+    Height = 901
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -278,12 +278,13 @@ object Form1: TForm1
     TabOrder = 3
     WantTabs = True
     OnDblClick = OutDblClick
+    ExplicitHeight = 971
   end
   object PanelPRO: TPanel
     Left = 1124
     Top = 34
     Width = 268
-    Height = 971
+    Height = 901
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -291,12 +292,13 @@ object Form1: TForm1
     Align = alRight
     ShowCaption = False
     TabOrder = 4
+    ExplicitHeight = 971
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 4
-      Top = 299
+      Top = 267
       Width = 260
-      Height = 668
+      Height = 630
       Margins.Top = 1
       Align = alClient
       BevelKind = bkTile
@@ -304,6 +306,8 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
+      ExplicitTop = 299
+      ExplicitHeight = 668
       object PrepareE: TButton
         Left = 0
         Top = 0
@@ -879,7 +883,7 @@ object Form1: TForm1
       Left = 4
       Top = 4
       Width = 260
-      Height = 293
+      Height = 261
       Margins.Bottom = 1
       Align = alTop
       BevelKind = bkTile
@@ -906,7 +910,7 @@ object Form1: TForm1
         Left = 4
         Top = 58
         Width = 248
-        Height = 202
+        Height = 175
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
@@ -940,7 +944,7 @@ object Form1: TForm1
       object Reinter: TCheckBox
         AlignWithMargins = True
         Left = 8
-        Top = 261
+        Top = 234
         Width = 244
         Height = 22
         Margins.Left = 8
@@ -955,6 +959,7 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitTop = 261
       end
       object NextS: TStaticText
         AlignWithMargins = True
@@ -985,7 +990,7 @@ object Form1: TForm1
     Left = 0
     Top = 34
     Width = 385
-    Height = 971
+    Height = 901
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -994,6 +999,7 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
+    ExplicitHeight = 971
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -1122,7 +1128,7 @@ object Form1: TForm1
       Left = 1
       Top = 74
       Width = 383
-      Height = 896
+      Height = 826
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -1147,13 +1153,14 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
+      ExplicitHeight = 896
     end
   end
   object PanelList2: TPanel
     Left = 389
     Top = 34
     Width = 370
-    Height = 971
+    Height = 901
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -1162,6 +1169,7 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
+    ExplicitHeight = 971
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 1
@@ -1218,7 +1226,7 @@ object Form1: TForm1
       Left = 1
       Top = 24
       Width = 368
-      Height = 916
+      Height = 846
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -1244,10 +1252,11 @@ object Form1: TForm1
       OnKeyUp = List2KeyUp
       OnMouseDown = List2MouseDown
       OnSelectCell = List2SelectCell
+      ExplicitHeight = 916
     end
     object SubDescript: TEdit
       Left = 1
-      Top = 940
+      Top = 870
       Width = 368
       Height = 30
       Margins.Left = 4
@@ -1265,6 +1274,7 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
+      ExplicitTop = 940
     end
   end
   object OpenDialog1: TOpenDialog
@@ -1337,7 +1347,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00740110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00780110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -633,58 +633,58 @@ void __fastcall TForm1::NextSClick(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
-
+int TForm1::GetEndOfRecord(int Row)
+{
+	if (Row < 0)
+		return 0;
+	int end = List->Cells[CSIZE][Row].ToIntDef(-1);
+	if (end == -1)
+		if (Row + 1 >= List->RowCount)
+			end = EoF;
+		else
+			end = List->Cells[CSTART][Row].ToIntDef(0) + List->Cells[CSTART][Row+1].ToIntDef(0);
+	else
+		end += List->Cells[CSTART][Row].ToIntDef(0);
+	return end;
+}
+//---------------------------------------------------------------------------
 void __fastcall TForm1::GoClick(TObject *Sender)
 {
 	int pos = ToE->Text.ToIntDef(0);
 	if (pos > EoF)
-	{
 		pos = EoF;
-		ToE->Text = EoF;
-	}
-	fseek(file, pos, SEEK_SET);
-	NextSClick(Sender);
+	int i, end = -1;
 	if (List->Row >= 0)
 	{
-		int off = List->Cells[CSTART][List->Row].ToIntDef(0);
-		if (pos >= off && pos <= off + List->Cells[CSIZE][List->Row].ToIntDef(0))
-		{
-			off = List2->Cells[CSTART][List2->Row].ToIntDef(0);
-			if (pos >= off && pos <= off + List2->Cells[CSIZE][List2->Row].ToIntDef(0))
-				return;
-			for (int i = 0; i < List2->RowCount; ++i)
-			{
-				off = List2->Cells[CSTART][i].ToIntDef(0);
-				if (pos >= off && pos <= off + List2->Cells[CSIZE][i].ToIntDef(0))
-				{
-					Opening = true;
-					BlockList2Sel = true;
-					List2->Row = i;
-					BlockList2Sel = false;
-					Opening = false;
-					return;
-				}
-			}
-		}
-		else
-		{
-			List2->Cols[CDATA2]->Clear();
-			List2->Cols[CTYPE]->Clear();
-			for (int i = 0; i < List->RowCount; ++i)
-			{
-				off = List->Cells[CSTART][i].ToIntDef(0);
-				if (pos >= off && pos <= off + List->Cells[CSIZE][i].ToIntDef(0))
-				{
-					Opening = true;
-					List->Row = i;
-					bloklist2 = 1;
-					//List2->Row = -1; bug
-					Opening = false;
-					return;
-				}
-			}
-		}
+		end = GetEndOfRecord(List->Row);
+		if (pos > end || pos < List->Cells[CSTART][List->Row].ToIntDef(0))
+			end = -1;
 	}
+	if (List->Row < 0 || end < 0)
+		for (i = 1; i < List->RowCount; ++i)
+			if (pos < List->Cells[CSTART][i].ToIntDef(0))
+         {
+            List->Row = i-1;
+            break;
+         }
+      if (i == List->RowCount)
+      	List->Row = List->RowCount-1;
+   //Нашли List.
+   for (i = 1; i < List2->RowCount; ++i)
+      if (pos < List2->Cells[CSTART][i].ToIntDef(0))
+      {
+         Opening = true;
+         BlockList2Sel = true;
+         List2->Row = i-1;
+         BlockList2Sel = false;
+         Opening = false;
+         break;
+      }
+   if (i == List2->RowCount)
+   	List2->Row = List2->RowCount-1;
+   ToE->Text = pos;
+   fseek(file, pos, SEEK_SET);
+   NextSClick(Sender);
 }
 //---------------------------------------------------------------------------
 
@@ -892,9 +892,6 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	//1 Чекнем секрет поле maina
 	int Offset = List->Cells[CSTART][ARow].ToInt();
    std::map<int, PACK>::iterator Curr = ListStore.find(Offset);
-//   if (Curr == NULL)
-//
-//   Curr = NULL;
 	if (ShowAll)
 	{
 		fseek(file, Offset + 4 + LENSIZE, SEEK_SET);
@@ -947,7 +944,6 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	//--------------
 	ToE->Text = List->Cells[CSTART][ARow];
 	BlockList2Sel = true;
-	//GoClick(Sender);
 	// Сбросить номер строки
 	if (SelMainHedr.Compare(HEAD) != 0)
 	{
@@ -2613,7 +2609,7 @@ void TForm1::PrepareFor(char SYMBS[4])
 						if (curr == SYMBS[0])
 						{
 							if (nach)
-								tolog("Warning, double of { in " + List->Cells[CDATA][i] +" offset="+ IntToStr((int)ftell(file)));
+								tolog("Warning, double of { in " + List->Cells[CDATA][i] +" offset= "+ IntToStr((int)ftell(file)));
 							nach = true;
 							RefStarts.push_back(ftell(file)-1);
 							kol++;
@@ -2621,14 +2617,14 @@ void TForm1::PrepareFor(char SYMBS[4])
 						if (curr == SYMBS[1])
 						{
 							if (!nach)
-								tolog("Warning, double of } in " + List->Cells[CDATA][i] +" offset="+IntToStr((int)ftell(file)));
+								tolog("Warning, double of } in " + List->Cells[CDATA][i] +" offset= "+IntToStr((int)ftell(file)));
 							nach = false;
 							RefEnds.push_back(ftell(file)-1);
 							kol++;
 						}
 					}
 					if (nach)
-						tolog("Warning, none of } in " + List->Cells[CDATA][i] +" offset="+ IntToStr((int)ftell(file)));
+						tolog("Warning, none of } in " + List->Cells[CDATA][i] +" offset= "+ IntToStr((int)ftell(file)));
 				} else
 					fseek(file, Len, SEEK_CUR);	//Tell2 = ftell(file);
 			}

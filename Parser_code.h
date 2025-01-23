@@ -469,6 +469,7 @@ public:		// User declarations
    typedef PACK* PPACK;
    std::map<int, PACK> ListStore;
    std::set<String> obj;
+   int GetEndOfRecord(int Row);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
