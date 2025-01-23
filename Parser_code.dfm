@@ -616,12 +616,15 @@ object Form1: TForm1
         Top = 349
         Width = 122
         Height = 31
+        Hint = 'Deletes from a sheet 1 all written down headings '
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
         Margins.Bottom = 4
         Caption = 'Mass Delete'
-        TabOrder = 33
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 32
         OnClick = MassDeleteClick
       end
       object CellRead: TButton
@@ -676,11 +679,14 @@ object Form1: TForm1
         Top = 380
         Width = 72
         Height = 32
+        Hint = 'Read GMDT'
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
         Margins.Bottom = 4
         Caption = 'sGMDT'
+        ParentShowHint = False
+        ShowHint = True
         TabOrder = 2
         Visible = False
         OnClick = GMDTReadClick
@@ -758,7 +764,7 @@ object Form1: TForm1
         Caption = 'Find CELL with Mast'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 34
+        TabOrder = 33
         OnClick = FindCELLmastClick
       end
       object MVRF: TButton
@@ -766,11 +772,14 @@ object Form1: TForm1
         Top = 475
         Width = 62
         Height = 31
+        Hint = 'Read MVRF'
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
         Margins.Bottom = 4
         Caption = 'MVRF'
+        ParentShowHint = False
+        ShowHint = True
         TabOrder = 28
         OnClick = MVRFClick
       end
@@ -779,11 +788,19 @@ object Form1: TForm1
         Top = 506
         Width = 233
         Height = 32
+        Hint = 
+          'Enter three headings: 1) base, which it is necessary to search; ' +
+          '2) the heading of a sublist with which needs to be removed; 3) i' +
+          't is necessary to remove heading of a sublist, up to which (incl' +
+          'usive)'
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
         Margins.Bottom = 4
         Caption = 'Delete mass subheaders'
+        Enabled = False
+        ParentShowHint = False
+        ShowHint = True
         TabOrder = 30
         OnClick = DeleteAllSubheadClick
       end
@@ -840,27 +857,20 @@ object Form1: TForm1
         TabOrder = 31
         OnClick = CheckCELLClick
       end
-      object Rotate: TButton
-        Left = 0
-        Top = 602
-        Width = 81
-        Height = 32
-        Margins.Left = 4
-        Margins.Top = 4
-        Margins.Right = 4
-        Margins.Bottom = 4
-        Caption = 'Rotate'
-        TabOrder = 32
-        Visible = False
-        OnClick = RotateClick
-      end
       object FindOwners: TButton
-        Left = 81
+        Left = 0
         Top = 602
         Width = 121
         Height = 32
+        Hint = 
+          'Searches for all CNAM and ANAM in CELL, it is the items of infor' +
+          'mation on the owner of object. If it is authorized to delete she' +
+          'ets, deletes all objects under the entered list having the owner' +
+          's'
         Caption = 'FindOwners'
-        TabOrder = 35
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 34
         OnClick = FindOwnersClick
       end
     end
@@ -1322,45 +1332,12 @@ object Form1: TForm1
       GroupIndex = 1
       OnClick = N2Click
     end
-    object N1: TMenuItem
-      Caption = '-'
-      GroupIndex = 1
-    end
-    object NFindHeader: TMenuItem
-      AutoCheck = True
-      Caption = 'Search in Header'
-      GroupIndex = 1
-      RadioItem = True
-      OnClick = NFindHeaderClick
-    end
-    object NSearchinData: TMenuItem
-      AutoCheck = True
-      Caption = 'Search in Data'
-      Checked = True
-      GroupIndex = 1
-      RadioItem = True
-      OnClick = NSearchinDataClick
-    end
-    object NSearchinOffset: TMenuItem
-      AutoCheck = True
-      Caption = 'Search in Offset'
-      GroupIndex = 1
-      RadioItem = True
-      OnClick = NSearchinOffsetClick
-    end
-    object NSearchinSize: TMenuItem
-      AutoCheck = True
-      Caption = 'Search in Size'
-      GroupIndex = 1
-      RadioItem = True
-      OnClick = NSearchinSizeClick
-    end
   end
   object ImageList1: TImageList
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00680110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00740110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

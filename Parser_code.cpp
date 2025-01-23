@@ -32,6 +32,11 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	for (char c = '0'; c <= '9'; ++c)
 		TagSymb << c;
 	TagSymb << '_';
+	if (List->Font->Height >= 0)
+		HeaderControl1->Sections->Items[0]->Width += List->Font->Height / 2;
+	else
+		HeaderControl1->Sections->Items[0]->Width -= List->Font->Height / 2;
+	HeaderControl2->Sections->Items[0]->Width = HeaderControl1->Sections->Items[0]->Width;
 	for (int i = 0; i < 4; ++i)
 	{
 		List->ColWidths[i] = HeaderControl1->Sections->Items[i]->Width - 1;
@@ -78,10 +83,18 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	Univ.Capacity = 0;
 	PanelPRO->Visible = ProModeCK->Checked;
 	SortingColumn = CSTART;
-	NSearchinDataClick(NULL);
+	WhatFindedChange(NULL);
 	ListEnter(NULL);
 	ShowAll = true;
 	what = NULL;
+	if (List->Font->Height >= 0)
+		List->DefaultRowHeight = List->Font->Height + 5;
+	else
+		List->DefaultRowHeight = -(List->Font->Height - 5);
+	if (List2->Font->Height >= 0)
+		List2->DefaultRowHeight = List2->Font->Height + 5;
+	else
+		List2->DefaultRowHeight = -(List2->Font->Height - 5);
 }
 //---------------------------------------------------------------------------
 
@@ -843,7 +856,7 @@ void __fastcall TForm1::HeaderControl1SectionResize(THeaderControl *HeaderContro
 		- HeaderControl1->Sections->Items[0]->Width
 		- HeaderControl1->Sections->Items[1]->Width
 		- HeaderControl1->Sections->Items[2]->Width - 1;
-		//HeaderControl1Resize(NULL); }
+	List->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width - 1;
 }
 //---------------------------------------------------------------------------
 
@@ -868,6 +881,7 @@ void __fastcall TForm1::HeaderControl2SectionResize(THeaderControl *HeaderContro
 		- HeaderControl2->Sections->Items[1]->Width
 		- HeaderControl2->Sections->Items[2]->Width
 		- HeaderControl2->Sections->Items[3]->Width - 1; //	}
+	List2->ColWidths[CDATA2] = HeaderControl2->Sections->Items[CDATA2]->Width - 1;
 }
 //---------------------------------------------------------------------------
 
@@ -1873,14 +1887,6 @@ void __fastcall TForm1::NTestMenuClick(TObject *Sender)
 	SPELread->Visible = true;
 	SPLMread->Visible = true;
 	Sel->Visible = true;
-	Coord xyz;
-//	xyz.x = 6666; Coords.push_back(xyz);
-//   xyz.x = 7777; Coords.push_back(xyz);
-//	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
-//	{
-//		Out->Lines->Add(FloatToStr(el->x)+"=main offset="+FloatToStr(el->y)
-//			+" g="+FloatToStr(el->rz)+" d="+FloatToStr(el->all[0]));
-//	}
 }
 //---------------------------------------------------------------------------
 
@@ -2398,7 +2404,6 @@ void __fastcall TForm1::NRewritesClick(TObject *Sender)
 {
 	PushCoord->Visible = NRewrites->Checked;
 	MVRF->Visible = NRewrites->Checked;
-	Rotate->Visible = NRewrites->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -2689,30 +2694,10 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::NFindHeaderClick(TObject *Sender)
-{
-	SearchingIn1 = SearchingIn2 = CHEADER;
-}
-//---------------------------------------------------------------------------
 
-void __fastcall TForm1::NSearchinDataClick(TObject *Sender)
-{
-	SearchingIn1 = CDATA;
-	SearchingIn2 = CDATA2;
-}
-//---------------------------------------------------------------------------
 
-void __fastcall TForm1::NSearchinOffsetClick(TObject *Sender)
-{
-	SearchingIn1 = SearchingIn2 = CSTART;
-}
-//---------------------------------------------------------------------------
 
-void __fastcall TForm1::NSearchinSizeClick(TObject *Sender)
-{
-	SearchingIn1 = SearchingIn2 = CSIZE;
-}
-//---------------------------------------------------------------------------
+
 
 void __fastcall TForm1::List2Enter(TObject *Sender)
 {
@@ -2883,6 +2868,7 @@ void TForm1::RetMes()
 	ShowMessage("firs");
 }
 //---------------------------------------------------------------------------
+//ѕровер€ет равеноство строки left с любой из массива right
 bool TForm1::StringsIdent(String left, String* &right, int rightcount)
 {
 	for (int i = 0; i < rightcount; ++i)
@@ -2894,15 +2880,18 @@ bool TForm1::StringsIdent(String left, String* &right, int rightcount)
 void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 {
 	if (Out->Lines->Count < 3)
-		return ShowMessage("1");
-	for (int i = 0; i < 3; i++)
 	{
-		if (Out->Lines->Strings[i].Length() % 5 != 4)
-			return ShowMessage("2");
-		//for (int j = 5; j < Out->Lines->Strings[i].Length(); j+=5)
-		//	if (Out->Lines->Strings[i][j] != ' ')
-		//		return ShowMessage("3");
+		Application->MessageBoxA(L"Enter three headings: 1) base, which it is necessary to search; 2) the heading of a sublist with which needs to be removed; 3) it is necessary to remove heading of a sublist, up to which (inclusive)"
+		, L"Mass deleting", MB_OK+MB_ICONEXCLAMATION);
+		return;
 	}
+	for (int i = 0; i < 3; i++)
+		if (Out->Lines->Strings[i].Length() % 5 != 4)
+		{
+			Application->MessageBoxA(String(Out->Lines->Strings[i]+ L" is not heading or list of headings through a blank.").w_str()
+			, L"Mass deleting", MB_OK+MB_ICONHAND);
+			return;
+		}
 	String *header[3];
 	int count[3];
 	bool CanSelect = true;
@@ -3130,97 +3119,11 @@ void __fastcall TForm1::DelGroupSubheadersClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::RotateClick(TObject *Sender)
-{
-	if (what == NULL)
-	{
-		what = new TStringList;
-		what->LoadFromFile("torotate.txt");
-		what->Sorted = true;
-	}
-   bool finded = false;
-	float Data[3];
-	float &x = Data[0];
-	float &y = Data[1];
-	float &z = Data[2];
-	int Length;
-	bool CanSel = false;
-	if (List->Row <= -1)
-		return;
-	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-	{
-		ListSelectCell(Sender, 0, i, CanSel);
-		int count = 0;
-		for (int j = 4; j < List2->RowCount; ++j)
-			if (finded)
-			{
-				if (List2->Cells[CHEADER][j] == "DATA")
-				{
-					finded = false;
-					int Offset = List2->Cells[CSTART][j].ToInt();
-					fseek(file, Offset + 4, SEEK_SET);
-					int Length;
-					fread(&Length, 4, 1, file);
-					fseek(file, 12, SEEK_CUR);
-					fread(Data, 4, 3, file);
-					x = x * 180.0 / 3.14159265358979;
-					y = y * 180.0 / 3.14159265358979;
-					z = z * 180.0 / 3.14159265358979;
-					if (equ(x,0) && equ(y,180)) //flat
-					{
-						y=0;
-						//z=180-z;
-					}
-					else if (equ(x,180) && equ(y,0)) //flat
-					{
-						x=0;
-						//z=180-z;
-					}
-					else if (equ(y,270) && x != 0) //flat
-					{
-						z = z + x;
-						x = 0;
-						//z=180-z;
-					}
-					else if (equ(y,90) && x != 0) //flat
-					{
-						z = 360 - x + z;
-						x = 0;
-						//z=180-z;
-					}
-					if (x < 0) x+=360;
-					if (y < 0) y+=360;
-					if (z < 0) z+=360;
-					if (x >= 360) x-=360;
-					if (y >= 360) y-=360;
-					if (z >= 360) z-=360;
-					if (x >= 359) x=0;
-					if (y >= 359) y=0;
-					if (z >= 359) z=0;
-					x = x * 3.14159265358979 / 180.0;
-					y = y * 3.14159265358979 / 180.0;
-					z = z * 3.14159265358979 / 180.0;
-					fseek(file, -12, SEEK_CUR);
-					fwrite(Data, sizeof(float), 3, file);
-					count++;
-					//Sadrith Mora, Telvanni Council House, Entry
-				}
-			}
-			else
-			{
-				if (List2->Cells[CHEADER][j] == "NAME")
-					if (what->IndexOf(List2->Cells[CDATA2][j]) != -1)
-						finded = true;
-			}
-		if (count > 0)
-			tolog(IntToStr(count)+"\t"+List->Cells[CDATA][i]);
-	}
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::WhatFindedChange(TObject *Sender)
 {
    SearchingIn1 = SearchingIn2 = WhatFinded->ItemIndex;
+   if (WhatFinded->ItemIndex == CDATA)
+		SearchingIn2 = CDATA2;
 }
 //---------------------------------------------------------------------------
 

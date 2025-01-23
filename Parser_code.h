@@ -96,7 +96,6 @@ __published:	// IDE-managed Components
 	TButton *Replace;
 	TLabel *Secr;
 	TMenuItem *NFindSub;
-	TMenuItem *NFindHeader;
 	TMenuItem *NRewrites;
 	TPanel *PanelSubRead;
 	TMenuItem *NShowData;
@@ -107,17 +106,12 @@ __published:	// IDE-managed Components
 	TButton *PrepareGame;
 	TButton *ExportScriptsBtn;
 	TButton *LoadCells;
-	TMenuItem *NSearchinData;
-	TMenuItem *NSearchinOffset;
-	TMenuItem *NSearchinSize;
-	TMenuItem *N1;
 	TButton *Button1;
 	TButton *MVRF;
 	TButton *DelGroupSubheaders;
 	TButton *DeleteAllSubhead;
 	TButton *CheckCELL;
 	TMenuItem *NAutoFind;
-	TButton *Rotate;
 	TComboBox *WhatFinded;
 	TButton *MassDelete;
 	TButton *FindCELLmast;
@@ -177,7 +171,6 @@ __published:	// IDE-managed Components
 	void __fastcall NextCellClick(TObject *Sender);
 	void __fastcall FindinSublistsClick(TObject *Sender);
 	void __fastcall ReplaceClick(TObject *Sender);
-	void __fastcall NFindHeaderClick(TObject *Sender);
 	void __fastcall NRewritesClick(TObject *Sender);
 	void __fastcall CheckConflictsClick(TObject *Sender);
 	bool __fastcall FormHelp(WORD Command, int Data, bool &CallHelp);
@@ -185,9 +178,6 @@ __published:	// IDE-managed Components
 	void __fastcall PrepareGameClick(TObject *Sender);
 	void __fastcall ExportScriptsBtnClick(TObject *Sender);
 	void __fastcall LoadCellsClick(TObject *Sender);
-	void __fastcall NSearchinDataClick(TObject *Sender);
-	void __fastcall NSearchinOffsetClick(TObject *Sender);
-	void __fastcall NSearchinSizeClick(TObject *Sender);
 	void __fastcall List2Enter(TObject *Sender);
 	void __fastcall ListEnter(TObject *Sender);
 	void __fastcall MVRFClick(TObject *Sender);
@@ -197,7 +187,6 @@ __published:	// IDE-managed Components
 	void __fastcall List2MouseDown(TObject *Sender, TMouseButton Button,
           TShiftState Shift, int X, int Y);
 	void __fastcall DelGroupSubheadersClick(TObject *Sender);
-	void __fastcall RotateClick(TObject *Sender);
 	void __fastcall WhatFindedChange(TObject *Sender);
 	void __fastcall MassDeleteClick(TObject *Sender);
 	void __fastcall FindCELLmastClick(TObject *Sender);
