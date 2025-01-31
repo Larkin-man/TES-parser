@@ -24,7 +24,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 {
 	Tes3 = true;
 	file = NULL;
-	save = NULL;      //ShowMessage
+	save = NULL;   //ShowMessage
 	Out->Clear();
 	Setup(4, 12, 320); //TES3
 	for (char c = 'A'; c <= 'Z'; ++c)
@@ -96,8 +96,28 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	else
 		List2->DefaultRowHeight = -(List2->Font->Height - 5);
 }
+	//---------------------------------------------------------------------------
+void TForm1::Ready(bool ready)
+{
+	PanelSubRead->Enabled = false;
+	FlowPanel1->Enabled = ready;
+	List->Enabled = ready;
+	Panel4->Enabled = ready;
+	List2->Enabled = ready;
+	NEnableList2Delete->Enabled = ready;
+	if (ready == false && ListStore.size() > 0)
+		for (std::map<int, PACK>::iterator el = ListStore.begin(); el != ListStore.end(); ++el)
+		{
+			delete el->second.col[0];
+			delete el->second.col[1];
+			delete el->second.col[2];
+			delete el->second.col[3];
+			delete el->second.col[4];
+		}
+	if (ready == false)
+		ListStore.clear();
+}
 //---------------------------------------------------------------------------
-
 void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 {
 	if (OpenDialog1->Execute() != ID_OK)
@@ -105,7 +125,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	if (file)
 	{
 		fclose(file);
-      Ready(false);
+   Ready(false);
 	}
 	if (NRewrites->Checked)
 	{
@@ -3266,4 +3286,4 @@ void __fastcall TForm1::N2Click(TObject *Sender)
    List2->DefaultRowHeight++;
 }
 //---------------------------------------------------------------------------
-
+	

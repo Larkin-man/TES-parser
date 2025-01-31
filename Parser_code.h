@@ -327,15 +327,7 @@ public:		// User declarations
 	DWORD Tick, Tick2;
 	std::set<int> DELEStarts;
 	void DeleteRecord(int Row);
-	void Ready(bool ready)
-	{
-		PanelSubRead->Enabled = false;
-		FlowPanel1->Enabled = ready;
-		List->Enabled = ready;
-		Panel4->Enabled = ready;
-		List2->Enabled = ready;
-		NEnableList2Delete->Enabled = ready;
-	}
+	void Ready(bool ready);
 	struct TAGTYPES
 	{
 		char Name[4];

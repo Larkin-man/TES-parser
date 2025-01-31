@@ -278,7 +278,6 @@ object Form1: TForm1
     TabOrder = 3
     WantTabs = True
     OnDblClick = OutDblClick
-    ExplicitHeight = 971
   end
   object PanelPRO: TPanel
     Left = 1124
@@ -292,7 +291,6 @@ object Form1: TForm1
     Align = alRight
     ShowCaption = False
     TabOrder = 4
-    ExplicitHeight = 971
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 4
@@ -306,8 +304,6 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      ExplicitTop = 299
-      ExplicitHeight = 668
       object PrepareE: TButton
         Left = 0
         Top = 0
@@ -959,7 +955,6 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitTop = 261
       end
       object NextS: TStaticText
         AlignWithMargins = True
@@ -973,7 +968,7 @@ object Form1: TForm1
         Align = alTop
         BevelKind = bkTile
         BevelOuter = bvNone
-        Caption = 'Next=TES3[0]'
+        Caption = 'Next='
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -18
@@ -999,7 +994,6 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
-    ExplicitHeight = 971
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -1153,7 +1147,6 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
-      ExplicitHeight = 896
     end
   end
   object PanelList2: TPanel
@@ -1169,7 +1162,6 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
-    ExplicitHeight = 971
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 1
@@ -1252,7 +1244,6 @@ object Form1: TForm1
       OnKeyUp = List2KeyUp
       OnMouseDown = List2MouseDown
       OnSelectCell = List2SelectCell
-      ExplicitHeight = 916
     end
     object SubDescript: TEdit
       Left = 1
@@ -1274,7 +1265,6 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
-      ExplicitTop = 940
     end
   end
   object OpenDialog1: TOpenDialog
@@ -1347,7 +1337,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00780110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00800110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
