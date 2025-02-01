@@ -24,7 +24,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 {
 	Tes3 = true;
 	file = NULL;
-	save = NULL;   //ShowMessage
+	save = NULL;//ShowMessage
 	Out->Clear();
 	Setup(4, 12, 320); //TES3
 	for (char c = 'A'; c <= 'Z'; ++c)
@@ -47,7 +47,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	Export = NULL;
 	//Out->Lines->Add(sizeof());
 	Ready(false);
-	nTypes = 0;   //int const  TAGSS = 18<-их колво   11 !!!!!!!!!!!
+	nTypes = 0;//int const  TAGSS = 18<-их колво   11 !!!!!!!!!!!
 	AddTagType("INTV",'4'); AddTagType("NAME",'t');
 	AddTagType("NAM5",'1'); AddTagType("FLTV",'g');
 	AddTagType("MVRF",'i'); AddTagType("SPDT",'4');
@@ -125,7 +125,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	if (file)
 	{
 		fclose(file);
-   Ready(false);
+ Ready(false);
 	}
 	if (NRewrites->Checked)
 	{
@@ -267,7 +267,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 				List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
 		if (Len <= 0 && BreakIf0Len->Checked)
 		{
-        	BreakIf0Len->Checked = false;
+  	BreakIf0Len->Checked = false;
 			break;
 		}
 	}
@@ -287,7 +287,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	else
 	{
 		if (NShowData->Tag == 1)
-      {
+   {
 			NShowData->Tag = 0;
 			for (int i = 0; i < List->RowCount; i++)
 				List->Cells[CDATA][i] = "";
@@ -3285,5 +3285,25 @@ void __fastcall TForm1::N2Click(TObject *Sender)
 	List->DefaultRowHeight++;
    List2->DefaultRowHeight++;
 }
+	//---------------------------------------------------------------------------
+
+void __fastcall TForm1::List2DblClick(TObject *Sender)
+{
+	static int idx = 2;
+	if (List2->Cells[CTYPE][List2->Row].Length() >= 1)
+		switch (List2->Cells[CTYPE][List2->Row][1])
+		{
+		case	'i':
+		case	'4':	idx = 0; break;
+		case	'g':
+		case	'f': 	idx = 3; break;
+		case	'1':
+		case	'b': 	idx = 5; break;
+		сase	't':
+		case	's':
+		case 	'N':	idx = 1; break;
+		}
+	ButtonGroup1ButtonClicked(Sender, idx);
+}
 //---------------------------------------------------------------------------
-	
+

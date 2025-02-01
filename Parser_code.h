@@ -192,6 +192,7 @@ __published:	// IDE-managed Components
 	void __fastcall FindCELLmastClick(TObject *Sender);
 	void __fastcall FindOwnersClick(TObject *Sender);
 	void __fastcall N2Click(TObject *Sender);
+	void __fastcall List2DblClick(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations
