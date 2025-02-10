@@ -54,7 +54,7 @@ object Form1: TForm1
     TabOrder = 0
     object LDele: TLabel
       AlignWithMargins = True
-      Left = 1035
+      Left = 1038
       Top = 5
       Width = 138
       Height = 24
@@ -78,6 +78,13 @@ object Form1: TForm1
       Margins.Bottom = 4
       Align = alLeft
       Shape = bsSpacer
+    end
+    object Splitter3: TSplitter
+      Left = 577
+      Top = 1
+      Height = 32
+      ExplicitLeft = 567
+      ExplicitTop = 0
     end
     object OpenBtn: TButton
       Left = 1
@@ -145,7 +152,7 @@ object Form1: TForm1
       ExplicitHeight = 35
     end
     object FindStr: TButton
-      Left = 577
+      Left = 580
       Top = 1
       Width = 72
       Height = 32
@@ -169,10 +176,11 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 3
       OnClick = FindStrClick
+      ExplicitLeft = 577
     end
     object ProModeCK: TCheckBox
       AlignWithMargins = True
-      Left = 904
+      Left = 907
       Top = 5
       Width = 123
       Height = 24
@@ -186,6 +194,7 @@ object Form1: TForm1
       State = cbChecked
       TabOrder = 4
       OnClick = ProModeCKClick
+      ExplicitLeft = 904
     end
     object Save2: TButton
       Left = 163
@@ -211,7 +220,7 @@ object Form1: TForm1
       OnClick = Save2Click
     end
     object Button1: TButton
-      Left = 649
+      Left = 652
       Top = 1
       Width = 106
       Height = 32
@@ -236,9 +245,10 @@ object Form1: TForm1
       TabOrder = 6
       Visible = False
       OnClick = FindStrClick
+      ExplicitLeft = 649
     end
     object WhatFinded: TComboBox
-      Left = 755
+      Left = 758
       Top = 1
       Width = 145
       Height = 32
@@ -258,6 +268,7 @@ object Form1: TForm1
         'Offset'
         'Size'
         'Data')
+      ExplicitLeft = 755
     end
   end
   object Out: TMemo
@@ -1338,7 +1349,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00840110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00880110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

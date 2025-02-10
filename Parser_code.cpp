@@ -1568,6 +1568,8 @@ void __fastcall TForm1::FindNextClick(TObject *Sender)
 bool TForm1::EndFind(int Row)
 {
 	SearchList->Row = Row;
+	if (SearchList->TopRow != 0 && Row >= SearchList->TopRow + SearchList->VisibleRowCount - 3)
+		SearchList->TopRow = Row - SearchList->VisibleRowCount / 2;
 	if (EFinds->Text.Compare(List->Cells[*SearchingIn][Row]) == 0)
 		EFinds->Font->Color = clBlack;
 	else
@@ -3299,7 +3301,7 @@ void __fastcall TForm1::List2DblClick(TObject *Sender)
 		case	'f': 	idx = 3; break;
 		case	'1':
 		case	'b': 	idx = 5; break;
-		ñase	't':
+		case	't':
 		case	's':
 		case 	'N':	idx = 1; break;
 		}

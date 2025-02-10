@@ -117,6 +117,7 @@ __published:	// IDE-managed Components
 	TButton *FindCELLmast;
 	TButton *FindOwners;
 	TMenuItem *N2;
+	TSplitter *Splitter3;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
