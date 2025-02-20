@@ -176,7 +176,6 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 3
       OnClick = FindStrClick
-      ExplicitLeft = 577
     end
     object ProModeCK: TCheckBox
       AlignWithMargins = True
@@ -194,7 +193,6 @@ object Form1: TForm1
       State = cbChecked
       TabOrder = 4
       OnClick = ProModeCKClick
-      ExplicitLeft = 904
     end
     object Save2: TButton
       Left = 163
@@ -245,7 +243,6 @@ object Form1: TForm1
       TabOrder = 6
       Visible = False
       OnClick = FindStrClick
-      ExplicitLeft = 649
     end
     object WhatFinded: TComboBox
       Left = 758
@@ -268,7 +265,6 @@ object Form1: TForm1
         'Offset'
         'Size'
         'Data')
-      ExplicitLeft = 755
     end
   end
   object Out: TMemo
@@ -1349,7 +1345,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00880110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00900110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

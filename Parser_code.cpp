@@ -1931,12 +1931,16 @@ void __fastcall TForm1::NClearOutClick(TObject *Sender)
 
 void __fastcall TForm1::DelTrashClick(TObject *Sender)
 {
+	if (List->Cells[CSTART][0] != 0)
+   	return ShowMessage("The list should be sorted on offset");
 	bool Can = false;
 	ShowAll = false;
 	NShowData->Checked = false;
 	for (int i = 0; i < List->RowCount; ++i)
 		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
 		{
+      	if (i < List->RowCount-1 && List->Cells[CHEADER][i+1].Compare("PGRD") == 0)
+         	continue;
 			ListSelectCell(Sender, 0, i, Can);
 			if (List2->RowCount <= 4) //todo: to optimal
 				DeleteRecord(i);
@@ -2205,6 +2209,8 @@ void __fastcall TForm1::CheckCoordClick(TObject *Sender)
 				else
 				{
 					fread(Data, 4, 6, file);
+               tolog(FloatToStr(Data[0])+" "+FloatToStr(Data[1])+" "+FloatToStr(Data[2])+" "
+               	+FloatToStr(Data[3])+" "+FloatToStr(Data[4])+" "+FloatToStr(Data[5]));
 					if (Ext)
 					{
 						isx = Data[0] / 8192;
