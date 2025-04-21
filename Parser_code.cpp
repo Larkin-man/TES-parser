@@ -267,7 +267,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 				List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
 		if (Len <= 0 && BreakIf0Len->Checked)
 		{
-	BreakIf0Len->Checked = false;
+			BreakIf0Len->Checked = false;
 			break;
 		}
 	}
@@ -287,7 +287,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	else
 	{
 		if (NShowData->Tag == 1)
-	{
+		{
 			NShowData->Tag = 0;
 			for (int i = 0; i < List->RowCount; i++)
 				List->Cells[CDATA][i] = "";
@@ -347,14 +347,17 @@ void TForm1::RefreshData(FILE* &file, int Start)
 			fread(Data, 4, 5, file);
 			pbit = reinterpret_cast<BITS*> (&(Data[2]));
 			String Str;// = "w2i4m6b8";
-			if	(pbit->b2 == 1) Str += 'w';
-			if	(pbit->b3 == 1) Str += 'i';
-			if	(pbit->b7 == 1) Str += 'm';
-			if	(pbit->b8 == 1) Str += 'b';
-			static int iknow = 0x38; ///111000
-			int idontknow = Data[2]&iknow;
-			if (idontknow != 0)
-				Str += idontknow;
+			if (ExtreriorFlagsPrint->Checked)
+			{
+				if	(pbit->b2 == 1) Str += 'w';
+				if	(pbit->b3 == 1) Str += 'i';
+				if	(pbit->b7 == 1) Str += 'm';
+				if	(pbit->b8 == 1) Str += 'b';
+				static int iknow = 0x38; ///111000
+				int idontknow = Data[2]&iknow;
+				if (idontknow != 0)
+					Str += idontknow;
+			}
 			if ((pbit) && (pbit->b1 == 1)) //interior
 			{
 				//Interpret ti;
@@ -3156,34 +3159,50 @@ void __fastcall TForm1::MassDeleteClick(TObject *Sender)
 	int type = 0;
 	Wordwrap->Checked = false;
 	std::set<String> heat;
+	String Info = Out->Lines->CommaText;
+	if (Info.Length() > 1024)
+	{
+		Info.SetLength(1024);
+		Info +="...";
+	}
 	String ss(L"To remove all from "+WhatFinded->Text
-		+L" conterminous with the {"+Out->Lines->CommaText.w_str()+L"}?");
+		+L" conterminous with the {"+Info.w_str()+L"}?");
 	if ( (type=Application->MessageBoxA(ss.w_str()
 		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))== ID_CANCEL)
 			return;
 	if (type == ID_NO)
 	{
 		ss = (L"To remove all "+WhatFinded->Text
-		+L" except for conterminous with the {"+Out->Lines->CommaText.w_str()+L"}?");
+		+L" except for conterminous with the {"+Info.w_str()+L"}?");
 		if ( (type=Application->MessageBoxA(ss.w_str()
 		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))!= ID_YES)
 			return;
 		type = 888;
-		heat.insert("TES3");
 	}
 	for (int i = 0; i < Out->Lines->Count; i++)
 		heat.insert(Out->Lines->Strings[i]);
+	std::set<String> heat2(heat);
 	if (type != 888)
 	{
 		for (int i = 0; i < List->RowCount; ++i)
 			if (heat.find(List->Cells[WhatFinded->ItemIndex][i]) != heat.end())
+			{
 				DeleteRecord(i);
+				heat2.erase(List->Cells[WhatFinded->ItemIndex][i]);
+			}
 	}
-	else
+	else //all Except find
 		for (int i = 0; i < List->RowCount; ++i)
 			if (heat.find(List->Cells[WhatFinded->ItemIndex][i]) == heat.end())
 				DeleteRecord(i);
-
+			else
+				heat2.erase(List->Cells[WhatFinded->ItemIndex][i]);
+	if (heat2.size() > 0)
+	{
+		Out->Lines->Append("The lines were not found:");
+		for (std::set<String>::iterator el = heat2.begin(); el != heat2.end(); ++el)
+			Out->Lines->Append(*el);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -3312,6 +3331,12 @@ void __fastcall TForm1::List2DblClick(TObject *Sender)
 		case 	'N':	idx = 1; break;
 		}
 	ButtonGroup1ButtonClicked(Sender, idx);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::ListDblClick(TObject *Sender)
+{
+	tolog(List->Cells[CDATA][List->Row]);
 }
 //---------------------------------------------------------------------------
 

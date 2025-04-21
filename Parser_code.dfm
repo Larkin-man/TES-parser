@@ -1151,6 +1151,7 @@ object Form1: TForm1
       ParentFont = False
       ScrollBars = ssVertical
       TabOrder = 2
+      OnDblClick = ListDblClick
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
@@ -1340,12 +1341,18 @@ object Form1: TForm1
       GroupIndex = 1
       OnClick = N2Click
     end
+    object ExtreriorFlagsPrint: TMenuItem
+      AutoCheck = True
+      Caption = 'Print Extrerior Flags'
+      Checked = True
+      GroupIndex = 1
+    end
   end
   object ImageList1: TImageList
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00900110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A009C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

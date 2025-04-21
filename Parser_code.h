@@ -118,6 +118,7 @@ __published:	// IDE-managed Components
 	TButton *FindOwners;
 	TMenuItem *N2;
 	TSplitter *Splitter3;
+	TMenuItem *ExtreriorFlagsPrint;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -164,7 +165,7 @@ __published:	// IDE-managed Components
 	void __fastcall CheckCoordClick(TObject *Sender);
 	void __fastcall HeaderControl2Resize(TObject *Sender);
 	void __fastcall HeaderControl2SectionResize(THeaderControl *HeaderControl,
-          THeaderSection *Section);
+			 THeaderSection *Section);
 	void __fastcall GMDTReadClick(TObject *Sender);
 	void __fastcall AddMainFieldsClick(TObject *Sender);
 	void __fastcall CheckCoordContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
@@ -186,7 +187,7 @@ __published:	// IDE-managed Components
 	void __fastcall CheckCELLClick(TObject *Sender);
 	void __fastcall OutDblClick(TObject *Sender);
 	void __fastcall List2MouseDown(TObject *Sender, TMouseButton Button,
-          TShiftState Shift, int X, int Y);
+			 TShiftState Shift, int X, int Y);
 	void __fastcall DelGroupSubheadersClick(TObject *Sender);
 	void __fastcall WhatFindedChange(TObject *Sender);
 	void __fastcall MassDeleteClick(TObject *Sender);
@@ -194,6 +195,7 @@ __published:	// IDE-managed Components
 	void __fastcall FindOwnersClick(TObject *Sender);
 	void __fastcall N2Click(TObject *Sender);
 	void __fastcall List2DblClick(TObject *Sender);
+	void __fastcall ListDblClick(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations
@@ -376,7 +378,7 @@ public:		// User declarations
 		{
 			List->Row = 0; //Tick = ::GetTickCount();
 			Out->SetFocus();
-      	List->Cols[0]->BeginUpdate();
+			List->Cols[0]->BeginUpdate();
 			List->Cols[1]->BeginUpdate();
 			List->Cols[2]->BeginUpdate();
 			List->Cols[3]->BeginUpdate();
@@ -390,7 +392,7 @@ public:		// User declarations
 			List->Cols[3]->EndUpdate();
 			List->ScrollBars = ssVertical;
 			HeaderControl1Resize(NULL);
-         //HeaderControl2Resize(NULL);
+			//HeaderControl2Resize(NULL);
 		}
 	}
 	bool localeinstalled;
@@ -421,7 +423,7 @@ public:		// User declarations
 	{
 		int st = 1;
 		int coi = 0;
-    	for (int j = 2; j <= str.Length(); j++)
+		for (int j = 2; j <= str.Length(); j++)
 		{
 			if (str[j] == ' ')
 			{
@@ -438,21 +440,21 @@ public:		// User declarations
 	{
 		return (value > rhs-3.0 && value < rhs+3.0);
 	}
-   struct PACK
-   {
-   	int Size;
-      int RowCount;
-    	TStringList *col[5];
-      PACK()
-      {
-       	col[0] = NULL;
-         col[1] = NULL;
-         col[2] = NULL;
-         col[3] = NULL;
-         col[4] = NULL;
+	struct PACK
+	{
+		int Size;
+		int RowCount;
+		TStringList *col[5];
+		PACK()
+		{
+			col[0] = NULL;
+			col[1] = NULL;
+			col[2] = NULL;
+			col[3] = NULL;
+			col[4] = NULL;
 		}
-      ~PACK()
-      {
+		~PACK()
+		{
 //       	delete col[0];
 //         delete col[1];
 //         delete col[2];
@@ -460,10 +462,10 @@ public:		// User declarations
 //         delete col[4];
 		}
 	};
-   typedef PACK* PPACK;
-   std::map<int, PACK> ListStore;
-   std::set<String> obj;
-   int GetEndOfRecord(int Row);
+	typedef PACK* PPACK;
+	std::map<int, PACK> ListStore;
+	std::set<String> obj;
+	int GetEndOfRecord(int Row);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
