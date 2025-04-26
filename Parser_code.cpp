@@ -118,6 +118,20 @@ void TForm1::Ready(bool ready)
 		ListStore.clear();
 }
 //---------------------------------------------------------------------------
+void TForm1::AddRow(char *Header, int Length, long Start)
+{
+	if (List->RowCount <= AddedRow)
+		List->RowCount++;
+	List->Cells[CHEADER][AddedRow] = Header;
+	List->Cells[CSIZE][AddedRow] = Length;
+	List->Cells[CSTART][AddedRow] = Start;
+	//List->Cells[CDATA][AddedRow] = Header;
+	//Sizes.insert(std::pair<int,int>(Start, Length));
+	Sizes.push_back(Length);
+	AddedRow++;
+	Ends.push_back(Start + Length + 4 + MAINLENSIZE);
+}
+//---------------------------------------------------------------------------
 void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 {
 	if (OpenDialog1->Execute() != ID_OK)
@@ -125,7 +139,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	if (file)
 	{
 		fclose(file);
- Ready(false);
+		Ready(false);
 	}
 	if (NRewrites->Checked)
 	{
@@ -264,7 +278,10 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 			if (Tes3 || strncmp(Name,"GRUP", 4)!=0 )
 				fseek(file, Len, SEEK_CUR);
 			else //its GRUP
+			{
 				List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
+				//Sizes.find(Tell)->second = MLENTOSLEN; TODO:fdfsfs
+			}
 		if (Len <= 0 && BreakIf0Len->Checked)
 		{
 			BreakIf0Len->Checked = false;
@@ -359,11 +376,8 @@ void TForm1::RefreshData(FILE* &file, int Start)
 					Str += idontknow;
 			}
 			if ((pbit) && (pbit->b1 == 1)) //interior
-			{
-				//Interpret ti;
-				//ti.i = Data[4];ЭТО floaт ДЕНСИТИ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				//Interpret ti; //ti.i = Data[4];ЭТО floaт ДЕНСИТИ!!!!!!!!!!!!!!!!!
 				List->Cells[CDATA][i] = String(DATA);// + "["+)float+"]"+Str;
-			}
 			else
 				List->Cells[CDATA][i] = String(DATA) + "("+IntToStr(Data[3])+","+IntToStr(Data[4])+")"+Str;
 			continue;
@@ -578,7 +592,7 @@ void TForm1::DeleteRecord(int Row)
 		if	(Deleted.find(Offset) == Deleted.end())
 		{
 			Deleted.insert(Offset);
-			DeletedSize += List->Cells[CSIZE][Row].ToIntDef(0);
+			DeletedSize += Sizes[Row];
 			DeletedSize += MLENTOSLEN;
 			List->Cells[CSIZE][Row] = "-X-";
 			LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
@@ -611,7 +625,7 @@ void __fastcall TForm1::DelDatasClick(TObject *Sender)
 			if (Deleted.find(Offset) == Deleted.end())
 			{
 				Deleted.insert(Offset);
-				DeletedSize += List->Cells[CSIZE][Row].ToIntDef(0);
+				DeletedSize += Sizes[Row];
 				List->Cells[CSIZE][Row] = "delete";
 				Report->Add(Out->Lines->Strings[i]);
 			}
@@ -656,21 +670,6 @@ void __fastcall TForm1::NextSClick(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
-int TForm1::GetEndOfRecord(int Row)
-{
-	if (Row < 0)
-		return 0;
-	int end = List->Cells[CSIZE][Row].ToIntDef(-1);
-	if (end == -1)
-		if (Row + 1 >= List->RowCount)
-			end = EoF;
-		else
-			end = List->Cells[CSTART][Row].ToIntDef(0) + List->Cells[CSTART][Row+1].ToIntDef(0);
-	else
-		end += List->Cells[CSTART][Row].ToIntDef(0);
-	return end;
-}
-//---------------------------------------------------------------------------
 void __fastcall TForm1::GoClick(TObject *Sender)
 {
 	int pos = ToE->Text.ToIntDef(0);
@@ -679,7 +678,7 @@ void __fastcall TForm1::GoClick(TObject *Sender)
 	int i, end = -1;
 	if (List->Row >= 0)
 	{
-		end = GetEndOfRecord(List->Row);
+		end = Ends[List->Row];
 		if (pos > end || pos < List->Cells[CSTART][List->Row].ToIntDef(0))
 			end = -1;
 	}
@@ -972,22 +971,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		List2->Row = 0;
 		SelMainHedr = HEAD;
 	}
-	//long end = ARow + 1 >= List->RowCount ? EoF : List->Cells[CSTART][ARow+1].ToInt();
-	// Определим end
-	long end;
-	if (List->Cells[CSIZE][ARow] == "-X-")
-	{
-		if (ARow < List->RowCount -1)
-			end = List->Cells[CSTART][ARow+1].ToInt();
-		if (end < Offset)
-			end = Offset + 4;
-	}
-	else
-		end = Offset + List->Cells[CSIZE][ARow].ToInt() + 4 + MAINLENSIZE;
-	if (end > EoF)
-		end = EoF;
+	//tolog("size="+IntToStr(Sizes[ARow])+"end="+IntToStr(Ends[ARow]));
 	// Разбор файла
-	//Out->Lines->Append(end);
 	//List2->Cols->BeginUpdate();
 	fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
 	//Out->Lines->Append(ftell(file));
@@ -996,7 +981,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	std::map<int, PACK>::iterator el;
 	if ( (el=ListStore.find(Offset)) != ListStore.end())
 	{
-		int r = el->second.RowCount;
+		//int r = el->second.RowCount;
 //      while (List2->RowCount < r)
 //			List2->RowCount++;
 		List2->RowCount = el->second.RowCount;
@@ -1006,7 +991,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		List2->Cols[3]->Assign(el->second.col[3]);
 		List2->Cols[4]->Assign(el->second.col[4]);
 	} else
-	while (Pos < end)
+	while (Pos < Ends[ARow])
 	{
 		if (List2->RowCount < Row+1)
 			List2->RowCount++;
@@ -1159,6 +1144,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		//EFinds->Text = f.col[4]->Count;
 		//Out->Lines->Assign(f.col[4]);
 		ListStore.insert(std::pair<int, PACK> (Offset, f));
+		tolog("coxpaHullo:"+IntToStr(f.RowCount));
 	}
 	//fseek(file, ToE->Text.ToIntDef(0) - ftell(file), SEEK_CUR);
 	for (Row = 0; Row < List2->RowCount; Row++)
@@ -1232,53 +1218,54 @@ void TForm1::QuickSort(int iLo, int iHi)  //рекурсивная
 	//Shifts+= ((Lo+Hi)/2);
 	do
 	{
-	 //printf("DO Lo[%d]=%d Hi[%d]=%d\n",Lo, M[Lo], Hi, M[Hi] );
-	 if (CompareString)
-	 {
-		while (List->Cells[SortingColumn][Lo] < Mid)//(M[Lo] < Mid)
-			Lo++;
-		while (List->Cells[SortingColumn][Hi] > Mid)
-			Hi--;
-	 }
-	 else
-	 {
-		while (List->Cells[SortingColumn][Lo].ToIntDef(0) < intMid)//(M[Lo] < Mid)
-			Lo++;
-		while (List->Cells[SortingColumn][Hi].ToIntDef(0) > intMid)
-			Hi--;
-	 }
-	 //printf("PO Lo[%d]=%d Hi[%d]=%d\n",Lo, M[Lo], Hi, M[Hi] );
-	 if (Lo <= Hi)
-	 {
-		if (Lo != Hi)
+		//printf("DO Lo[%d]=%d Hi[%d]=%d\n",Lo, M[Lo], Hi, M[Hi] );
+		if (CompareString)
 		{
-			//printf("Lo=%d Hi=%d\n", Lo, Hi);
-			//print (M[Lo], M[Hi]);
-			// VisualSwap(M[Lo], M[Hi], Lo, Hi);
-			List->Cols[CHEADER]->Exchange(Lo,Hi);
-			List->Cols[CSTART]->Exchange(Lo,Hi);
-			List->Cols[CSIZE]->Exchange(Lo,Hi);
-			List->Cols[CDATA]->Exchange(Lo,Hi);
-			//t = M[Lo];
-			//M[Lo] = M[Hi];
-			//M[Hi] = t;
+			while (List->Cells[SortingColumn][Lo] < Mid)//(M[Lo] < Mid)
+				Lo++;
+			while (List->Cells[SortingColumn][Hi] > Mid)
+				Hi--;
 		}
-		Lo++;
-		Hi--;
-	 }
+		else
+		{
+			while (List->Cells[SortingColumn][Lo].ToIntDef(0) < intMid)//(M[Lo] < Mid)
+				Lo++;
+			while (List->Cells[SortingColumn][Hi].ToIntDef(0) > intMid)
+				Hi--;
+		}
+		//printf("PO Lo[%d]=%d Hi[%d]=%d\n",Lo, M[Lo], Hi, M[Hi] );
+		if (Lo <= Hi)
+		{
+			if (Lo != Hi)
+			{
+				//printf("Lo=%d Hi=%d\n", Lo, Hi);
+				//print (M[Lo], M[Hi]);
+				// VisualSwap(M[Lo], M[Hi], Lo, Hi);
+				List->Cols[CHEADER]->Exchange(Lo,Hi);
+				List->Cols[CSTART]->Exchange(Lo,Hi);
+				List->Cols[CSIZE]->Exchange(Lo,Hi);
+				List->Cols[CDATA]->Exchange(Lo,Hi);
+				int t = Sizes[Lo];
+				Sizes[Lo] = Sizes[Hi];
+				Sizes[Hi] = t;
+				t = Ends[Lo];
+				Ends[Lo] = Ends[Hi];
+				Ends[Hi] = t;
+			}
+			Lo++;
+			Hi--;
+		}
 	}
 	while (Lo <= Hi);
 	bool fool = false;
-
 	if (Hi > iLo)
 	{
-	  fool=true;
-	  QuickSort(iLo, Hi);
-	  //Out->Lines->Add("more ");
+		fool=true;
+		QuickSort(iLo, Hi);
+		//Out->Lines->Add("more ");
 	}
 	if (Lo < iHi)
-	{  //if (fool) Out->Lines->Add(" FOOL ");
-	 QuickSort(Lo, iHi); }
+		QuickSort(Lo, iHi);
 	//Out->Lines->Add("end;\n");
 }
 //---------------------------------------------------------------------------
@@ -1944,7 +1931,13 @@ void __fastcall TForm1::DelTrashClick(TObject *Sender)
 		{
 			if (i < List->RowCount-1 && List->Cells[CHEADER][i+1].Compare("PGRD") == 0)
 				continue;
+			std::map<int, PACK>::iterator el;
+			if ( (el=ListStore.find(List->Cells[CSTART][i].ToInt())) != ListStore.end())
+			{
+				tolog(List->Cells[CDATA][i]+IntToStr(el->second.RowCount));
+			}
 			ListSelectCell(Sender, 0, i, Can);
+			tolog(IntToStr(List2->RowCount)+" <=> "+List->Cells[CDATA][i]);
 			if (List2->RowCount <= 4) //todo: to optimal
 				DeleteRecord(i);
 			else if (List2->RowCount == 5)
@@ -1990,6 +1983,7 @@ void __fastcall TForm1::NEnableList2DeleteClick(TObject *Sender)
 	DeleteExtraData->Enabled = true;
 	DelGroupSubheaders->Enabled = true;
 	DeleteAllSubhead->Enabled = true;
+	DevastateCell->Visible = NEnableList2Delete->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -2027,7 +2021,7 @@ void TForm1::DeleteSublist(int Row2, int MainRow)
 		Save2->Enabled = true;
 		LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
 		int MainLenOffset = List->Cells[CSTART][MainRow].ToInt() + 4;//char4
-		int MainLen = List->Cells[CSIZE][MainRow].ToInt();
+		int MainLen = Sizes[MainRow];
 		if (!ShowAll)
 			tolog(IntToStr(Offset)+":DELE in:"+List->Cells[CDATA][MainRow]);
 		else
@@ -2035,7 +2029,7 @@ void TForm1::DeleteSublist(int Row2, int MainRow)
 		SubDelete.push_back(DeleteItem(MainLenOffset, MainLen, Offset, del));
 		//запишем размер header
 		if (List->Cells[CHEADER][MainRow].ToIntDef(-1) == -1) //first del
-			List->Cells[CHEADER][MainRow] = List->Cells[CSIZE][MainRow].ToInt() - del;
+			List->Cells[CHEADER][MainRow] = Sizes[MainRow] - del;
 		else
 			List->Cells[CHEADER][MainRow] = List->Cells[CHEADER][MainRow].ToInt() - del;
 		//List->Cells[CHEADER][MainRow] = List->Cells[CSIZE][MainRow]; //костыль
@@ -2483,7 +2477,10 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 			if (Tes3 || strncmp(Name,"GRUP", 4)!=0 )
 				fseek(conf, Len, SEEK_CUR);
 			else //its GRUP
+			{
 				List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
+				//Sizes.find(Tell)->second = MLENTOSLEN; //TODO: grup is broken
+			}
 		AddRow(Name, Len, Tell);
 	}
 	Out->Lines->Add("End on "+IntToStr((int)ftell(conf)));
@@ -2505,14 +2502,14 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 		byte buf[4096];
 		for (int i = StartCon+1; i < List->RowCount; i++)
 		{  //по конфликтному
-			MainLen = List->Cells[CSIZE][i].ToInt();
+			MainLen = Sizes[i];
 			String Hed = List->Cells[CHEADER][i];
 			if (MainLen > 4096)
 				tolog(Hed+StrToInt(MainLen)+" too long");
 			mainbuf[0] = 0;
 			for (int j = 1; j < StartCon; ++j)
 			{
-				Len = List->Cells[CSIZE][j].ToInt();
+				Len = Sizes[j];
 				if (MainLen != Len)
 					continue;
 				if (Hed.Compare(List->Cells[CHEADER][j]) != 0)
@@ -2618,7 +2615,7 @@ void TForm1::PrepareFor(char SYMBS[4])
 	{
 		if (List->Cells[CHEADER][i].Compare("INFO") == 0)
 		{
-			int size = List->Cells[CSIZE][i].ToIntDef(-1);
+			int size = Sizes[i];
 			if (size <= MNAMETOSUBLEN)
 				continue;
 			int end = List->Cells[CSTART][i].ToInt();
@@ -2692,7 +2689,7 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 		{
 			int ende = List->Cells[CSTART][i].ToInt();
 			fseek(file, ende + MLENTOSLEN, SEEK_SET);
-			ende += List->Cells[CSIZE][i].ToInt();
+			ende += Sizes[i];
 			len = 0;
 			do
 			{
@@ -2774,7 +2771,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		//grid[0] = grid[0] * 8192 + 4096; //crednee
 		//grid[1] = grid[1] * 8192 + 4096;
 		Curr.MainLenOffset = List->Cells[CSTART][i].ToInt()+4;
-		Curr.MainLen = List->Cells[CSIZE][i].ToInt();
+		Curr.MainLen = Sizes[i];
 		Curr.PasteOffset = -1;
 		ListSelectCell(Sender, 0, i, CanSelect);
 		bool HasMvrf = false;
@@ -3337,6 +3334,20 @@ void __fastcall TForm1::List2DblClick(TObject *Sender)
 void __fastcall TForm1::ListDblClick(TObject *Sender)
 {
 	tolog(List->Cells[CDATA][List->Row]);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::DevastateCellClick(TObject *Sender)
+{
+	bool CanSelect = true;
+	int p;
+	for (int i = 0; i < List->RowCount; ++i)
+		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
+		{
+			ListSelectCell(Sender, 0, i, CanSelect);
+			for (int Row = 3; Row < List2->RowCount; ++Row)
+				Delete2(Row);
+		}
 }
 //---------------------------------------------------------------------------
 

@@ -880,6 +880,16 @@ object Form1: TForm1
         TabOrder = 34
         OnClick = FindOwnersClick
       end
+      object DevastateCell: TButton
+        Left = 121
+        Top = 602
+        Width = 133
+        Height = 25
+        Caption = 'DevastateCell'
+        TabOrder = 35
+        Visible = False
+        OnClick = DevastateCellClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -1155,6 +1165,8 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
+      ExplicitLeft = -1
+      ExplicitTop = 78
     end
   end
   object PanelList2: TPanel
@@ -1352,7 +1364,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A009C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00AC0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

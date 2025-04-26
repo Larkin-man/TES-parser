@@ -119,6 +119,7 @@ __published:	// IDE-managed Components
 	TMenuItem *N2;
 	TSplitter *Splitter3;
 	TMenuItem *ExtreriorFlagsPrint;
+	TButton *DevastateCell;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -196,6 +197,7 @@ __published:	// IDE-managed Components
 	void __fastcall N2Click(TObject *Sender);
 	void __fastcall List2DblClick(TObject *Sender);
 	void __fastcall ListDblClick(TObject *Sender);
+	void __fastcall DevastateCellClick(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations
@@ -252,6 +254,7 @@ public:		// User declarations
 		DELEStarts.clear();
 		RefStarts.clear();
 		RefEnds.clear();
+		Sizes.clear();
 	}
 	void tolog(String msg)
 	{
@@ -299,16 +302,7 @@ public:		// User declarations
 	TableLoader types;
 
 	int AddedRow;
-	void AddRow(char *Header, int Length, long Start)
-	{
-		if (List->RowCount <= AddedRow)
-			List->RowCount++;
-		List->Cells[CHEADER][AddedRow] = Header;
-		List->Cells[CSIZE][AddedRow] = Length;
-		List->Cells[CSTART][AddedRow] = Start;
-		//List->Cells[CDATA][AddedRow] = Header;
-		AddedRow++;
-	}
+	void AddRow(char *Header, int Length, long Start);
 	void SkipSubheader()
 	{
 		int Length;
@@ -466,6 +460,9 @@ public:		// User declarations
 	std::map<int, PACK> ListStore;
 	std::set<String> obj;
 	int GetEndOfRecord(int Row);
+	//std::map<int,int>Sizes;
+	std::vector<int>Sizes;
+	std::vector<long>Ends;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
