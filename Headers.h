@@ -3,7 +3,6 @@
 #ifndef HeadersH
 #define HeadersH
 //---------------------------------------------------------------------------
-static unsigned int LENSTOP = 6000;
 
 struct MHeader
 {
@@ -20,11 +19,12 @@ struct MHeader
 //		unsigned char u;
 //		wchar_t t;
 //	}
+	unsigned int LENSTOP;
 	void *Data;
 	unsigned int Capacity;
 	void Read(FILE* &file, int lensize);
 	void Write(FILE* &file);
-	MHeader() { Length = 0; Data=NULL; }
+	MHeader() { Length = 0; Data=NULL; LENSTOP=6000; }
 	~MHeader() { free(Data); }
 };
 
@@ -171,7 +171,7 @@ struct Coord
 
 	Coord::Coord() : x(all[0]), y(all[1]), z(all[2])
 		, rx(all[3]), ry(all[4]), rz(all[5]) {	}
-   Coord(const Coord &rhs) : x(all[0]), y(all[1]), z(all[2])
+	Coord(const Coord &rhs) : x(all[0]), y(all[1]), z(all[2])
 		, rx(all[3]), ry(all[4]), rz(all[5])
 	{
 		*this = rhs;

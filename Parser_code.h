@@ -46,7 +46,6 @@ __published:	// IDE-managed Components
 	TButton *TES3Read;
 	TButton *CellRead;
 	TButton *GMDTRead;
-	TButton *DelDatas;
 	TCheckBox *Reinter;
 	TPanel *PanelList;
 	TPanel *Panel4;
@@ -116,16 +115,15 @@ __published:	// IDE-managed Components
 	TButton *MassDelete;
 	TButton *FindCELLmast;
 	TButton *FindOwners;
-	TMenuItem *N2;
+	TMenuItem *NAbove;
 	TSplitter *Splitter3;
-	TMenuItem *ExtreriorFlagsPrint;
+	TMenuItem *NExtreriorFlagsPrint;
 	TButton *DevastateCell;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
 	void __fastcall CellReadClick(TObject *Sender);
 	void __fastcall ButtonGroup1ButtonClicked(TObject *Sender, int Index);
-	void __fastcall DelDatasClick(TObject *Sender);
 	void __fastcall NextSClick(TObject *Sender);
 	void __fastcall FindNextClick(TObject *Sender);
 	void __fastcall GoClick(TObject *Sender);
@@ -176,7 +174,6 @@ __published:	// IDE-managed Components
 	void __fastcall ReplaceClick(TObject *Sender);
 	void __fastcall NRewritesClick(TObject *Sender);
 	void __fastcall CheckConflictsClick(TObject *Sender);
-	bool __fastcall FormHelp(WORD Command, int Data, bool &CallHelp);
 	void __fastcall PrepareEClick(TObject *Sender);
 	void __fastcall PrepareGameClick(TObject *Sender);
 	void __fastcall ExportScriptsBtnClick(TObject *Sender);
@@ -187,21 +184,18 @@ __published:	// IDE-managed Components
 	void __fastcall DeleteAllSubheadClick(TObject *Sender);
 	void __fastcall CheckCELLClick(TObject *Sender);
 	void __fastcall OutDblClick(TObject *Sender);
-	void __fastcall List2MouseDown(TObject *Sender, TMouseButton Button,
-			 TShiftState Shift, int X, int Y);
 	void __fastcall DelGroupSubheadersClick(TObject *Sender);
 	void __fastcall WhatFindedChange(TObject *Sender);
 	void __fastcall MassDeleteClick(TObject *Sender);
 	void __fastcall FindCELLmastClick(TObject *Sender);
 	void __fastcall FindOwnersClick(TObject *Sender);
-	void __fastcall N2Click(TObject *Sender);
+	void __fastcall NAboveClick(TObject *Sender);
 	void __fastcall List2DblClick(TObject *Sender);
 	void __fastcall ListDblClick(TObject *Sender);
 	void __fastcall DevastateCellClick(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations
-	//ESPFile esp;
 	__fastcall TForm1(TComponent* Owner);
 					 //Morr   //podliv     sku
 	int LENSIZE; //4      //sublen 2  2
@@ -213,52 +207,19 @@ public:		// User declarations
 	int *SecretData;
 	int SecretLen;
 	int POSNRECORDS;
-	void Setup(int SubLenSize, int MainLenSize, int CountOffset)
-	{
-		LENSIZE = 4;               //M O S
-		MAINLENSIZE = MainLenSize;//12 16 20
-		MOVERLENTOSNAME = MAINLENSIZE - 4;//main overlen to subname 8 12 16
-		SLENSIZE = SubLenSize;
-		MLENTOSLEN = LENSIZE + MAINLENSIZE;//16 20 24
-		MNAMETOSUBLEN = MLENTOSLEN + 4; //20 24 28
-		SecretLen = MOVERLENTOSNAME / 4;
-		SecretData = new int[SecretLen];
-		POSNRECORDS = CountOffset;
-	}
+	void Setup(int SubLenSize, int MainLenSize, int CountOffset);
 	FILE *file, *save;
 	long EoF;
-	Tes3Header hTes3;
-	MData_Cell Cell;
-	SPEL Spel;
-	RECORD3INT Land;
-	RECORD4INT1STR Ltex;
-	RECORD1INT1STR3INT Mast;
-	//INTV Intv;
-	RECORD1INT1STR Stri;
-	//	TRECORDINTMAS Ints;
-	//TRECORD3ByteMas Bytes3;
 	MHeader Univ;
-	//MHeader Xscl;
-	//RECORD4INT1STR CURR;
-	BITS bit, *pbit;
-	void ClearDele()
-	{
-		for (std::vector<DeleteItem>::iterator el = SubDelete.begin(); el != SubDelete.end(); ++el)
-			if (el->Addon)
-				delete [] el->Addon;
-		Deleted.clear();
-		DeletedSize = 0;
-		LogUp = true;
-		FindIdx = -1;
-		SubDelete.clear();
-		DELEStarts.clear();
-		RefStarts.clear();
-		RefEnds.clear();
-		Sizes.clear();
-	}
+	BITS *pbit;
+	void ClearDele();
 	void tolog(String msg)
 	{
 		Out->Lines->Add(msg);
+	}
+	void tologi(String msg, int i)
+	{
+		Out->Lines->Add(msg+"="+IntToStr(i));
 	}
 	void ToLogLen(String msg, int Len=-1)
 	{
@@ -300,30 +261,14 @@ public:		// User declarations
 	int DeletedSize;
 	bool Tes3;
 	TableLoader types;
-
 	int AddedRow;
 	void AddRow(char *Header, int Length, long Start);
-	void SkipSubheader()
-	{
-		int Length;
-		fread(&Length, SLENSIZE, 1, file);
-		fseek(file, Length + 4, SEEK_SET);
-	}
 	void RefreshData(FILE* &file, int Start=0);
 	TStringList *Export, *Expo;
 	bool LogUp;
 	bool CompareString;
 	int  SortingColumn;
-	bool ListCompare(const String& lhs, const String& rhs)
-	{
-		if (CompareString)
-			return lhs > rhs;
-		else
-			return lhs.ToIntDef(0) > rhs.ToIntDef(0);
-	}
 	void QuickSort(int iLo, int iHi);
-	DWORD Tick, Tick2;
-	std::set<int> DELEStarts;
 	void DeleteRecord(int Row);
 	void Ready(bool ready);
 	struct TAGTYPES
@@ -333,15 +278,7 @@ public:		// User declarations
 		char MainTag[4];
 	} TagTypes[TAGSS];
 	int nTypes;
-	void AddTagType(char *name, char type, char *maintag = NULL)
-	{
-		//TagTypes = new TAGTYPES[nTypes+1];
-		strncpy(TagTypes[nTypes].Name, name, 4);
-		TagTypes[nTypes].Type = type;
-		if (maintag != NULL)
-			strncpy(TagTypes[nTypes].MainTag, maintag, 4);
-		nTypes++;
-	}
+	void AddTagType(char *name, char type, char *maintag = NULL);
 	String PluginName;
 	String *THeader;
 	String *TSubHeader;
@@ -349,54 +286,24 @@ public:		// User declarations
 	String *TDescr;
 	int *SubIndexes; //для поля description
 	int cSubIndexes;
-	Interpret ish;
 	int GetOkrugl(int x);
 	float Check999(float x);
 	bool Opening;
 	bool Find(String find);
 	bool EndFind(int Row);
-	String SelMainHedr;
-	bool BlockList2Sel;  //int Indextt;
+	bool BlockList2Sel; //int Indextt;
 	void Delete2(int Row2);
 	void DeleteSublist(int Row2, int MainRow);
 	int FindIdx;
 	String OpenedFileName;
-	//TStringList *FindList;
 	std::vector<DeleteItem>SubDelete;
 	int RecordCount;
 	int DebugL2c;
 	void SetDescription(int Num, int Row);
-	void DoUpdateList(bool begin)
-	{
-		if (begin)
-		{
-			List->Row = 0; //Tick = ::GetTickCount();
-			Out->SetFocus();
-			List->Cols[0]->BeginUpdate();
-			List->Cols[1]->BeginUpdate();
-			List->Cols[2]->BeginUpdate();
-			List->Cols[3]->BeginUpdate();
-			List->ScrollBars = ssNone; //List->Items->BeginUpdate();
-		}
-		else
-		{
-			List->Cols[0]->EndUpdate();
-			List->Cols[1]->EndUpdate();
-			List->Cols[2]->EndUpdate();
-			List->Cols[3]->EndUpdate();
-			List->ScrollBars = ssVertical;
-			HeaderControl1Resize(NULL);
-			//HeaderControl2Resize(NULL);
-		}
-	}
+	void DoUpdateList(bool begin);
 	bool localeinstalled;
 	int bloklist2;
 	String CurrCell;
-	void CheckLot(int &Length, int Max)
-	{
-		if (Length > Max)
-			Length = Max;
-	}
 	std::vector<long> RefStarts;
 	std::vector<long> RefEnds;
 	void PrepareFor(char SYMBS[4]);
@@ -406,29 +313,12 @@ public:		// User declarations
 	int *SearchingIn;
 	TStringGrid *SearchList;
 	bool ShowAll;
-	void RetMes();
 	bool StringsIdent(String left, String* &right, int rightcount);
 	TableLoader basecel;
 	//№	Header	Name	Subheader	Size	Type	Data
 	Basecell Mor;
 	std::vector<Coord> Coords;
-	//Coord TextToFloat6(String &str)//, float** &mas)
-	void TextToFloat6(String str, Coord &curr)
-	{
-		int st = 1;
-		int coi = 0;
-		for (int j = 2; j <= str.Length(); j++)
-		{
-			if (str[j] == ' ')
-			{
-				curr.all[coi] = str.SubString(st, j-st).ToDouble();
-				st = j+1;
-				coi++;
-			}
-		}
-		curr.rz = str.SubString(st, str.Length()-st+1).ToDouble();
-		//return xyz;
-	}
+	void TextToFloat6(String str, Coord &curr);
 	TStringList *what;
 	bool equ(float &value, float rhs)
 	{
@@ -459,8 +349,6 @@ public:		// User declarations
 	typedef PACK* PPACK;
 	std::map<int, PACK> ListStore;
 	std::set<String> obj;
-	int GetEndOfRecord(int Row);
-	//std::map<int,int>Sizes;
 	std::vector<int>Sizes;
 	std::vector<long>Ends;
 };

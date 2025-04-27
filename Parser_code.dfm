@@ -324,14 +324,14 @@ object Form1: TForm1
         Caption = 'Prepare for editing'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 24
+        TabOrder = 23
         OnClick = PrepareEClick
       end
       object PrepareGame: TButton
         Left = 0
         Top = 32
         Width = 172
-        Height = 31
+        Height = 32
         Hint = 'akella\1C. INFO replace @# to {}'
         Margins.Left = 4
         Margins.Top = 4
@@ -340,14 +340,14 @@ object Form1: TForm1
         Caption = 'Prepare for game'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 25
+        TabOrder = 24
         OnClick = PrepareGameClick
       end
       object ExportBtn: TButton
         Left = 172
         Top = 32
         Width = 73
-        Height = 31
+        Height = 32
         Hint = 'Export selected records'
         Margins.Left = 4
         Margins.Top = 4
@@ -356,12 +356,12 @@ object Form1: TForm1
         Caption = 'Export'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 8
+        TabOrder = 7
         OnClick = ExportBtnClick
       end
       object DelTrash: TButton
         Left = 0
-        Top = 63
+        Top = 64
         Width = 126
         Height = 32
         Hint = 'Auto delete trash CELL'
@@ -372,12 +372,12 @@ object Form1: TForm1
         Caption = 'Delete Trash'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 13
+        TabOrder = 12
         OnClick = DelTrashClick
       end
       object FindNext: TButton
         Left = 126
-        Top = 63
+        Top = 64
         Width = 95
         Height = 32
         Hint = 'Find text from string field. Right click is delete.'
@@ -388,15 +388,15 @@ object Form1: TForm1
         Caption = 'Fin&d next'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 7
+        TabOrder = 6
         OnClick = FindNextClick
         OnContextPopup = NextTagContextPopup
       end
       object NextCell: TButton
         Left = 0
-        Top = 95
+        Top = 96
         Width = 91
-        Height = 31
+        Height = 32
         Hint = 'Next CELL LAND PGRD'
         Margins.Left = 4
         Margins.Top = 4
@@ -405,14 +405,14 @@ object Form1: TForm1
         Caption = 'Next Cell'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 20
+        TabOrder = 19
         OnClick = NextCellClick
       end
       object Replace: TButton
         Left = 91
-        Top = 95
+        Top = 96
         Width = 119
-        Height = 31
+        Height = 32
         Hint = 'Replace @# to {} from clipboard'
         Margins.Left = 4
         Margins.Top = 4
@@ -421,12 +421,12 @@ object Form1: TForm1
         Caption = 'Replace @#'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 22
+        TabOrder = 21
         OnClick = ReplaceClick
       end
       object DelDials: TButton
         Left = 0
-        Top = 126
+        Top = 128
         Width = 183
         Height = 32
         Hint = 'Delete DIAL'#39's without INFO'
@@ -437,14 +437,14 @@ object Form1: TForm1
         Caption = 'Delete trash DIAL'#39's'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 9
+        TabOrder = 8
         OnClick = DelDialsClick
       end
       object CheckConflicts: TButton
         Left = 0
-        Top = 158
+        Top = 160
         Width = 143
-        Height = 31
+        Height = 32
         Hint = 'Check plugin same identifiers'
         Margins.Left = 4
         Margins.Top = 4
@@ -453,12 +453,12 @@ object Form1: TForm1
         Caption = 'Check conflicts'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 23
+        TabOrder = 22
         OnClick = CheckConflictsClick
       end
       object setlocaleBtn: TButton
         Left = 143
-        Top = 158
+        Top = 160
         Width = 94
         Height = 32
         Hint = 'setlocale for Localized. '#39'Find'#39' field is locale page'
@@ -469,12 +469,12 @@ object Form1: TForm1
         Caption = 'setlocale'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 19
+        TabOrder = 18
         OnClick = setlocaleBtnClick
       end
       object FindinList2: TButton
         Left = 0
-        Top = 190
+        Top = 192
         Width = 143
         Height = 32
         Hint = 'Find in List 2'
@@ -485,14 +485,14 @@ object Form1: TForm1
         Caption = 'Find in subList'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 14
+        TabOrder = 13
         OnClick = FindinList2Click
       end
       object Sel: TButton
         Left = 143
-        Top = 190
+        Top = 192
         Width = 67
-        Height = 31
+        Height = 32
         Hint = 'Start clicking on the selected rows in List1'
         Margins.Left = 4
         Margins.Top = 4
@@ -501,13 +501,13 @@ object Form1: TForm1
         Caption = 'Select'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 16
+        TabOrder = 15
         Visible = False
         OnClick = SelClick
       end
       object FindinSublists: TButton
         Left = 0
-        Top = 222
+        Top = 224
         Width = 173
         Height = 32
         Hint = 'Find in all list and sublists'
@@ -518,13 +518,13 @@ object Form1: TForm1
         Caption = 'Find in &all sublists'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 21
+        TabOrder = 20
         OnClick = FindinSublistsClick
       end
       object Wordwrap: TCheckBox
         AlignWithMargins = True
         Left = 3
-        Top = 258
+        Top = 260
         Width = 120
         Height = 22
         Margins.Top = 4
@@ -533,28 +533,12 @@ object Form1: TForm1
         Caption = 'Word wrap'
         Checked = True
         State = cbChecked
-        TabOrder = 12
+        TabOrder = 11
         OnClick = WordwrapClick
       end
-      object DelDatas: TButton
-        Left = 124
-        Top = 254
-        Width = 129
-        Height = 31
-        Hint = 'Find and delete Headers with Data'#39's from Memo strings.'
-        Margins.Left = 4
-        Margins.Top = 4
-        Margins.Right = 4
-        Margins.Bottom = 4
-        Caption = 'Delete Data'#39's'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 3
-        OnClick = DelDatasClick
-      end
       object ExportScriptsBtn: TButton
-        Left = 0
-        Top = 285
+        Left = 124
+        Top = 256
         Width = 131
         Height = 32
         Hint = 'Exports all SCPT\SCTX'
@@ -565,12 +549,12 @@ object Form1: TForm1
         Caption = 'Export scripts'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 26
+        TabOrder = 25
         OnClick = ExportScriptsBtnClick
       end
       object ExportSPEL: TButton
-        Left = 131
-        Top = 285
+        Left = 0
+        Top = 288
         Width = 123
         Height = 32
         Hint = 'Export selected SPEL'
@@ -581,14 +565,14 @@ object Form1: TForm1
         Caption = 'Export SPEL'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 6
+        TabOrder = 5
         OnClick = ExportSPELClick
       end
       object DeleteExtraData: TButton
         Left = 0
-        Top = 317
+        Top = 320
         Width = 168
-        Height = 31
+        Height = 32
         Hint = 
           'Deletes from a sheet 2 all up to the following heading FRMR NAM0' +
           ' DATA'
@@ -600,12 +584,12 @@ object Form1: TForm1
         Enabled = False
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 15
+        TabOrder = 14
         OnClick = DeleteExtraDataClick
       end
       object TES3Read: TButton
         Left = 168
-        Top = 317
+        Top = 320
         Width = 64
         Height = 32
         Hint = 'read TES3 header'
@@ -620,9 +604,9 @@ object Form1: TForm1
       end
       object MassDelete: TButton
         Left = 0
-        Top = 349
+        Top = 352
         Width = 122
-        Height = 31
+        Height = 32
         Hint = 'Deletes from a sheet 1 all written down headings '
         Margins.Left = 4
         Margins.Top = 4
@@ -631,14 +615,14 @@ object Form1: TForm1
         Caption = 'Mass Delete'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 32
+        TabOrder = 31
         OnClick = MassDeleteClick
       end
       object CellRead: TButton
         Left = 122
-        Top = 349
+        Top = 352
         Width = 63
-        Height = 31
+        Height = 32
         Hint = 'Read CELL'
         Margins.Left = 4
         Margins.Top = 4
@@ -652,21 +636,21 @@ object Form1: TForm1
       end
       object TestP: TButton
         Left = 185
-        Top = 349
+        Top = 352
         Width = 62
-        Height = 31
+        Height = 32
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
         Margins.Bottom = 4
         Caption = 'TestP'
-        TabOrder = 4
+        TabOrder = 3
         Visible = False
         OnClick = TestPClick
       end
       object CheckCoord: TButton
         Left = 0
-        Top = 380
+        Top = 384
         Width = 165
         Height = 32
         Hint = 'max min of Z of selected CELL'
@@ -677,13 +661,13 @@ object Form1: TForm1
         Caption = 'Check coordinate'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 17
+        TabOrder = 16
         OnClick = CheckCoordClick
         OnContextPopup = CheckCoordContextPopup
       end
       object GMDTRead: TButton
         Left = 165
-        Top = 380
+        Top = 384
         Width = 72
         Height = 32
         Hint = 'Read GMDT'
@@ -700,9 +684,9 @@ object Form1: TForm1
       end
       object AddMainFields: TButton
         Left = 0
-        Top = 412
+        Top = 416
         Width = 153
-        Height = 31
+        Height = 32
         Hint = 'To add bytes after the size'
         Margins.Left = 4
         Margins.Top = 4
@@ -711,26 +695,26 @@ object Form1: TForm1
         Caption = 'Add main fields'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 18
+        TabOrder = 17
         OnClick = AddMainFieldsClick
       end
       object SPELread: TButton
         Left = 153
-        Top = 412
+        Top = 416
         Width = 63
-        Height = 31
+        Height = 32
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
         Margins.Bottom = 4
         Caption = 'SPEL'
-        TabOrder = 5
+        TabOrder = 4
         Visible = False
         OnClick = SPELreadClick
       end
       object PushCoord: TButton
         Left = 0
-        Top = 443
+        Top = 448
         Width = 169
         Height = 32
         Hint = 
@@ -743,42 +727,42 @@ object Form1: TForm1
         Caption = 'Swap coordinates'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 11
+        TabOrder = 10
         OnClick = PushCoordClick
       end
       object SPLMread: TButton
         Left = 169
-        Top = 443
+        Top = 448
         Width = 62
-        Height = 31
+        Height = 32
         Margins.Left = 4
         Margins.Top = 4
         Margins.Right = 4
         Margins.Bottom = 4
         Caption = 'SPLM'
-        TabOrder = 10
+        TabOrder = 9
         Visible = False
         OnClick = SPLMreadClick
       end
       object FindCELLmast: TButton
         Left = 0
-        Top = 475
+        Top = 480
         Width = 193
-        Height = 31
+        Height = 32
         Hint = 
           'Checks all FRMR in all cells and finds which is specified master' +
           ' file > 3'
         Caption = 'Find CELL with Mast'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 33
+        TabOrder = 32
         OnClick = FindCELLmastClick
       end
       object MVRF: TButton
         Left = 193
-        Top = 475
+        Top = 480
         Width = 62
-        Height = 31
+        Height = 32
         Hint = 'Read MVRF'
         Margins.Left = 4
         Margins.Top = 4
@@ -787,12 +771,12 @@ object Form1: TForm1
         Caption = 'MVRF'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 28
+        TabOrder = 27
         OnClick = MVRFClick
       end
       object DeleteAllSubhead: TButton
         Left = 0
-        Top = 506
+        Top = 512
         Width = 233
         Height = 32
         Hint = 
@@ -808,12 +792,12 @@ object Form1: TForm1
         Enabled = False
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 30
+        TabOrder = 29
         OnClick = DeleteAllSubheadClick
       end
       object DelGroupSubheaders: TButton
         Left = 0
-        Top = 538
+        Top = 544
         Width = 241
         Height = 32
         Hint = 
@@ -827,12 +811,12 @@ object Form1: TForm1
         Enabled = False
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 29
+        TabOrder = 28
         OnClick = DelGroupSubheadersClick
       end
       object LoadCells: TButton
         Left = 0
-        Top = 570
+        Top = 576
         Width = 102
         Height = 32
         Hint = 
@@ -845,14 +829,14 @@ object Form1: TForm1
         Caption = 'Load Cells'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 27
+        TabOrder = 26
         OnClick = LoadCellsClick
       end
       object CheckCELL: TButton
         Left = 102
-        Top = 570
+        Top = 576
         Width = 112
-        Height = 31
+        Height = 32
         Hint = 'Checks the changed coordinates of objects in cells'
         Margins.Left = 4
         Margins.Top = 4
@@ -861,12 +845,12 @@ object Form1: TForm1
         Caption = 'Chec&k CELL'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 31
+        TabOrder = 30
         OnClick = CheckCELLClick
       end
       object FindOwners: TButton
         Left = 0
-        Top = 602
+        Top = 608
         Width = 121
         Height = 32
         Hint = 
@@ -877,16 +861,16 @@ object Form1: TForm1
         Caption = 'FindOwners'
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 34
+        TabOrder = 33
         OnClick = FindOwnersClick
       end
       object DevastateCell: TButton
         Left = 121
-        Top = 602
+        Top = 608
         Width = 133
-        Height = 25
+        Height = 32
         Caption = 'DevastateCell'
-        TabOrder = 35
+        TabOrder = 34
         Visible = False
         OnClick = DevastateCellClick
       end
@@ -995,6 +979,7 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
+        ExplicitWidth = 53
       end
     end
   end
@@ -1165,8 +1150,6 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
-      ExplicitLeft = -1
-      ExplicitTop = 78
     end
   end
   object PanelList2: TPanel
@@ -1263,7 +1246,6 @@ object Form1: TForm1
       OnDblClick = List2DblClick
       OnEnter = List2Enter
       OnKeyUp = List2KeyUp
-      OnMouseDown = List2MouseDown
       OnSelectCell = List2SelectCell
     end
     object SubDescript: TEdit
@@ -1348,12 +1330,12 @@ object Form1: TForm1
       Caption = 'AutoFind'
       GroupIndex = 1
     end
-    object N2: TMenuItem
+    object NAbove: TMenuItem
       Caption = 'More'
       GroupIndex = 1
-      OnClick = N2Click
+      OnClick = NAboveClick
     end
-    object ExtreriorFlagsPrint: TMenuItem
+    object NExtreriorFlagsPrint: TMenuItem
       AutoCheck = True
       Caption = 'Print Extrerior Flags'
       Checked = True
@@ -1364,7 +1346,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00AC0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00BC0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
