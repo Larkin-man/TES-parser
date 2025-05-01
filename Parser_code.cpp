@@ -2036,15 +2036,17 @@ void TForm1::DeleteSublist(int Row2, int MainRow)
 		del += SLENSIZE;
 		del += 4;
 		DeletedSize += del;
-		LDele->Visible = true;
-		Save2->Enabled = true;
-		LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
 		int MainLenOffset = List->Cells[CSTART][MainRow].ToInt() + 4;//char4
 		int MainLen = Sizes[MainRow];
-		if (!ShowAll)
-			tolog(IntToStr(Offset)+":DELE in:"+List->Cells[CDATA][MainRow]);
-		else
+		if (ShowAll)
+		{
+			LDele->Visible = true;
+			Save2->Enabled = true;
+			LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
 			List2->Cells[CSIZE][Row2] = "-X-";
+		}
+//		else
+//			tolog(IntToStr(Offset)+":DELE in:"+List->Cells[CDATA][MainRow]);
 		SubDelete.push_back(DeleteItem(MainLenOffset, MainLen, Offset, del));
 		//запишем размер header
 		if (List->Cells[CHEADER][MainRow].ToIntDef(-1) == -1) //first del
@@ -3322,7 +3324,10 @@ void __fastcall TForm1::DevastateCellClick(TObject *Sender)
 				DeleteSublist(Row, i);
 		}
 	ShowAll = true;
+	LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
 	NShowData->Checked = true;
+	LDele->Visible = true;
+	Save2->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
