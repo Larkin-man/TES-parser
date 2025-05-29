@@ -874,6 +874,19 @@ object Form1: TForm1
         Visible = False
         OnClick = DevastateCellClick
       end
+      object DropMaster: TButton
+        Left = 0
+        Top = 640
+        Width = 120
+        Height = 32
+        Hint = 'set FRMR.MAST to 0 in CELL'
+        Caption = 'Drop Master'
+        Enabled = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 35
+        OnClick = DropMasterClick
+      end
     end
     object PanelSubRead: TPanel
       AlignWithMargins = True
@@ -1345,7 +1358,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00C00110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00C40110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

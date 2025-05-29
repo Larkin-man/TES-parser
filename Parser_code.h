@@ -119,6 +119,7 @@ __published:	// IDE-managed Components
 	TSplitter *Splitter3;
 	TMenuItem *NExtreriorFlagsPrint;
 	TButton *DevastateCell;
+	TButton *DropMaster;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -193,6 +194,7 @@ __published:	// IDE-managed Components
 	void __fastcall List2DblClick(TObject *Sender);
 	void __fastcall ListDblClick(TObject *Sender);
 	void __fastcall DevastateCellClick(TObject *Sender);
+	void __fastcall DropMasterClick(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations

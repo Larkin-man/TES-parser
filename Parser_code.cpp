@@ -2003,6 +2003,7 @@ void __fastcall TForm1::NEnableList2DeleteClick(TObject *Sender)
 	DelGroupSubheaders->Enabled = true;
 	DeleteAllSubhead->Enabled = true;
 	DevastateCell->Visible = NEnableList2Delete->Checked;
+	DropMaster->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
@@ -3328,6 +3329,24 @@ void __fastcall TForm1::DevastateCellClick(TObject *Sender)
 	NShowData->Checked = true;
 	LDele->Visible = true;
 	Save2->Enabled = true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::DropMasterClick(TObject *Sender)
+{
+	if (List->Cells[CHEADER][List->Row] != "CELL")
+		return;
+	int frmr, mast;
+	for (int j = 1; j < List2->RowCount; j++)
+		if (List2->Cells[CHEADER][j].Compare("FRMR") == 0)
+		{
+			fseek(file, List2->Cells[CSTART][j].ToInt() + 8, SEEK_SET);
+			int Data;
+			fread(&Data, 4, 1, file);
+			mast = Data / 16777216;
+			frmr = Data % 16777216;
+			tolog(IntToStr(frmr)+" "+IntToStr(mast));
+		}
 }
 //---------------------------------------------------------------------------
 
