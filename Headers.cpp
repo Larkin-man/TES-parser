@@ -54,4 +54,12 @@ void TRECORD1INT1STR::Write(FILE* &file)
 	fwrite(&Length, 4, 1, file);
 	fwrite(Data, Length, 1, file);
 }
+void FRMR::Set(FILE* &file, int FRMRoffset)
+{
+	fseek(file, FRMRoffset + 8, SEEK_SET);
+	int Data;
+	fread(&Data, 4, 1, file);
+	mast = Data / 16777216;
+	frmr = Data % 16777216;
+}
 #pragma package(smart_init)

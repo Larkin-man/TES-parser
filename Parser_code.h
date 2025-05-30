@@ -195,6 +195,8 @@ __published:	// IDE-managed Components
 	void __fastcall ListDblClick(TObject *Sender);
 	void __fastcall DevastateCellClick(TObject *Sender);
 	void __fastcall DropMasterClick(TObject *Sender);
+	void __fastcall DropMasterContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
+
 
 private:	// User declarations
 public:		// User declarations
@@ -214,7 +216,7 @@ public:		// User declarations
 	long EoF;
 	MHeader Univ;
 	BITS *pbit;
-	void ClearDele();
+	void Clear();
 	void tolog(String msg)
 	{
 		Out->Lines->Add(msg);
@@ -308,6 +310,13 @@ public:		// User declarations
 	String CurrCell;
 	std::vector<long> RefStarts;
 	std::vector<long> RefEnds;
+	struct SavingData
+	{
+		void *Data;
+		int Size;
+	};
+	std::map<long, int> Edited;
+	typedef std::map<long, int>::iterator ED;
 	void PrepareFor(char SYMBS[4]);
 	bool PrepareForEdit;
 	int SearchingIn1;

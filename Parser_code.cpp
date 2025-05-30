@@ -77,7 +77,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	SubIndexes = new int[cSubIndexes];
 	Opening = false;
 	Expo = NULL;
-	ClearDele();
+	Clear();
 	//ToLog(sizeof(MHeader::HeaderData));
 	localeinstalled = false;
 	Univ.Capacity = 0;
@@ -97,6 +97,24 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 		List2->DefaultRowHeight = -(List2->Font->Height - 5);
 }
 //---------------------------------------------------------------------------
+void TForm1::Clear()
+{
+	for (std::vector<DeleteItem>::iterator el = SubDelete.begin(); el != SubDelete.end(); ++el)
+		if (el->Addon)
+			delete [] el->Addon;
+	Deleted.clear();
+	DeletedSize = 0;
+	LogUp = true;
+	FindIdx = -1;
+	SubDelete.clear();
+	RefStarts.clear();
+	RefEnds.clear();
+	Sizes.clear();
+	Ends.clear();
+	Edited.clear();
+}
+//---------------------------------------------------------------------------
+
 void TForm1::AddTagType(char *name, char type, char *maintag)
 {
 	//TagTypes = new TAGTYPES[nTypes+1];
@@ -174,7 +192,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	EoF = ftell(file);
 	if (EoF < 48)
 		return ShowMessage( "File is empty.");
-	ClearDele();
+	Clear();
 	Save->Enabled = false;
 	LDele->Visible = false;
 	for (int i=OpenDialog1->FileName.Length(); i>1; --i)
@@ -350,22 +368,6 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	if (NClearOut->Checked)
 		Out->Lines->Clear();
 	Opening = false;
-}
-//---------------------------------------------------------------------------
-void TForm1::ClearDele()
-{
-	for (std::vector<DeleteItem>::iterator el = SubDelete.begin(); el != SubDelete.end(); ++el)
-		if (el->Addon)
-			delete [] el->Addon;
-	Deleted.clear();
-	DeletedSize = 0;
-	LogUp = true;
-	FindIdx = -1;
-	SubDelete.clear();
-	RefStarts.clear();
-	RefEnds.clear();
-	Sizes.clear();
-	Ends.clear();
 }
 //---------------------------------------------------------------------------
 void TForm1::RefreshData(FILE* &file, int Start)
@@ -773,14 +775,14 @@ void __fastcall TForm1::SPELreadClick(TObject *Sender)
 
 void __fastcall TForm1::SaveClick(TObject *Sender)
 {
-	if (RefStarts.empty() && Deleted.empty() && RefEnds.empty())
+	if (RefStarts.empty() && Deleted.empty() && RefEnds.empty() && Edited.empty())
 		return;
 	FILE *curr = NULL;
 	String Nam = "CLEAR_" + PluginName;
 	byte *mem = NULL;
 	long cap = 0;
 	int Len;
-	if (RefStarts.empty() == false || RefEnds.empty() == false)
+	if (RefStarts.empty() == false || RefEnds.empty() == false || Edited.empty() == false)
 	{
 		if (Deleted.empty())
 			curr = _wfopen(Nam.w_str(), L"wb");
@@ -791,6 +793,7 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 		Save->Enabled = false;
 		fseek(file, 0, SEEK_END);
 		EoF = ftell(file);
+		//curr = копия file
 		fseek(file, 0, SEEK_SET);
 		fseek(curr, 0, SEEK_SET);
 		cap = 65536;
@@ -803,6 +806,12 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 		Len = EoF+cap-Len;
 		fread (mem, Len, 1, file);
 		fwrite(mem, Len, 1, curr);
+		//.
+		for (ED ele = Edited.begin(); ele != Edited.end(); ++ele)
+		{
+			fseek(curr, ele->first, SEEK_SET);
+			fwrite(&ele->second, 4, 1, curr);
+		}
 		char symb = PrepareForEdit ? '{' : '@';
 		std::vector<long>::iterator ele = RefStarts.begin();
 		for (; ele != RefStarts.end(); ++ele)
@@ -2003,7 +2012,6 @@ void __fastcall TForm1::NEnableList2DeleteClick(TObject *Sender)
 	DelGroupSubheaders->Enabled = true;
 	DeleteAllSubhead->Enabled = true;
 	DevastateCell->Visible = NEnableList2Delete->Checked;
-	DropMaster->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
@@ -2456,7 +2464,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	int EoC = ftell(conf);
 	if (EoC < 48)
 		return ShowMessage( "File is empty.");
-	ClearDele();
+	Clear();
 	Save->Enabled = false;
 	LDele->Visible = false;
 	for (int i=OpenDialog1->FileName.Length(); i>1; --i)
@@ -3313,7 +3321,7 @@ void __fastcall TForm1::DevastateCellClick(TObject *Sender)
 	bool CanSelect = true;
 	ShowAll = false;
 	NShowData->Checked = false;
-	for (int i = 0; i < List->RowCount; ++i)
+	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
 		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
 		{
 			ListSelectCell(Sender, 0, i, CanSelect);
@@ -3340,13 +3348,29 @@ void __fastcall TForm1::DropMasterClick(TObject *Sender)
 	for (int j = 1; j < List2->RowCount; j++)
 		if (List2->Cells[CHEADER][j].Compare("FRMR") == 0)
 		{
-			fseek(file, List2->Cells[CSTART][j].ToInt() + 8, SEEK_SET);
+			int Offset = List2->Cells[CSTART][j].ToInt() + 8;
+			fseek(file, Offset, SEEK_SET);
 			int Data;
 			fread(&Data, 4, 1, file);
 			mast = Data / 16777216;
 			frmr = Data % 16777216;
 			tolog(IntToStr(frmr)+" "+IntToStr(mast));
+			if (mast > 0)
+				Edited.insert(std::pair<long, int>(Offset, frmr));
 		}
+	if (Edited.size() > 0)
+	{
+		tolog("Done. "+IntToStr((int)Edited.size())+" substitutions. Click Save to complete.");
+		Save->Enabled = true;
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::DropMasterContextPopup(TObject *Sender, TPoint &MousePos,
+          bool &Handled)
+{
+	for (ED el = Edited.begin(); el != Edited.end(); ++el)
+		tolog(IntToStr((int)el->first)+" "+IntToStr(el->second));
 }
 //---------------------------------------------------------------------------
 

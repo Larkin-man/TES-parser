@@ -192,14 +192,7 @@ struct FRMR
 {
 	int frmr;
 	int mast;
-	void Set(FILE* &file, int FRMRoffset)
-	{
-		fseek(file, FRMRoffset + 8, SEEK_SET);
-		int Data;
-		fread(&Data, 4, 1, file);
-		mast = Data / 16777216;
-		frmr = Data % 16777216;
-	}
+	void Set(FILE* &file, int FRMRoffset);
 };
 
 #endif

@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'TES parser'
-  ClientHeight = 935
+  ClientHeight = 956
   ClientWidth = 1392
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object Form1: TForm1
     Left = 759
     Top = 34
     Width = 4
-    Height = 901
+    Height = 922
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -31,7 +31,7 @@ object Form1: TForm1
     Left = 385
     Top = 34
     Width = 4
-    Height = 901
+    Height = 922
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -271,7 +271,7 @@ object Form1: TForm1
     Left = 763
     Top = 34
     Width = 361
-    Height = 901
+    Height = 922
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -285,12 +285,13 @@ object Form1: TForm1
     TabOrder = 3
     WantTabs = True
     OnDblClick = OutDblClick
+    ExplicitHeight = 901
   end
   object PanelPRO: TPanel
     Left = 1124
     Top = 34
     Width = 268
-    Height = 901
+    Height = 922
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -298,12 +299,13 @@ object Form1: TForm1
     Align = alRight
     ShowCaption = False
     TabOrder = 4
+    ExplicitHeight = 901
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 4
       Top = 267
       Width = 260
-      Height = 630
+      Height = 651
       Margins.Top = 1
       Align = alClient
       BevelKind = bkTile
@@ -311,6 +313,7 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
+      ExplicitHeight = 630
       object PrepareE: TButton
         Left = 0
         Top = 0
@@ -881,11 +884,11 @@ object Form1: TForm1
         Height = 32
         Hint = 'set FRMR.MAST to 0 in CELL'
         Caption = 'Drop Master'
-        Enabled = False
         ParentShowHint = False
         ShowHint = True
         TabOrder = 35
         OnClick = DropMasterClick
+        OnContextPopup = DropMasterContextPopup
       end
     end
     object PanelSubRead: TPanel
@@ -999,7 +1002,7 @@ object Form1: TForm1
     Left = 0
     Top = 34
     Width = 385
-    Height = 901
+    Height = 922
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -1008,6 +1011,7 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
+    ExplicitHeight = 901
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -1136,7 +1140,7 @@ object Form1: TForm1
       Left = 1
       Top = 74
       Width = 383
-      Height = 826
+      Height = 847
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -1162,13 +1166,14 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
+      ExplicitHeight = 826
     end
   end
   object PanelList2: TPanel
     Left = 389
     Top = 34
     Width = 370
-    Height = 901
+    Height = 922
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -1177,6 +1182,7 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
+    ExplicitHeight = 901
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 1
@@ -1233,7 +1239,7 @@ object Form1: TForm1
       Left = 1
       Top = 24
       Width = 368
-      Height = 846
+      Height = 867
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -1259,10 +1265,11 @@ object Form1: TForm1
       OnEnter = List2Enter
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
+      ExplicitHeight = 846
     end
     object SubDescript: TEdit
       Left = 1
-      Top = 870
+      Top = 891
       Width = 368
       Height = 30
       Margins.Left = 4
@@ -1280,6 +1287,7 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
+      ExplicitTop = 870
     end
   end
   object OpenDialog1: TOpenDialog
@@ -1358,7 +1366,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00C40110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00C80110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
