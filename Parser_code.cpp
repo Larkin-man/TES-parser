@@ -1027,7 +1027,10 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		List2->Cells[CSIZE][Row] = Univ.Length;
 		List2->Cells[CDATA2][Row] = "";
 		List2->Cells[CTYPE][Row] = "";
-		Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
+		if (ExportBtn->Tag != 1)
+			Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
+		else
+			Len = Univ.Length;
 		//Интерпретирование данных
 		if (NShowData->Checked)
 		{
@@ -1431,6 +1434,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 			return;
 	if (expTab == ID_YES)
 	{
+		ExportBtn->Tag = 1;
 		Export = new TStringList;
 		Export->Append("Header\tOffset\tSize\tData");
 		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
@@ -1452,6 +1456,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 
 	if (type == ID_NO) //Ровная таблица
 	{
+		ExportBtn->Tag = 1;
 		int num = 1;
 		int count = 1;
 		if (expOff == ID_YES)
@@ -1492,6 +1497,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 	}
 	else //в строку subheaders
 	{
+		ExportBtn->Tag = 1;
 		if (expOff == ID_YES)
 			if (expSize == ID_YES)
 				Export->Append("Header\tName\tSubheader[Offset]{Size}\tData");
@@ -1524,6 +1530,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 	LogUp = true;
 	Export->SaveToFile(PluginName+".txt");
 	ShowMessage("Saved:"+PluginName+".txt");
+	ExportBtn->Tag = 0;
 }
 //---------------------------------------------------------------------------
 bool TForm1::Find(String find)

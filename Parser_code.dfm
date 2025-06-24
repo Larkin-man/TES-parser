@@ -285,7 +285,6 @@ object Form1: TForm1
     TabOrder = 3
     WantTabs = True
     OnDblClick = OutDblClick
-    ExplicitHeight = 901
   end
   object PanelPRO: TPanel
     Left = 1124
@@ -299,7 +298,6 @@ object Form1: TForm1
     Align = alRight
     ShowCaption = False
     TabOrder = 4
-    ExplicitHeight = 901
     object FlowPanel1: TFlowPanel
       AlignWithMargins = True
       Left = 4
@@ -313,7 +311,6 @@ object Form1: TForm1
       Caption = 'FlowPanel1'
       ShowCaption = False
       TabOrder = 0
-      ExplicitHeight = 630
       object PrepareE: TButton
         Left = 0
         Top = 0
@@ -1011,7 +1008,6 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 1
-    ExplicitHeight = 901
     object Panel4: TPanel
       Left = 1
       Top = 1
@@ -1166,7 +1162,6 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
-      ExplicitHeight = 826
     end
   end
   object PanelList2: TPanel
@@ -1182,7 +1177,6 @@ object Form1: TForm1
     Caption = 'PanelList'
     ShowCaption = False
     TabOrder = 2
-    ExplicitHeight = 901
     object HeaderControl2: THeaderControl
       AlignWithMargins = True
       Left = 1
@@ -1265,7 +1259,6 @@ object Form1: TForm1
       OnEnter = List2Enter
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
-      ExplicitHeight = 846
     end
     object SubDescript: TEdit
       Left = 1
@@ -1287,7 +1280,6 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'SubDescript'
       Visible = False
-      ExplicitTop = 870
     end
   end
   object OpenDialog1: TOpenDialog
@@ -1366,7 +1358,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00C80110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00CC0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
