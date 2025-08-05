@@ -74,7 +74,7 @@ __published:	// IDE-managed Components
 	TCheckBox *ProModeCK;
 	TEdit *SubDescript;
 	TButton *SPLMread;
-	TButton *PushCoord;
+	TButton *SwapCoord;
 	TCheckBox *Wordwrap;
 	TPopupMenu *PopupMenu1;
 	TMenuItem *NTestMenu;
@@ -146,7 +146,7 @@ __published:	// IDE-managed Components
 	void __fastcall List2SelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
 	void __fastcall ProModeCKClick(TObject *Sender);
 	void __fastcall SPLMreadClick(TObject *Sender);
-	void __fastcall PushCoordClick(TObject *Sender);
+	void __fastcall SwapCoordClick(TObject *Sender);
 	void __fastcall CloseClick(TObject *Sender);
 	void __fastcall WordwrapClick(TObject *Sender);
 	void __fastcall NTestMenuClick(TObject *Sender);

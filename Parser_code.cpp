@@ -1746,7 +1746,7 @@ void __fastcall TForm1::SPLMreadClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::PushCoordClick(TObject *Sender)
+void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 {
 	if (List->Row < 0)
 		return;
@@ -1935,7 +1935,7 @@ void __fastcall TForm1::NEnableSublistClick(TObject *Sender)
 	PanelSubRead->Visible = NEnableSublist->Checked;
 	FindinList2->Enabled = NEnableSublist->Checked;
 	FindinSublists->Enabled = NEnableSublist->Checked;
-	PushCoord->Enabled = NEnableSublist->Checked;
+	SwapCoord->Enabled = NEnableSublist->Checked;
 	DeleteExtraData->Enabled = NEnableSublist->Checked && NEnableList2Delete->Checked;
 	DelGroupSubheaders->Enabled = NEnableSublist->Checked && NEnableList2Delete->Checked;
 	DeleteAllSubhead->Enabled = NEnableSublist->Checked && NEnableList2Delete->Checked;
@@ -2454,7 +2454,7 @@ void __fastcall TForm1::ReplaceClick(TObject *Sender)
 
 void __fastcall TForm1::NRewritesClick(TObject *Sender)
 {
-	PushCoord->Visible = NRewrites->Checked;
+	SwapCoord->Visible = NRewrites->Checked;
 	MVRF->Visible = NRewrites->Checked;
 }
 //---------------------------------------------------------------------------
@@ -3351,6 +3351,20 @@ void __fastcall TForm1::DropMasterClick(TObject *Sender)
 {
 	if (List->Cells[CHEADER][List->Row] != "CELL")
 		return;
+	int type = 0;
+	if ( (type=Application->MessageBoxA(L"FRMR indexes - 0:New; 1:M; 2:T; 3:B; 4+: Another esm. To replace 4+ to 0?"
+		, L"FRMR Indexes->0", MB_YESNOCANCEL)) == ID_CANCEL)
+			return;
+	if (type == ID_YES)
+		type = 400;
+	else
+	if ( (type=Application->MessageBoxA(L"FRMR indexes 0:New; 1:M; 2:T; 3:B; 4+: Another esm. To replace ALL to 0?"
+		, L"FRMR Indexes->0", MB_YESNOCANCEL)) == ID_CANCEL)
+			return;
+	if (type == ID_YES)
+		type = 1;
+	else
+		type = 4;
 	int frmr, mast;
 	for (int j = 1; j < List2->RowCount; j++)
 		if (List2->Cells[CHEADER][j].Compare("FRMR") == 0)
@@ -3361,9 +3375,13 @@ void __fastcall TForm1::DropMasterClick(TObject *Sender)
 			fread(&Data, 4, 1, file);
 			mast = Data / 16777216;
 			frmr = Data % 16777216;
-			tolog(IntToStr(frmr)+" "+IntToStr(mast));
-			if (mast > 0)
+			if (mast >= type)
+			{
 				Edited.insert(std::pair<long, int>(Offset, frmr));
+				tolog(IntToStr(frmr)+" "+IntToStr(mast)+" = drop.");
+			}
+			else
+				tolog(IntToStr(frmr)+" "+IntToStr(mast)+" = ignored.");
 		}
 	if (Edited.size() > 0)
 	{
