@@ -156,27 +156,32 @@ struct Basecell
 	int* CoordRef;
 };
 
-struct Coord
+struct Coord6
 {
-	int FRMR;
-	String Name;
+	float all[6];
 	float &x;
 	float &y;
 	float &z;
 	float &rx;
 	float &ry;
 	float &rz;
-	float all[6];
-	String Dodt;
-
-	Coord::Coord() : x(all[0]), y(all[1]), z(all[2])
+	Coord6::Coord6() : x(all[0]), y(all[1]), z(all[2])
 		, rx(all[3]), ry(all[4]), rz(all[5]) {	}
-	Coord(const Coord &rhs) : x(all[0]), y(all[1]), z(all[2])
-		, rx(all[3]), ry(all[4]), rz(all[5])
+	bool TextToFloat3(String str);
+	void TextToFloat6(String str);
+	String ToStr()
 	{
-		*this = rhs;
+		return String("\t"+FloatToStr(x)+"\t"+FloatToStr(y)+"\t"+FloatToStr(z));
 	}
+	static float round(float x);
+	void Round();
+};
 
+struct Coord: public Coord6
+{
+	int FRMR;
+	String Name;
+	String Dodt;
 	Coord& operator=(const Coord &rhs)
 	{
 		for (int i = 0; i < 6; i++)

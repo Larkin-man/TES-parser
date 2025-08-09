@@ -1,11 +1,11 @@
 //---------------------------------------------------------------------------
-
 #include <vcl.h>
 #include <stdio.h>
 #include <set>
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <io.h> //for access
 //#include <float.h>
 #include "Headers.h"
 #pragma hdrstop
@@ -1758,69 +1758,48 @@ void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 		IsCell = false;
 	else
 		return ShowMessage("Нужно выделить ячейку CELL или PGRD");
-	Base = EFinds->Text;
-	if (Base.Length() < 2)
+	if (EFinds->Text.Length() < 2)
 		return ShowMessage("Поле ввода должно содержать координаты X Y Z через пробел из редактора");
-	int p;
-	Base = Base.Trim();
-	while ((p = Base.Pos('.')) > 0)
-		Base[p] = ',';
-	while ((p = Base.Pos("  ")) > 0)
-		Base.Delete(p,1);
-	EFinds->Text = Base;
-
-	p = Base.Pos(' ');
-	if (p <= 0)
+	Coord6 in;
+	if	(in.TextToFloat3(EFinds->Text))
 		return ShowMessage("Поле ввода должно содержать координаты X Y Z");
-	String Word = Base.SubString(1,p-1);
-	float x = Word.ToDouble();
-	Base.Delete(1,p);
-	p = Base.Pos(' ');
-	if (p <= 0)
-		return ShowMessage("Отсутствует координата Z");
-	Word = Base.SubString(1,p-1);
-	float y = Word.ToDouble();
-	Base.Delete(1,p);
-	float z = Base.ToDouble();
-
-	Out->Lines->Add(FloatToStr(x)+FloatToStr(y)+FloatToStr(z));
+	int p;
+	Out->Lines->Add(FloatToStr(in.x)+FloatToStr(in.y)+FloatToStr(in.z));
 	if (IsCell)
 	{
-		float xyz[3];
-		float xm1 = x-1; float xp1 = x+1;
-		float ym1 = y-1; float yp1 = y+1;
-		float zm1 = z-1; float zp1 = z+1;
+		Coord6 xyz;
+		float xm1 = in.x-1; float xp1 = in.x+1;
+		float ym1 = in.y-1; float yp1 = in.y+1;
+		float zm1 = in.z-1; float zp1 = in.z+1;
 		for (int i = 0; i < List2->RowCount; ++i)
 			if (List2->Cells[CHEADER][i] == "DATA")
 				if (List2->Cells[CSIZE][i].ToInt() == 24)
 				{
 					int adr = List2->Cells[CSTART][i].ToInt();
 					fseek(file, adr + 8, SEEK_SET);
-					fread(xyz, sizeof(float), 3, file);
-					if (xyz[0] > xm1 && xyz[0] < xp1)
-						xyz[0] = 0;
+					fread(&xyz, sizeof(float), 3, file);
+					if (xyz.x > xm1 && xyz.x < xp1)
+						xyz.x = 0;
 					else
-						xyz[0] = Check999(xyz[0] - x);
-
-					if (xyz[1] > ym1 && xyz[1] < yp1)
-						xyz[1] = 0;
+						xyz.x = Check999(xyz.x - in.x);
+					if (xyz.y > ym1 && xyz.y < yp1)
+						xyz.y = 0;
 					else
-						xyz[1] = Check999(xyz[1] - y);
-
-					if (xyz[2] > zm1 && xyz[2] < zp1)
-						xyz[2] = 0;
+						xyz.y = Check999(xyz.y - in.y);
+					if (xyz.z > zm1 && xyz.z < zp1)
+						xyz.z = 0;
 					else
-						xyz[2] = Check999(xyz[2] - z);
+						xyz.z = Check999(xyz.z - in.z);
 					if (Wordwrap->Checked)
-						Out->Lines->Add(IntToStr(adr)+":"+FloatToStr(xyz[0])+"*"+FloatToStr(xyz[1])+"*"+FloatToStr(xyz[2]));
+						Out->Lines->Add(IntToStr(adr)+":"+xyz.ToStr());
 					fseek(file, -12, SEEK_CUR);
-					fwrite(xyz, sizeof(float), 3, file);
+					fwrite(&xyz, sizeof(float), 3, file);
 				}
 	}
 	else
 	{
 		int xyzpop[3];
-		xyzpop[0] = x; xyzpop[1] = y; xyzpop[2] = z;
+		xyzpop[0] = in.x; xyzpop[1] = in.y; xyzpop[2] = in.z;
 		int xyzh[4];
 		for (int i = 0; i < List2->RowCount; ++i)
 			if (List2->Cells[CHEADER][i] == "PGRP")
@@ -1851,7 +1830,6 @@ void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 	EFinds->SetFocus();
 }
 //---------------------------------------------------------------------------
-
 int TForm1::GetOkrugl(int x)
 {
 	int pr, min;
@@ -2952,6 +2930,20 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 
 void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 {
+	if (access("BASECELLS.txt", 0) < 0)
+	{
+		int p;
+		for (int i = 0; i < Out->Lines->Count; i++)
+		{
+			p = Out->Lines->Strings[i].Pos('\t');
+			String L(Out->Lines->Strings[i].SubString(1, p-1));
+			String F(Out->Lines->Strings[i].SubString(p+1, Out->Lines->Strings[i].Length()-p));
+			Loc1.insert(L);
+			LocFrmr.insert(L+F);
+		}
+		tolog("Total "+IntToStr((int)LocFrmr.size()));
+		return;
+	}
 	basecel.IgnoreFirstString = true;
 	basecel.IgnoreDelimitersPack = false;
 	//№	!Header!	Name	Subheader	Size	Type	Data
@@ -2967,7 +2959,7 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 	for (int i = 0; i < basecel.RowCount; i++)
 	{
 		Mor.CoordRef[i] = -1;
-		if (Mor.N[i] != CurIdx)
+		if (Mor.N[i] != CurIdx) //Для Mor.Name[i] экстерьеров
 		{
 			if ( (StartCell=Mor.Name[i].Pos(')')) > 0 )
 				Mor.Name[i].SetLength(StartCell);
@@ -2985,7 +2977,7 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 		} else
 		if (Mor.Size[i] == 24 && Mor.Subheader[i].Compare("DATA") == 0)
 		{
-			TextToFloat6(Mor.Data[i], curr);
+			curr.TextToFloat6(Mor.Data[i]);
 			Mor.CoordRef[i] = Coords.size();
 			Coords.push_back(curr);
 		} else
@@ -3005,20 +2997,6 @@ void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 //		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
 }
 //---------------------------------------------------------------------------
-void TForm1::TextToFloat6(String str, Coord &curr)
-{
-	int st = 1;
-	int coi = 0;
-	for (int j = 2; j <= str.Length(); j++)
-		if (str[j] == ' ')
-		{
-			curr.all[coi] = str.SubString(st, j-st).ToDouble();
-			st = j+1;
-			coi++;
-		}
-	curr.rz = str.SubString(st, str.Length()-st+1).ToDouble();
-}
-//---------------------------------------------------------------------------
 void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 {
 	if (List->Row < 0)
@@ -3032,28 +3010,38 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 	Idx = 0;
 	int Start = -1;
 	int End = basecel.RowCount;
-	for (int i = 0; i < basecel.RowCount; i++)
-		if (Mor.N[i] != Idx) //нашел первую строку новой ячеки
-		{
-			Idx = Mor.N[i];
-			if (Mor.Name[i].Compare(CellName) == 0) //ее название совпало
+	if (LocFrmr.size() > 0) //Для округления координат Locationname/FRMR
+	{
+		if (Loc1.find(CellName) == Loc1.end())
+			return;
+	}
+	else
+	{
+		for (int i = 0; i < basecel.RowCount; i++)
+			if (Mor.N[i] != Idx) //нашел первую строку новой ячеки
 			{
-				Start = i;
-				i++;
-				for (; i < basecel.RowCount; i++)
-					if (Mor.N[i] != Idx)
-					{
-						End = i;
-						break;
-					}
-				break;
+				Idx = Mor.N[i];
+				if (Mor.Name[i].Compare(CellName) == 0) //ее название совпало
+				{
+					Start = i;
+					i++;
+					for (; i < basecel.RowCount; i++)
+						if (Mor.N[i] != Idx)
+						{
+							End = i;
+							break;
+						}
+					break;
+				}
 			}
-		}
-	if (Start == -1)
-		return tolog("Nothing");
-	tolog("\t"+CellName);
-	tolog("\t"+IntToStr(Start)+" do "+IntToStr(End));
+		if (Start == -1)
+			return tolog("Nothing");
+		tolog("\t"+CellName);
+		tolog("\t"+IntToStr(Start)+" do "+IntToStr(End));
+	}
 	Coord curr;
+	Coord6 xyz;
+	std::set<String>::iterator currFrmr;
 	for (int Row = 2; Row < List2->RowCount; Row++)
 	{
 		if (List2->Cells[CHEADER][Row].Compare("FRMR") == 0)
@@ -3061,14 +3049,31 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 			curr.FRMR = List2->Cells[CDATA2][Row].SubString(1, List2->Cells[CDATA2][Row].Pos(' ')-1).ToInt();
 			if (curr.Dodt.Length() > 0)
 				curr.Dodt.SetLength(0);
+			if (LocFrmr.size() > 0)
+				currFrmr = LocFrmr.find(CellName+curr.FRMR);
 		} else
 		if (List2->Cells[CHEADER][Row].Compare("NAME") == 0)
 		{
 			curr.Name = List2->Cells[CDATA2][Row];
 		} else
-		if (List2->Cells[CHEADER][Row].Compare("DATA") == 0)
+		if (List2->Cells[CHEADER][Row].Compare("DATA") == 0
+			&& List2->Cells[CSIZE][Row].ToInt() == 24)
 		{
-			TextToFloat6(List2->Cells[CDATA2][Row], curr);
+			if (LocFrmr.size() > 0)
+			{
+				if	(currFrmr != LocFrmr.end())
+				{
+					int adr = List2->Cells[CSTART][Row].ToInt();
+					fseek(file, adr + 8, SEEK_SET);
+					fread(&curr, sizeof(float), 3, file);
+					curr.Round();
+					fseek(file, -3 * sizeof(float), SEEK_CUR);
+					fwrite(&curr, sizeof(float), 3, file);
+					tolog(IntToStr(curr.FRMR)+curr.Name+curr.ToStr());
+				}
+				continue;
+			}
+			curr.TextToFloat6(List2->Cells[CDATA2][Row]);
 			for (int i = Start; i < End; i++)
 			{
 				if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)

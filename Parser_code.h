@@ -290,6 +290,7 @@ public:		// User declarations
 	String *TDescr;
 	int *SubIndexes; //для поля description
 	int cSubIndexes;
+	//float round(float x);
 	int GetOkrugl(int x);
 	float Check999(float x);
 	bool Opening;
@@ -329,7 +330,7 @@ public:		// User declarations
 	//№	Header	Name	Subheader	Size	Type	Data
 	Basecell Mor;
 	std::vector<Coord> Coords;
-	void TextToFloat6(String str, Coord &curr);
+	//void TextToFloat6(String str, Coord &curr);
 	TStringList *what;
 	bool equ(float &value, float rhs)
 	{
@@ -362,6 +363,8 @@ public:		// User declarations
 	std::set<String> obj;
 	std::vector<int>Sizes;
 	std::vector<long>Ends;
+	std::set<String>Loc1;
+	std::set<String>LocFrmr;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
