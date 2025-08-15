@@ -104,8 +104,6 @@ object Form1: TForm1
       ShowHint = True
       TabOrder = 0
       OnClick = OpenBtnClick
-      ExplicitLeft = -7
-      ExplicitTop = 0
     end
     object Save: TButton
       Left = 82
@@ -995,6 +993,23 @@ object Form1: TForm1
         OnClick = DropMasterClick
         OnContextPopup = DropMasterContextPopup
       end
+      object MassDelete2: TButton
+        Left = 0
+        Top = 672
+        Width = 122
+        Height = 32
+        Hint = 'Deletes from a sheet 1 all written down headings '
+        Margins.Left = 4
+        Margins.Top = 4
+        Margins.Right = 4
+        Margins.Bottom = 4
+        Caption = 'Mass Delete'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 36
+        Visible = False
+        OnClick = MassDelete2Click
+      end
     end
   end
   object PanelList: TPanel
@@ -1360,7 +1375,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00E40110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00E80110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

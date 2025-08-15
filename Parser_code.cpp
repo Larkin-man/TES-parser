@@ -3040,7 +3040,7 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 		tolog("\t"+IntToStr(Start)+" do "+IntToStr(End));
 	}
 	Coord curr;
-	Coord6 xyz;
+
 	std::set<String>::iterator currFrmr;
 	for (int Row = 2; Row < List2->RowCount; Row++)
 	{
@@ -3401,6 +3401,66 @@ void __fastcall TForm1::DropMasterContextPopup(TObject *Sender, TPoint &MousePos
 {
 	for (ED el = Edited.begin(); el != Edited.end(); ++el)
 		tolog(IntToStr((int)el->first)+" "+IntToStr(el->second));
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::MassDelete2Click(TObject *Sender)
+{
+	if (List->Row == -1)
+		return;
+	int type = 0;
+	Wordwrap->Checked = false;
+
+	String Info = Out->Lines->CommaText;
+	if (Info.Length() > 1024)
+	{
+		Info.SetLength(1024);
+		Info +="...";
+	}
+	String ss(L"To remove all from "+WhatFinded->Text
+		+L" conterminous with the {"+Info.w_str()+L"}?");
+	if ( (type=Application->MessageBoxA(ss.w_str()
+		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))== ID_CANCEL)
+			return;
+	if (type == ID_NO)
+	{
+		ss = (L"To remove all "+WhatFinded->Text
+		+L" except for conterminous with the {"+Info.w_str()+L"}?");
+		if ( (type=Application->MessageBoxA(ss.w_str()
+		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))!= ID_YES)
+			return;
+		type = 888;
+	}
+	std::set<String> heat;
+	for (int i = 0; i < Out->Lines->Count; i++)
+		heat.insert(Out->Lines->Strings[i]);
+	std::set<String> heat2(heat);
+	bool CanSel = true;
+	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+	{
+		ListSelectCell(Sender, 0, i, CanSel);
+		if (type != 888)
+		{
+			for (int j = 0; j < List2->RowCount; ++j)
+				if (heat.find(List2->Cells[WhatFinded->ItemIndex][j]) != heat.end())
+				{
+					Delete2(j);
+					heat2.erase(List->Cells[WhatFinded->ItemIndex][j]);
+				}
+		}
+		else //all Except find
+			for (int j = 0; j < List2->RowCount; ++j)
+				if (heat.find(List2->Cells[WhatFinded->ItemIndex][j]) == heat.end())
+					Delete2(j);
+				else
+					heat2.erase(List2->Cells[WhatFinded->ItemIndex][j]);
+	}
+	if (heat2.size() > 0)
+	{
+		Out->Lines->Append("The lines were not found:");
+		for (std::set<String>::iterator el = heat2.begin(); el != heat2.end(); ++el)
+			Out->Lines->Append(*el);
+	}
 }
 //---------------------------------------------------------------------------
 

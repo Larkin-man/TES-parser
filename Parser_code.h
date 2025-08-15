@@ -120,6 +120,7 @@ __published:	// IDE-managed Components
 	TMenuItem *NExtreriorFlagsPrint;
 	TButton *DevastateCell;
 	TButton *DropMaster;
+	TButton *MassDelete2;
 	void __fastcall OpenBtnClick(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall TES3ReadClick(TObject *Sender);
@@ -196,6 +197,7 @@ __published:	// IDE-managed Components
 	void __fastcall DevastateCellClick(TObject *Sender);
 	void __fastcall DropMasterClick(TObject *Sender);
 	void __fastcall DropMasterContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
+	void __fastcall MassDelete2Click(TObject *Sender);
 
 
 private:	// User declarations

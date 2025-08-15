@@ -23,6 +23,7 @@ CELL	ZNAM	?	Disabled: 1 byte. [ESS?] Probably presence is enough. Byte always ==
 CLAS	CLDT	int	atr1, atr2, spec, 10skill, Flags, autocalc.
 CNTC	NPCO	int	Count [int] + name
 CONT	NPCO	int	Inventory of a creature or NPC; contents of a container.
+CREA	NPCS	string	Spell
 CREA	NPDT	byte	Information is a set of 1-byte integers, listed in this order
 CREA	FLAG	byte	This is a bitmask, containing values for several fields on the monster
 CREA	XSCL	float	The scale of the object as a floating point number from 0.0 to 1.0.
