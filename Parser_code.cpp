@@ -1997,6 +1997,8 @@ void __fastcall TForm1::NEnableList2DeleteClick(TObject *Sender)
 	DelGroupSubheaders->Enabled = true;
 	DeleteAllSubhead->Enabled = true;
 	DevastateCell->Visible = NEnableList2Delete->Checked;
+	MassDelete2->Visible = NEnableList2Delete->Checked;
+	MassDelete->Visible = !NEnableList2Delete->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -3444,14 +3446,14 @@ void __fastcall TForm1::MassDelete2Click(TObject *Sender)
 			for (int j = 0; j < List2->RowCount; ++j)
 				if (heat.find(List2->Cells[WhatFinded->ItemIndex][j]) != heat.end())
 				{
-					Delete2(j);
+					DeleteSublist(j, i);
 					heat2.erase(List->Cells[WhatFinded->ItemIndex][j]);
 				}
 		}
 		else //all Except find
 			for (int j = 0; j < List2->RowCount; ++j)
 				if (heat.find(List2->Cells[WhatFinded->ItemIndex][j]) == heat.end())
-					Delete2(j);
+					DeleteSublist(j, i);
 				else
 					heat2.erase(List2->Cells[WhatFinded->ItemIndex][j]);
 	}
