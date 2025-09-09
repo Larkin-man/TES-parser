@@ -3444,18 +3444,18 @@ void __fastcall TForm1::MassDelete2Click(TObject *Sender)
 		if (type != 888)
 		{
 			for (int j = 0; j < List2->RowCount; ++j)
-				if (heat.find(List2->Cells[WhatFinded->ItemIndex][j]) != heat.end())
+				if (heat.find(List2->Cells[SearchingIn2][j]) != heat.end())
 				{
 					DeleteSublist(j, i);
-					heat2.erase(List->Cells[WhatFinded->ItemIndex][j]);
+					heat2.erase(List->Cells[SearchingIn2][j]);
 				}
 		}
 		else //all Except find
 			for (int j = 0; j < List2->RowCount; ++j)
-				if (heat.find(List2->Cells[WhatFinded->ItemIndex][j]) == heat.end())
+				if (heat.find(List2->Cells[SearchingIn2][j]) == heat.end())
 					DeleteSublist(j, i);
 				else
-					heat2.erase(List2->Cells[WhatFinded->ItemIndex][j]);
+					heat2.erase(List2->Cells[SearchingIn2][j]);
 	}
 	if (heat2.size() > 0)
 	{
