@@ -2355,7 +2355,7 @@ void __fastcall TForm1::FindinSublistsClick(TObject *Sender)
 			return;
 		}
 	ShowAll = false;
-	for (int i = List->Row+1; i < List->RowCount; ++i)
+	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
 	{
 		ListSelectCell(Sender, 0, i, CanSelect);
 		for (int Row = 0; Row < List2->RowCount; ++Row)
@@ -2364,7 +2364,6 @@ void __fastcall TForm1::FindinSublistsClick(TObject *Sender)
 				List->Row = i;
 				List2->Row = Row;
 				ShowAll= true;
-				//NextSClick(Sender);
 				return;
 			}
 	}

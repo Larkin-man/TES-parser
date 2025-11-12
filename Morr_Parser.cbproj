@@ -67,17 +67,6 @@
 			<TASM_Debugging>None</TASM_Debugging>
 		</PropertyGroup>
 		<ItemGroup>
-			<CppCompile Include="ESPFile.cpp">
-				<DependentOn>ESPFile.h</DependentOn>
-				<BuildOrder>3</BuildOrder>
-			</CppCompile>
-			<CppCompile Include="Morr_Parser.cpp">
-				<BuildOrder>0</BuildOrder>
-			</CppCompile>
-			<ResourceCompile Include="textin.rc">
-				<Form>textin.res</Form>
-				<BuildOrder>5</BuildOrder>
-			</ResourceCompile>
 			<ResFiles Include="Morr_Parser.res">
 				<BuildOrder>1</BuildOrder>
 			</ResFiles>
@@ -90,6 +79,17 @@
 				<DependentOn>Parser_code.h</DependentOn>
 				<BuildOrder>2</BuildOrder>
 			</CppCompile>
+			<CppCompile Include="ESPFile.cpp">
+				<DependentOn>ESPFile.h</DependentOn>
+				<BuildOrder>3</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="Morr_Parser.cpp">
+				<BuildOrder>0</BuildOrder>
+			</CppCompile>
+			<ResourceCompile Include="textin.rc">
+				<Form>textin.res</Form>
+				<BuildOrder>5</BuildOrder>
+			</ResourceCompile>
 			<FormResources Include="Parser_code.dfm"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
@@ -118,7 +118,7 @@
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">3</VersionInfo>
 						<VersionInfo Name="Release">1</VersionInfo>
-						<VersionInfo Name="Build">369</VersionInfo>
+						<VersionInfo Name="Build">370</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -130,7 +130,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.3.1.369</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.3.1.370</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">TES parseer</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Larkin</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
