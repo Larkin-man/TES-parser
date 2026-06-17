@@ -253,7 +253,6 @@ object Form1: TForm1
       Align = alLeft
       Style = csDropDownList
       Color = 16053492
-      ItemHeight = 24
       ItemIndex = 3
       ParentShowHint = False
       ShowHint = True
@@ -402,6 +401,7 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
+        ExplicitWidth = 53
       end
     end
     object FlowPanel1: TFlowPanel
@@ -1179,6 +1179,13 @@ object Form1: TForm1
       OnEnter = ListEnter
       OnKeyUp = ListKeyUp
       OnSelectCell = ListSelectCell
+      ColWidths = (
+        70
+        70
+        70
+        70)
+      RowHeights = (
+        16)
     end
   end
   object PanelList2: TPanel
@@ -1276,6 +1283,14 @@ object Form1: TForm1
       OnEnter = List2Enter
       OnKeyUp = List2KeyUp
       OnSelectCell = List2SelectCell
+      ColWidths = (
+        50
+        50
+        50
+        50
+        50)
+      RowHeights = (
+        16)
     end
     object SubDescript: TEdit
       Left = 1
@@ -1375,7 +1390,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00F40110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00F80110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

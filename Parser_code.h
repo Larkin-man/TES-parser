@@ -3,17 +3,18 @@
 #ifndef Parser_codeH
 #define Parser_codeH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
-#include <ExtCtrls.hpp>
-#include <ComCtrls.hpp>
-#include <ButtonGroup.hpp>
-#include <Grids.hpp>
-#include <Dialogs.hpp>
-#include <Menus.hpp>
-#include <ImgList.hpp>
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <Vcl.ComCtrls.hpp>
+#include <Vcl.ButtonGroup.hpp>
+#include <Vcl.Grids.hpp>
+#include <Vcl.Dialogs.hpp>
+#include <Vcl.Menus.hpp>
+#include <Vcl.ImgList.hpp>
+#include <System.ImageList.hpp>
 //---------------------------------------------------------------------------
 const int CHEADER = 0;
 const int CSTART = 1;
@@ -273,7 +274,7 @@ public:		// User declarations
 	TStringList *Export, *Expo;
 	bool LogUp;
 	bool CompareString;
-	int  SortingColumn;
+	int SortingColumn;
 	void QuickSort(int iLo, int iHi);
 	void DeleteRecord(int Row);
 	void Ready(bool ready);
@@ -353,11 +354,11 @@ public:		// User declarations
 		}
 		~PACK()
 		{
-//       	delete col[0];
-//         delete col[1];
-//         delete col[2];
-//         delete col[3];
-//         delete col[4];
+//			delete col[0];
+//			delete col[1];
+//			delete col[2];
+//			delete col[3];
+//			delete col[4];
 		}
 	};
 	typedef PACK* PPACK;

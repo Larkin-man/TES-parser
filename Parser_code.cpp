@@ -5,12 +5,11 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-#include <io.h> //for access
 //#include <float.h>
 #include "Headers.h"
 #pragma hdrstop
 #include "TableLoader.cpp"
-int const  TAGSS = 33;
+int const TAGSS = 33;
 #include "Parser_code.h"
 
 //---------------------------------------------------------------------------
@@ -47,7 +46,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	Export = NULL;
 	//Out->Lines->Add(sizeof());
 	Ready(false);
-	nTypes = 0;//int const  TAGSS = 18<-их колво   11 !!!!!!!!!!!
+	nTypes = 0;//int const TAGSS = 18<-их колво 11 !!!!!!!!!!!
 	AddTagType("INTV",'4'); AddTagType("NAME",'t');
 	AddTagType("NAM5",'1'); AddTagType("FLTV",'g');
 	AddTagType("MVRF",'i'); AddTagType("SPDT",'4');
@@ -498,7 +497,7 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::TES3ReadClick(TObject *Sender)
-{  //(TES3 + HEDR ++?)
+{	//(TES3 + HEDR ++?)
 	Tes3Header hTes3;
 	if (ftell(file) > 0)
 		fseek(file, 0, SEEK_SET);
@@ -512,7 +511,7 @@ void __fastcall TForm1::TES3ReadClick(TObject *Sender)
 	ToLog(hTes3.Version_Number,"Version number");
 	ToLog(hTes3.Unknown,"Unknown");
 	ToLog(hTes3.Author_Name,"Author");
-	ToLog(hTes3.Description,"Description");  //*/
+	ToLog(hTes3.Description,"Description"); //*/
 	ToLog(hTes3.NumRecords,"Num Records");
 	if (save)
 		fwrite(&hTes3, sizeof(hTes3), 1, save);
@@ -1007,7 +1006,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	if ( (el=ListStore.find(Offset)) != ListStore.end())
 	{
 		//int r = el->second.RowCount;
-//      while (List2->RowCount < r)
+//		while (List2->RowCount < r)
 //			List2->RowCount++;
 		List2->RowCount = el->second.RowCount;
 		List2->Cols[0]->Assign(el->second.col[0]);
@@ -1028,7 +1027,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 		List2->Cells[CDATA2][Row] = "";
 		List2->Cells[CTYPE][Row] = "";
 		if (ExportBtn->Tag != 1)
-			Len = Univ.Length > 64 ? 64 : Univ.Length;  ////TODO: shririna
+			Len = Univ.Length > 64 ? 64 : Univ.Length; ////TODO: shririna
 		else
 			Len = Univ.Length;
 		//Интерпретирование данных
@@ -1041,7 +1040,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 			//SetDescription(-1, Row);
 			for (int t = m1; t <= m2; ++t)
 				if (find.Compare(TSubHeader[t]) == 0)
-				{  //нашли
+				{	//нашли
 					if (TDescr[t].Length() > 0)
 						SetDescription(t, Row); //	SubIndexes[Row] = t;
 					else
@@ -1050,8 +1049,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 					List2->Cells[CTYPE][Row] = TType[t][1];
 					switch (TType[t][1])
 					{
-						//case 't': List2->Cells[CDATA2][Row] = st;  break;  //ToLog(&Name[8]);
-						case 's': List2->Cells[CDATA2][Row] = String((char*)st);  break;
+						//case 't': List2->Cells[CDATA2][Row] = st; break; //ToLog(&Name[8]);
+						case 's': List2->Cells[CDATA2][Row] = String((char*)st); break;
 						case 'i':
 						for (unsigned int i = 0; i < Len; i+=sizeof(int))
 								InterpretStr += IntToStr(*(int*)&st[i])+" ";
@@ -1230,7 +1229,7 @@ void TForm1::SetDescription(int Num, int Row)
 }
 //---------------------------------------------------------------------------
 
-void TForm1::QuickSort(int iLo, int iHi)  //рекурсивная
+void TForm1::QuickSort(int iLo, int iHi) //рекурсивная
 {
 	int Lo, Hi;
 	//String* Mid;
@@ -1285,10 +1284,8 @@ void TForm1::QuickSort(int iLo, int iHi)  //рекурсивная
 		}
 	}
 	while (Lo <= Hi);
-	bool fool = false;
 	if (Hi > iLo)
 	{
-		fool=true;
 		QuickSort(iLo, Hi);
 		//Out->Lines->Add("more ");
 	}
@@ -1305,14 +1302,14 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 	//static bool HasSorting[4] ={false,false,false,false};
 	//TStrings *Curr = List->Rows[1];
 	//Out->Lines->Exchange(1,2);
-	//List->Rows->Exchange(1,3);  неработает
+	//List->Rows->Exchange(1,3); не работает
 	//List->Rows[1] = List->Rows[2];
-	//List->Rows[2] = Curr;    неработает обмен
+	//List->Rows[2] = Curr; не работает обмен
 	SortingColumn = Section->Index;
 	CompareString = (SortingColumn==CHEADER||SortingColumn==CDATA);
 	List->ScrollBars = ssNone;
 	QuickSort(0, List->RowCount-1);
-	//Tick = ::GetTickCount() - Tick;  //Вычислить время расчета
+	//Tick = ::GetTickCount() - Tick; //Вычислить время расчета
 	//Out->Lines->Add("Время расчета : "+FloatToStr(Tick)+" миллисек.");
 	List->ScrollBars = ssVertical;
 	 //HasSorting[SortingColumn] = !HasSorting[SortingColumn];
@@ -1469,7 +1466,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
 		{
 			String Head = IntToStr(num)+"\t"+List->Cells[CHEADER][i]+"\t"+List->Cells[CDATA][i]+"\t";
-			ListSelectCell(Sender, 0, i, stup);  //(TObject *Sender, int ACol, int ARow, bool &CanSelect)
+			ListSelectCell(Sender, 0, i, stup); //(TObject *Sender, int ACol, int ARow, bool &CanSelect)
 			for (int j = 0; j < List2->RowCount; ++j)
 				if (expOff == ID_YES)
 					if (expSize == ID_YES)
@@ -1508,7 +1505,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
 		{
 			String Str = List->Cells[CHEADER][i]+"\t"+List->Cells[CDATA][i];
-			ListSelectCell(Sender, 0, i, stup);  //(TObject *Sender, int ACol, int ARow, bool &CanSelect)
+			ListSelectCell(Sender, 0, i, stup); //(TObject *Sender, int ACol, int ARow, bool &CanSelect)
 			for (int j = 0; j < List2->RowCount; ++j)
 				if (expOff == ID_YES)
 					if (expSize == ID_YES)
@@ -1857,7 +1854,7 @@ int TForm1::GetOkrugl(int x)
 	pr = x / 32;
 	min = pr * 32;
 	if ((x - min) <= 16)
-		return otr ? -min : min;   //макс расхожд 16
+		return otr ? -min : min; //макс расхожд 16
 	else
 		return otr ? -(min + 32) : (min + 32);
 }
@@ -2181,7 +2178,6 @@ void __fastcall TForm1::NextTagContextPopup(TObject *Sender, TPoint &MousePos, b
 
 void __fastcall TForm1::CheckCoordClick(TObject *Sender)
 {
-	bool Can = false;
 	int Param[3];
 	bool Ext;
 	float max, min;
@@ -2511,7 +2507,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 		byte mainbuf[4096];
 		byte buf[4096];
 		for (int i = StartCon+1; i < List->RowCount; i++)
-		{  //по конфликтному
+		{	//по конфликтному
 			MainLen = Sizes[i];
 			String Hed = List->Cells[CHEADER][i];
 			if (MainLen > 4096)
@@ -2806,7 +2802,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 				Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
 				continue;
 			}
-		continue;
+//		continue;
 			if	(List2->Cells[CHEADER][Row].Compare(tmvrf) == 0)
 			{
 				ende++;
@@ -2931,7 +2927,7 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 
 void __fastcall TForm1::LoadCellsClick(TObject *Sender)
 {
-	if (access("BASECELLS.txt", 0) < 0)
+	if (FileExists("BASECELLS.txt"))
 	{
 		int p;
 		for (int i = 0; i < Out->Lines->Count; i++)
