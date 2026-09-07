@@ -67,11 +67,11 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	AddTagType("XATO",'t');
 	if (nTypes != TAGSS)
 		tolog("REPLACE TAGGS COUNT!!!!!!");
-	types.IgnoreFirstString = false;
+	types.IgnoreFirstString = true;
 	types.IgnoreDelimitersPack = false;
 	types.LoadFromResource("TEXTRES","ssss",&THeader,&TSubHeader,&TType,&TDescr);
 	//for (int i = 0; i < types.RowCount; ++i)
-	//	Out->Lines->Add(THeader[i]);
+	//	Out->Lines->Add(TDescr[i]);
 	cSubIndexes = 32;
 	SubIndexes = new int[cSubIndexes];
 	Opening = false;
@@ -284,7 +284,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	fseek(file, MLENTOSLEN-4-SLENSIZE, SEEK_SET);
 	Tell = MLENTOSLEN + Len;
 	String Req = " ";
-	char *st = NULL;
+	unsigned char *st = NULL;
 	while (ftell(file) < Tell)
 	{
 		fread(Name, 4, 1, file);
@@ -292,7 +292,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		if (strncmp(Name,"MAST", 4)==0)
 		{
 			st = file->curp;
-			Req += String(st)+", ";
+			Req += String(reinterpret_cast<const char*>(st))+", ";
 		}
 		fseek(file, Len, SEEK_CUR);	//Tell2 = ftell(file);
 	}
@@ -988,8 +988,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 	ToE->Text = List->Cells[CSTART][ARow];
 	BlockList2Sel = true;
 	// Сбросить номер строки
-	static String SelMainHedr;
-	if (SelMainHedr.Compare(HEAD) != 0)
+	static String SelMainHedr = "";
+	if (SelMainHedr != HEAD)
 	{
 		List2->Row = 0;
 		SelMainHedr = HEAD;
@@ -1346,8 +1346,8 @@ void __fastcall TForm1::rplusbClick(TObject *Sender)
 {
 	if (file)
 	{
-		ToLog("file->curp",file->curp);
-		ToLog("file->buffer",file->buffer);
+		ToLog("file->curp",reinterpret_cast<const char*>(file->curp));
+		ToLog("file->buffer",reinterpret_cast<const char*>(file->buffer));
 		ToLog(file->level,"level");
 		ToLog(file->bsize,"bsize");
 		ToLog(file->istemp,"bsize");
@@ -1379,7 +1379,7 @@ void __fastcall TForm1::DelDialsClick(TObject *Sender)
 		End = List->Selection.Bottom;
 		ToLog("Finding trash DIAL's from "+IntToStr(Row)+" to "+IntToStr(End));
 	}
-	int DialRow;
+	int DialRow = -1;
 	bool NeedDel = false;
 	for (; Row < End; ++Row)
 	{
@@ -1427,7 +1427,7 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 			return;
 	int expTab = 0;
 	if (expAll && type == ID_YES)
-		if ( (expTab=Application->MessageBoxA(L"Export only table?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
+		if ( (expTab=Application->MessageBox(L"Export only table?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
 			return;
 	if (expTab == ID_YES)
 	{
@@ -1442,10 +1442,10 @@ void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 		return;
 	}
 	int expOff = 0;
-	if ( (expOff=Application->MessageBoxA(L"Export Offset?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
+	if ( (expOff=Application->MessageBox(L"Export Offset?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
 		return;
 	int expSize = 0;
-	if ( (expSize=Application->MessageBoxA(L"Export Size?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
+	if ( (expSize=Application->MessageBox(L"Export Size?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
 		return;
 	Export = new TStringList;
 	LogUp = false;
@@ -1637,11 +1637,9 @@ void __fastcall TForm1::ProModeCKClick(TObject *Sender)
 void __fastcall TForm1::SPLMreadClick(TObject *Sender)
 {
 	//Go16Click(Sender);
-	Byte NAM0, XNAM;
-	char NAME[4], Name[4];
+	char Name[4];
 	int Length;
 	String Data;
-	Interpret Store;
 	struct SPDT //вроде это спелл который чтото дает
 	{
 		int i1; //int
@@ -1760,7 +1758,6 @@ void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 	Coord6 in;
 	if	(in.TextToFloat3(EFinds->Text))
 		return ShowMessage("Поле ввода должно содержать координаты X Y Z");
-	int p;
 	Out->Lines->Add(FloatToStr(in.x)+FloatToStr(in.y)+FloatToStr(in.z));
 	if (IsCell)
 	{
@@ -1796,7 +1793,7 @@ void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 	else
 	{
 		int xyzpop[3];
-		xyzpop[0] = in.x; xyzpop[1] = in.y; xyzpop[2] = in.z;
+		xyzpop[0] = (int)in.x; xyzpop[1] = (int)in.y; xyzpop[2] = (int)in.z;
 		int xyzh[4];
 		for (int i = 0; i < List2->RowCount; ++i)
 			if (List2->Cells[CHEADER][i] == "PGRP")
@@ -2088,7 +2085,6 @@ void __fastcall TForm1::Save2Click(TObject *Sender)
 	fseek(file, 0, SEEK_SET);
 	int MemSize = 0;
 	byte *Mem = NULL;
-	int Len;
 	fseek(file, 0, SEEK_SET);
 
 	el = SubDelete.begin();
@@ -2220,11 +2216,11 @@ void __fastcall TForm1::CheckCoordClick(TObject *Sender)
 						+FloatToStr(Data[3])+" "+FloatToStr(Data[4])+" "+FloatToStr(Data[5]));
 					if (Ext)
 					{
-						isx = Data[0] / 8192;
+						isx = static_cast<int>(Data[0] / 8192.0f);
 						if (Data[0] < 0)	isx--;
 						if (isx != Param[1])
 							Out->Lines->Add(IntToStr(isx)+"!!!X:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[0]/8192)+"\t"+List2->Cells[CDATA2][j]);
-						isy = Data[1] / 8192;
+						isy = static_cast<int>(Data[1] / 8192.0f);
 						if (Data[1] < 0)	isy--;
 						if (isy != Param[2])
 							Out->Lines->Add(IntToStr(isy)+" !!Y:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[1]/8192)+"\t"+List2->Cells[CDATA2][j]);
@@ -2312,7 +2308,7 @@ void __fastcall TForm1::setlocaleBtnClick(TObject *Sender)
 	if (EFinds->Text.Length() <= 0)
 		return ShowMessage("'Find' field is empty. Write a localization page in it. eg \".1251\"");
 	String mes = L"Set the locale to \""+EFinds->Text+"\"?" ;
-	switch (Application->MessageBoxA(mes.w_str(), L"setlocale", MB_YESNOCANCEL))
+	switch (Application->MessageBox(mes.w_str(), L"setlocale", MB_YESNOCANCEL))
 	{
 	case ID_NO: break;
 	case ID_CANCEL:
@@ -2379,7 +2375,7 @@ void __fastcall TForm1::ReplaceClick(TObject *Sender)
 		GlobalUnlock(hData);//разблокируем память
 		CloseClipboard();//закрываем буфер обмена
 	}
-	int p=1, d;
+	int p=1;
 	while ((p=fromClipboard.Pos('@')) > 0)
 	{
 		fromClipboard = fromClipboard.Delete(p, 1);
@@ -2457,7 +2453,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 			break;
 		}
 	bool dele = false;
-	dele = (Application->MessageBoxA(L"Delete conflicts?", L"Option", MB_YESNO) == ID_YES);
+	dele = (Application->MessageBox(L"Delete conflicts?", L"Option", MB_YESNO) == ID_YES);
 	Opening = true;
 	TES3Read->Enabled = true;
 	if (NClearOut->Checked)
@@ -2465,7 +2461,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	Out->Lines->Add("Check conflicts for " + PluginName);
 	Out->Lines->Add("Size="+IntToStr(EoC));
 	int Hard = 0;
-	if ( (Hard=Application->MessageBoxA(L"Check full data?", L"Option", MB_YESNOCANCEL))== ID_CANCEL)
+	if ( (Hard=Application->MessageBox(L"Check full data?", L"Option", MB_YESNOCANCEL))== ID_CANCEL)
 		return;
 	char 	Name[5];	Name[4] = '\0';
 	int 	Len;
@@ -2685,13 +2681,12 @@ void TForm1::PrepareFor(char SYMBS[4])
 
 void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 {
-	Int8 expAll = ID_YES;
+	int expAll = ID_YES;
 	if (List->Row != -1 || List->Selection.Bottom - List->Selection.Top + 1 != List->RowCount)
-		if ( (expAll=Application->MessageBoxA(L"Export all scripts?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
+		if ( (expAll=Application->MessageBox(L"Export all scripts?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
 			return;
 	int i = ( expAll == ID_YES)? 0 : List->Selection.Top;
 	int end = ( expAll == ID_YES)? List->RowCount : List->Selection.Bottom + 1;
-	int tall;
 	int len;
 	char 	Name[5];	Name[4] = '\0';
 	FILE *scpt = NULL;
@@ -2843,7 +2838,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 					fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
 					float z;
 					fread(&z, sizeof(float), 1, file);
-					z += 1000.0;
+					z += 1000.0f;
 					fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
 					fwrite(&z, sizeof(float), 1, file);
 				}
@@ -2881,14 +2876,14 @@ void __fastcall TForm1::DeleteAllSubheadClick(TObject *Sender)
 {
 	if (Out->Lines->Count < 3)
 	{
-		Application->MessageBoxA(L"Enter three headings: 1) base, which it is necessary to search; 2) the heading of a sublist with which needs to be removed; 3) it is necessary to remove heading of a sublist, up to which (inclusive)"
+		Application->MessageBox(L"Enter three headings: 1) base, which it is necessary to search; 2) the heading of a sublist with which needs to be removed; 3) it is necessary to remove heading of a sublist, up to which (inclusive)"
 		, L"Mass deleting", MB_OK+MB_ICONEXCLAMATION);
 		return;
 	}
 	for (int i = 0; i < 3; i++)
 		if (Out->Lines->Strings[i].Length() % 5 != 4)
 		{
-			Application->MessageBoxA(String(Out->Lines->Strings[i]+ L" is not heading or list of headings through a blank.").w_str()
+			Application->MessageBox(String(Out->Lines->Strings[i]+ L" is not heading or list of headings through a blank.").w_str()
 			, L"Mass deleting", MB_OK+MB_ICONHAND);
 			return;
 		}
@@ -3073,7 +3068,7 @@ void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 			curr.TextToFloat6(List2->Cells[CDATA2][Row]);
 			for (int i = Start; i < End; i++)
 			{
-				if (Mor.Size[i] == 24 & Mor.Subheader[i].Compare("DATA") == 0)
+				if (Mor.Size[i] == 24 && Mor.Subheader[i].Compare("DATA") == 0)
 				{
 					if (Coords[Mor.CoordRef[i]].FRMR == curr.FRMR)
 					{
@@ -3163,14 +3158,14 @@ void __fastcall TForm1::MassDeleteClick(TObject *Sender)
 	}
 	String ss(L"To remove all from "+WhatFinded->Text
 		+L" conterminous with the {"+Info.w_str()+L"}?");
-	if ( (type=Application->MessageBoxA(ss.w_str()
+	if ( (type=Application->MessageBox(ss.w_str()
 		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))== ID_CANCEL)
 			return;
 	if (type == ID_NO)
 	{
 		ss = (L"To remove all "+WhatFinded->Text
 		+L" except for conterminous with the {"+Info.w_str()+L"}?");
-		if ( (type=Application->MessageBoxA(ss.w_str()
+		if ( (type=Application->MessageBox(ss.w_str()
 		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))!= ID_YES)
 			return;
 		type = 888;
@@ -3354,13 +3349,13 @@ void __fastcall TForm1::DropMasterClick(TObject *Sender)
 	if (List->Cells[CHEADER][List->Row] != "CELL")
 		return;
 	int type = 0;
-	if ( (type=Application->MessageBoxA(L"FRMR indexes - 0:New; 1:M; 2:T; 3:B; 4+: Another esm. To replace 4+ to 0?"
+	if ( (type=Application->MessageBox(L"FRMR indexes - 0:New; 1:M; 2:T; 3:B; 4+: Another esm. To replace 4+ to 0?"
 		, L"FRMR Indexes->0", MB_YESNOCANCEL)) == ID_CANCEL)
 			return;
 	if (type == ID_YES)
 		type = 400;
 	else
-	if ( (type=Application->MessageBoxA(L"FRMR indexes 0:New; 1:M; 2:T; 3:B; 4+: Another esm. To replace ALL to 0?"
+	if ( (type=Application->MessageBox(L"FRMR indexes 0:New; 1:M; 2:T; 3:B; 4+: Another esm. To replace ALL to 0?"
 		, L"FRMR Indexes->0", MB_YESNOCANCEL)) == ID_CANCEL)
 			return;
 	if (type == ID_YES)
@@ -3416,14 +3411,14 @@ void __fastcall TForm1::MassDelete2Click(TObject *Sender)
 	}
 	String ss(L"To remove all from "+WhatFinded->Text
 		+L" conterminous with the {"+Info.w_str()+L"}?");
-	if ( (type=Application->MessageBoxA(ss.w_str()
+	if ( (type=Application->MessageBox(ss.w_str()
 		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))== ID_CANCEL)
 			return;
 	if (type == ID_NO)
 	{
 		ss = (L"To remove all "+WhatFinded->Text
 		+L" except for conterminous with the {"+Info.w_str()+L"}?");
-		if ( (type=Application->MessageBoxA(ss.w_str()
+		if ( (type=Application->MessageBox(ss.w_str()
 		, L"Mass deleting", MB_YESNOCANCEL+MB_ICONQUESTION))!= ID_YES)
 			return;
 		type = 888;

@@ -24,8 +24,28 @@ struct MHeader
 	unsigned int Capacity;
 	void Read(FILE* &file, int lensize);
 	void Write(FILE* &file);
-	MHeader() { Length = 0; Data=NULL; LENSTOP=6000; }
-	~MHeader() { free(Data); }
+	MHeader()
+	{
+		Length = 0;
+		Data = NULL;
+		LENSTOP = 6000;
+		Capacity = 0;
+	}
+	// Безопасный деструктор
+	~MHeader()
+	{
+		if (Data)
+		{
+			free(Data);
+			Data = NULL; // Зануляем указатель во избежание dangling pointer
+		}
+	}
+
+private:
+	// Запрещаем копирование структуры, чтобы компилятор Borland сразу выдал ошибку,
+	// если вы случайно попытаетесь скопировать объект и вызвать двойное освобождение памяти
+	MHeader(const MHeader&);
+	MHeader& operator=(const MHeader&);
 };
 
 typedef struct TRECORD3INT
@@ -67,7 +87,7 @@ struct Tes3Header : public TRECORD3INT
 	char	Author_Name	[32];
 	char	Description	[256];
 	int   NumRecords; //этого всего записей в ФАЙЛЕ
-};      //(1+3+1+1+1+1)*4+32+256
+};  //(1+3+1+1+1+1)*4+32+256
 
 struct MData_Cell : public RECORD4INT1STR    //Это INTV на самомаделе
 {
@@ -116,7 +136,7 @@ union Interpret
 	float f;
 	short w[2];
 	unsigned short uw[2];
-	Byte b[4];
+	unsigned char b[4];
 	char c;
 } ;
 
@@ -126,7 +146,7 @@ struct DeleteItem
 	int MainLen;
 	int Offset;
 	int Size; //size of deleting block
-	byte *Addon;
+	unsigned char *Addon;
 	DeleteItem(int mlo, int ml, int o, int s)
 	{
 		MainLenOffset = mlo;
@@ -158,20 +178,31 @@ struct Basecell
 
 struct Coord6
 {
-	float all[6];
-	float &x;
-	float &y;
-	float &z;
-	float &rx;
-	float &ry;
-	float &rz;
-	Coord6::Coord6() : x(all[0]), y(all[1]), z(all[2])
-		, rx(all[3]), ry(all[4]), rz(all[5]) {	}
+	// Анонимное объединение: все поля делят одну память
+	union
+	{
+		float all[6];
+		struct
+		{
+			float x;
+			float y;
+			float z;
+			float rx;
+			float ry;
+			float rz;
+		};
+	};
+	Coord6()
+	{
+		memset(all, 0, sizeof(all));
+	}
 	bool TextToFloat3(String str);
 	void TextToFloat6(String str);
 	String ToStr()
 	{
-		return String("\t"+FloatToStr(x)+"\t"+FloatToStr(y)+"\t"+FloatToStr(z));
+		// Оптимизация: Format работает быстрее, чем куча сложений строк через "+"
+		return Format(L"\t%g\t%g\t%g", ARRAYOFCONST((x, y, z)));
+		//return String("\t"+FloatToStr(x)+"\t"+FloatToStr(y)+"\t"+FloatToStr(z));
 	}
 	static float round(float x);
 	void Round();

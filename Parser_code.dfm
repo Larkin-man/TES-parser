@@ -189,8 +189,6 @@ object Form1: TForm1
       Margins.Bottom = 4
       Align = alLeft
       Caption = 'Pro mode'
-      Checked = True
-      State = cbChecked
       TabOrder = 4
       OnClick = ProModeCKClick
     end
@@ -401,7 +399,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 53
       end
     end
     object FlowPanel1: TFlowPanel
@@ -1390,7 +1387,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00F80110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A00FC0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <Dialogs.hpp>
+#include <cstdlib> // для работы функций malloc / free   _wtof
+#include <stdlib.h> // memset / memcpy
+#include <cwchar> // Для функции wcstof
 #pragma hdrstop
 
 #include "Headers.h"
@@ -66,43 +69,46 @@ void FRMR::Set(FILE* &file, int FRMRoffset)
 //---------------------------------------------------------------------------
 bool Coord6::TextToFloat3(String str)
 {
-	if (str.Length() < 2)
-		return true;
-	int p;
-	str = str.Trim();
-	while ((p = str.Pos('.')) > 0)
-		str[p] = ',';
-	while ((p = str.Pos("  ")) > 0)
-		str.Delete(p,1);
-	//EFinds->Text = str;
-	p = str.Pos(' ');
-	if (p <= 0)
-		return true;
-	String Word = str.SubString(1,p-1);
-	x = Word.ToDouble();
-	str.Delete(1,p);
-	p = str.Pos(' ');
-	if (p <= 0)
-		return true;
-	Word = str.SubString(1,p-1);
-	y = Word.ToDouble();
-	str.Delete(1,p);
-	z = str.ToDouble();
-	return false;
+	if (str.IsEmpty()) return true;
+	// Подготавливаем настройки формата, чтобы точка ВСЕГДА воспринималась как разделитель
+	TFormatSettings settings = TFormatSettings::Create();
+	settings.DecimalSeparator = L'.';
+	// Если в вашей системе гарантированно используется запятая, поменяйте на L','
+	// Но если в строке могут быть и точки, и запятые, то нормализуем строку ОДНИМ проходом:
+	wchar_t* pStart = str.c_str();
+	// Быстрая замена запятых на точки (или наоборот) за один проход по памяти
+	for (int i = 0; pStart[i] != L'\0'; i++)
+		if (pStart[i] == L',') pStart[i] = L'.';
+	wchar_t* pEnd;
+	// Использование wcstod автоматически пропускает любые группы пробелов!
+	// Она считывает число, а в pEnd записывает указатель на место, где оно закончилось.
+	x = static_cast<float>(std::wcstod(pStart, &pEnd));
+	if (pStart == pEnd) return true; // Не удалось прочитать X
+	pStart = pEnd;
+	y = static_cast<float>(std::wcstod(pStart, &pEnd));
+	if (pStart == pEnd) return true; // Не удалось прочитать Y
+	pStart = pEnd;
+	z = static_cast<float>(std::wcstod(pStart, &pEnd));
+	if (pStart == pEnd) return true; // Не удалось прочитать Z
+	return false; // Успешно прочитано
 }
 //---------------------------------------------------------------------------
+
 void Coord6::TextToFloat6(String str)
 {
-	int st = 1;
-	int coi = 0;
-	for (int j = 2; j <= str.Length(); j++)
-		if (str[j] == ' ')
-		{
-			all[coi] = str.SubString(st, j-st).ToDouble();
-			st = j+1;
-			coi++;
-		}
-	rz = str.SubString(st, str.Length()-st+1).ToDouble();
+	wchar_t* pStart = str.c_str(); // Получаем указатель на строку
+	for (int i = 0; i < 5; i++)
+	{
+		// _wtof считывает float/double до первого пробела
+		all[i] = static_cast<float>(_wtof(pStart));
+		// Сдвигаем указатель за пробел к следующему числу
+		while (*pStart && *pStart != L' ')
+			pStart++;
+		if (*pStart == L' ')
+			pStart++; // Пропускаем сам пробел
+	}
+	// Записываем последнее 6-е число
+	rz = static_cast<float>(_wtof(pStart));
 }
 //---------------------------------------------------------------------------
 void Coord6::Round()
@@ -114,8 +120,8 @@ void Coord6::Round()
 float Coord6::round(float x)
 {
 	if (x >= 0)
-		return floor(x + 0.5); //в сторону меньшего
-	return ceil(x - 0.5); //в сторону большего
+		return floor(x + 0.5f); //в сторону меньшего
+	return ceil(x - 0.5f); //в сторону большего
 }
 //---------------------------------------------------------------------------
 #pragma package(smart_init)

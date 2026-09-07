@@ -200,7 +200,6 @@ __published:	// IDE-managed Components
 	void __fastcall DropMasterContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
 	void __fastcall MassDelete2Click(TObject *Sender);
 
-
 private:	// User declarations
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
