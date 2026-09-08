@@ -7,9 +7,8 @@
 #include <algorithm>
 //#include <float.h>
 #include "Headers.h"
+#include "TableLoader.h"
 #pragma hdrstop
-#include "TableLoader.cpp"
-int const TAGSS = 33;
 #include "Parser_code.h"
 
 //---------------------------------------------------------------------------
@@ -17,8 +16,7 @@ int const TAGSS = 33;
 #pragma resource "*.dfm"
 TForm1 *Form1;
 //---------------------------------------------------------------------------
-//typedef char TAG[4];
-//typedef Set<int, 0, 2147483647> TAGSET;
+
 __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 {
 	Tes3 = true;
@@ -46,27 +44,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	Export = NULL;
 	//Out->Lines->Add(sizeof());
 	Ready(false);
-	nTypes = 0;//int const TAGSS = 18<-их колво 11 !!!!!!!!!!!
-	AddTagType("INTV",'4'); AddTagType("NAME",'t');
-	AddTagType("NAM5",'1'); AddTagType("FLTV",'g');
-	AddTagType("MVRF",'i'); AddTagType("SPDT",'4');
-	AddTagType("NAM0",'i'); AddTagType("NPDT",'4');
-	AddTagType("CNDT",'g'); AddTagType("SCRI",'t');
-	AddTagType("XSCL",'g'); AddTagType("MODL",'t');
-	AddTagType("MAST",'t'); AddTagType("SCTX",'t');
-	AddTagType("RGNN",'t'); AddTagType("SCHD",'t');
-	AddTagType("AIDT",'t'); AddTagType("NPCS",'t');
-	//skyrim
-	AddTagType("SCVR",'t'); AddTagType("EDID",'t');
-	AddTagType("FULL",'t'); AddTagType("MOD2",'t');
-	AddTagType("MOD3",'t'); AddTagType("ICON",'t');
-	AddTagType("NIFZ",'t'); AddTagType("MICO",'t');
-	AddTagType("NAM1",'t'); AddTagType("MOD4",'t');
-	AddTagType("ICO2",'t'); AddTagType("DESC",'t');
-	AddTagType("ITXT",'t'); AddTagType("RDMP",'t');
-	AddTagType("XATO",'t');
-	if (nTypes != TAGSS)
-		tolog("REPLACE TAGGS COUNT!!!!!!");
+	CreateTags();
 	types.IgnoreFirstString = true;
 	types.IgnoreDelimitersPack = false;
 	types.LoadFromResource("TEXTRES","ssss",&THeader,&TSubHeader,&TType,&TDescr);
@@ -81,7 +59,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	localeinstalled = false;
 	Univ.Capacity = 0;
 	PanelPRO->Visible = ProModeCK->Checked;
-	SortingColumn = CSTART;
+	//SortingColumn = CSTART;
 	WhatFindedChange(NULL);
 	ListEnter(NULL);
 	ShowAll = true;
@@ -94,6 +72,8 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 		List2->DefaultRowHeight = List2->Font->Height + 5;
 	else
 		List2->DefaultRowHeight = -(List2->Font->Height - 5);
+	LastSortingColumn = -1;
+	AscendingOrder = true;
 }
 //---------------------------------------------------------------------------
 void TForm1::Clear()
@@ -111,17 +91,6 @@ void TForm1::Clear()
 	Sizes.clear();
 	Ends.clear();
 	Edited.clear();
-}
-//---------------------------------------------------------------------------
-
-void TForm1::AddTagType(char *name, char type, char *maintag)
-{
-	//TagTypes = new TAGTYPES[nTypes+1];
-	strncpy(TagTypes[nTypes].Name, name, 4);
-	TagTypes[nTypes].Type = type;
-	if (maintag != NULL)
-		strncpy(TagTypes[nTypes].MainTag, maintag, 4);
-	nTypes++;
 }
 //---------------------------------------------------------------------------
 void TForm1::Ready(bool ready)
@@ -148,7 +117,7 @@ void TForm1::Ready(bool ready)
 
 void TForm1::Setup(int SubLenSize, int MainLenSize, int CountOffset)
 {
-	LENSIZE = 4;               //M O S
+	LENSIZE = 4;           //M O S
 	MAINLENSIZE = MainLenSize;//12 16 20
 	MOVERLENTOSNAME = MAINLENSIZE - 4;//main overlen to subname 8 12 16
 	SLENSIZE = SubLenSize;
@@ -358,8 +327,8 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	if (RecordCount != List->RowCount - 1)
 		ToLog("Wrong Record Count " +IntToStr(RecordCount)+"("+IntToStr(List->RowCount - 1)+")");
 	//fal 3 wrong
-	Ready(true);
-	SortingColumn = CSTART;
+		Ready(true);
+	//SortingColumn = CSTART;
 	if (NRewrites->Checked)
 		NRewrites->Enabled = false;
 	else
@@ -493,29 +462,6 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 		delete el->second.col[3];
 		delete el->second.col[4];
 	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::TES3ReadClick(TObject *Sender)
-{	//(TES3 + HEDR ++?)
-	Tes3Header hTes3;
-	if (ftell(file) > 0)
-		fseek(file, 0, SEEK_SET);
-	fread(&hTes3, 324, 1, file);
-	char4ToLog(hTes3.Name);
-	ToLog(hTes3.i[0],"i[0]");
-	ToLog(hTes3.i[1],"i[1]");
-	ToLog(hTes3.i[2],"i[2]");
-	char4ToLog(hTes3.Header);
-	ToLog(hTes3.HeaderSize, "HEDR size");
-	ToLog(hTes3.Version_Number,"Version number");
-	ToLog(hTes3.Unknown,"Unknown");
-	ToLog(hTes3.Author_Name,"Author");
-	ToLog(hTes3.Description,"Description"); //*/
-	ToLog(hTes3.NumRecords,"Num Records");
-	if (save)
-		fwrite(&hTes3, sizeof(hTes3), 1, save);
-	NextSClick(Sender);
 }
 //---------------------------------------------------------------------------
 
@@ -1084,46 +1030,52 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool
 				SetDescription(-1, Row); //ETOSHTO
 				unsigned int pe;
 				//2 Не нашли. Поищем в встроеных
-				for (int i = 0; i < nTypes; ++i)
-					if (strncmp(TagTypes[i].Name, Name, 4) == 0)
+				std::map<String, TagInfo>::const_iterator it = tagMap.find(Name);
+				//for (int i = 0; i < nTypes; ++i)
+				if (it != tagMap.end())
+				{
+					const TagInfo& currentTag = it->second; // Получаем найденные свойства тега
+					// Записываем тип в ячейку StringGrid (автоматически приведется к String)
+					st = file->curp;
+					List2->Cells[CTYPE][Row] = currentTag.type;
+
+					// Превращаем mainTag (std::string) в VCL String для метода tolog
+					String vclMainTag = currentTag.mainTag.c_str();
+					switch (currentTag.type)
 					{
-						st = file->curp;
-						List2->Cells[CTYPE][Row] = TagTypes[i].Type;
-						switch (TagTypes[i].Type)
-						{
-							case 't':
-								//check pechatn symbols
-								for (pe = 0; pe < Univ.Length-1; pe++)
-									if (st[pe] < 32)
-										break;
-								if (pe >= Univ.Length-1)
-								{
-									find = (char*)st;
-									if ((unsigned int)find.Length() > Univ.Length)
-										List2->Cells[CDATA2][Row] = find.SetLength(Univ.Length);
-									else
-										List2->Cells[CDATA2][Row] = find;
-									i = nTypes;	break;
-								}
-							case '1':
-								for (unsigned int i = 0; i < Len; i+=1)
-									InterpretStr += IntToStr(*(byte*)&st[i])+" ";
-								i = nTypes; break;
-							case 'g': for (unsigned int i = 0; i < Len; i+=sizeof(float))
-									InterpretStr += FloatToStr(*(float*)&st[i])+" ";
-								i = nTypes; break;
-							case '4':
-								for (unsigned int i = 0; i < Len; i+=sizeof(int))
-									InterpretStr += IntToStr(*(int*)&st[i])+" ";
-								i = nTypes; break;
-							case '2':
-								for (unsigned int i = 0; i < Len; i+=2)
-									InterpretStr += IntToStr(*(WORD*)&st[i])+" ";
-								i = nTypes; break;
-						}
-						if (InterpretStr.Length() > 0)
-							List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
+						case 't':
+							//check pechatn symbols
+							for (pe = 0; pe < Univ.Length-1; pe++)
+								if (st[pe] < 32)
+									break;
+							if (pe >= Univ.Length-1)
+							{
+								find = (char*)st;
+								if ((unsigned int)find.Length() > Univ.Length)
+									List2->Cells[CDATA2][Row] = find.SetLength(Univ.Length);
+								else
+									List2->Cells[CDATA2][Row] = find;
+								break;
+							}
+						case '1':
+							for (unsigned int i = 0; i < Len; i+=1)
+								InterpretStr += IntToStr(*(byte*)&st[i])+" ";
+							break;
+						case 'g': for (unsigned int i = 0; i < Len; i+=sizeof(float))
+								InterpretStr += FloatToStr(*(float*)&st[i])+" ";
+							break;
+						case '4':
+							for (unsigned int i = 0; i < Len; i+=sizeof(int))
+								InterpretStr += IntToStr(*(int*)&st[i])+" ";
+							break;
+						case '2':
+							for (unsigned int i = 0; i < Len; i+=2)
+								InterpretStr += IntToStr(*(WORD*)&st[i])+" ";
+							break;
 					}
+					if (InterpretStr.Length() > 0)
+						List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
+				}
 			}
 			if	(List2->Cells[CTYPE][Row] == "")
 			{
@@ -1229,98 +1181,68 @@ void TForm1::SetDescription(int Num, int Row)
 }
 //---------------------------------------------------------------------------
 
-void TForm1::QuickSort(int iLo, int iHi) //рекурсивная
+void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl, THeaderSection *Section)
 {
-	int Lo, Hi;
-	//String* Mid;
-	Lo = iLo;
-	Hi = iHi;
-	String Mid(List->Cells[SortingColumn][(Lo+Hi)/2]);
-	int intMid;
-	if (CompareString==false)
+	DWORD tick = ::GetTickCount();
+	int sortingColumn = Section->Index;
+	// Определяем тип столбца
+	bool compareString = (sortingColumn == CHEADER || sortingColumn == CDATA);
+	int totalRows = List->RowCount;
+	if (totalRows <= 1)
+		return;
+	// Логика Excel: если кликнули ту же колонку — меняем порядок на обратный.
+	// Если кликнули новую колонку — всегда начинаем с сортировки по возрастанию.
+	if (sortingColumn == LastSortingColumn)
 	{
-		intMid = Mid.ToIntDef(0);
-		Mid.SetLength(0);
-	}
-	//Shifts+= ((Lo+Hi)/2);
-	do
+		AscendingOrder = !AscendingOrder;
+	} else
 	{
-		//printf("DO Lo[%d]=%d Hi[%d]=%d\n",Lo, M[Lo], Hi, M[Hi] );
-		if (CompareString)
-		{
-			while (List->Cells[SortingColumn][Lo] < Mid)//(M[Lo] < Mid)
-				Lo++;
-			while (List->Cells[SortingColumn][Hi] > Mid)
-				Hi--;
-		}
-		else
-		{
-			while (List->Cells[SortingColumn][Lo].ToIntDef(0) < intMid)//(M[Lo] < Mid)
-				Lo++;
-			while (List->Cells[SortingColumn][Hi].ToIntDef(0) > intMid)
-				Hi--;
-		}
-		//printf("PO Lo[%d]=%d Hi[%d]=%d\n",Lo, M[Lo], Hi, M[Hi] );
-		if (Lo <= Hi)
-		{
-			if (Lo != Hi)
-			{
-				//printf("Lo=%d Hi=%d\n", Lo, Hi);
-				//print (M[Lo], M[Hi]);
-				// VisualSwap(M[Lo], M[Hi], Lo, Hi);
-				List->Cols[CHEADER]->Exchange(Lo,Hi);
-				List->Cols[CSTART]->Exchange(Lo,Hi);
-				List->Cols[CSIZE]->Exchange(Lo,Hi);
-				List->Cols[CDATA]->Exchange(Lo,Hi);
-				int t = Sizes[Lo];
-				Sizes[Lo] = Sizes[Hi];
-				Sizes[Hi] = t;
-				t = Ends[Lo];
-				Ends[Lo] = Ends[Hi];
-				Ends[Hi] = t;
-			}
-			Lo++;
-			Hi--;
-		}
+		AscendingOrder = true;
+		LastSortingColumn = sortingColumn;
 	}
-	while (Lo <= Hi);
-	if (Hi > iLo)
-	{
-		QuickSort(iLo, Hi);
-		//Out->Lines->Add("more ");
-	}
-	if (Lo < iHi)
-		QuickSort(Lo, iHi);
-	//Out->Lines->Add("end;\n");
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl,
-			 THeaderSection *Section)
-{
-	//Tick = ::GetTickCount();
-	//static bool HasSorting[4] ={false,false,false,false};
-	//TStrings *Curr = List->Rows[1];
-	//Out->Lines->Exchange(1,2);
-	//List->Rows->Exchange(1,3); не работает
-	//List->Rows[1] = List->Rows[2];
-	//List->Rows[2] = Curr; не работает обмен
-	SortingColumn = Section->Index;
-	CompareString = (SortingColumn==CHEADER||SortingColumn==CDATA);
+	// 1. Замораживаем графику VCL
+	List->Perform(WM_SETREDRAW, FALSE, 0);
 	List->ScrollBars = ssNone;
-	QuickSort(0, List->RowCount-1);
-	//Tick = ::GetTickCount() - Tick; //Вычислить время расчета
-	//Out->Lines->Add("Время расчета : "+FloatToStr(Tick)+" миллисек.");
+	// 2. Считываем данные в память
+	std::vector<RowData> rows;
+	rows.reserve(totalRows);
+	for (int i = 0; i < totalRows; ++i)
+	{
+		RowData row;
+		row.cells[CHEADER] = List->Cells[CHEADER][i];
+		row.cells[CSTART]  = List->Cells[CSTART][i];
+		row.cells[CSIZE]   = List->Cells[CSIZE][i];
+		row.cells[CDATA]   = List->Cells[CDATA][i];
+		row.sizeVal		= Sizes[i];
+		row.endVal		 = Ends[i];
+		rows.push_back(row);
+	}
+	// 3. Стабильная сортировка (сохраняет порядок дубликатов) с учетом направления
+	std::stable_sort(rows.begin(), rows.end(), RowComparator(sortingColumn, compareString, AscendingOrder));
+	// 4. Записываем результат обратно
+	for (int i = 0; i < totalRows; ++i)
+	{
+		List->Cells[CHEADER][i] = rows[i].cells[CHEADER];
+		List->Cells[CSTART][i]  = rows[i].cells[CSTART];
+		List->Cells[CSIZE][i]   = rows[i].cells[CSIZE];
+		List->Cells[CDATA][i]   = rows[i].cells[CDATA];
+		Sizes[i]				= rows[i].sizeVal;
+		Ends[i]				 = rows[i].endVal;
+	}
+	// 5. Размораживаем и обновляем экран
 	List->ScrollBars = ssVertical;
-	 //HasSorting[SortingColumn] = !HasSorting[SortingColumn];
+	List->Perform(WM_SETREDRAW, TRUE, 0);
+	List->Invalidate();
+	tick = ::GetTickCount() - tick;
+	//String directionText = AscendingOrder ? L" (по возрастанию)" : L" (по убыванию)";
+	//Out->Lines->Add("Колонка " + IntToStr(sortingColumn) + directionText + " отсортирована за: " + FloatToStr(tick) + " мс.");
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::TestPClick(TObject *Sender)
 {
 	NTestMenuClick(Sender);
-	for (int i = 0; i < nTypes; ++i)
-		Out->Lines->Add(String(TagTypes[i].Name) +"\t"+ String(TagTypes[i].Type));
+	PrintAllTags();
 }
 //---------------------------------------------------------------------------
 
@@ -1363,14 +1285,14 @@ void __fastcall TForm1::DelDialsClick(TObject *Sender)
 {
 	if (List->Row < 0)
 		return;
-	if (SortingColumn != CSTART)
-	{
-		SortingColumn = CSTART;
-		CompareString = false;
-		List->ScrollBars = ssNone;
-		QuickSort(0, List->RowCount-1);
-		List->ScrollBars = ssVertical;
-	}
+//	if (SortingColumn != CSTART)
+//	{
+//		SortingColumn = CSTART;
+//		CompareString = false;
+//		List->ScrollBars = ssNone;
+//		QuickSort(0, List->RowCount-1);
+//		List->ScrollBars = ssVertical;
+//	}
 	int Row = 0;
 	int End = List->RowCount;
 	if (List->Selection.Top != List->Selection.Bottom)
@@ -3389,7 +3311,7 @@ void __fastcall TForm1::DropMasterClick(TObject *Sender)
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::DropMasterContextPopup(TObject *Sender, TPoint &MousePos,
-          bool &Handled)
+      bool &Handled)
 {
 	for (ED el = Edited.begin(); el != Edited.end(); ++el)
 		tolog(IntToStr((int)el->first)+" "+IntToStr(el->second));
@@ -3455,4 +3377,4 @@ void __fastcall TForm1::MassDelete2Click(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
-
+	

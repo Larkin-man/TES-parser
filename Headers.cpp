@@ -1,10 +1,4 @@
 //---------------------------------------------------------------------------
-#include <stdio.h>
-#include <math.h>
-#include <Dialogs.hpp>
-#include <cstdlib> // для работы функций malloc / free   _wtof
-#include <stdlib.h> // memset / memcpy
-#include <cwchar> // Для функции wcstof
 #pragma hdrstop
 
 #include "Headers.h"
