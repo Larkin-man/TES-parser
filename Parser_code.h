@@ -201,11 +201,14 @@ __published:	// IDE-managed Components
 	void __fastcall MassDelete2Click(TObject *Sender);
 
 private:	// User declarations
+	// Внутри класса TForm1:
+	int LastSortingColumn; // Запоминает, какую колонку кликали прошлым шагом
+	bool AscendingOrder;   // Флаг направления сортировки
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
-					 //Morr   //podliv     sku
-	int LENSIZE; //4      //sublen 2  2
-	int MAINLENSIZE; //12  16         20
+					 //Morr   //podliv	 sku
+	int LENSIZE; //4	  //sublen 2  2
+	int MAINLENSIZE; //12  16		 20
 	int MOVERLENTOSNAME; //8
 	int SLENSIZE; //4
 	int MLENTOSLEN;//16
@@ -219,49 +222,13 @@ public:		// User declarations
 	MHeader Univ;
 	BITS *pbit;
 	void Clear();
-	void tolog(String msg)
-	{
-		Out->Lines->Add(msg);
-	}
-	void tologi(String msg, int i)
-	{
-		Out->Lines->Add(msg+"="+IntToStr(i));
-	}
-	void ToLogLen(String msg, int Len=-1)
-	{
-		if (LogUp) {
-			if (msg.Length() > Len)
-				Out->Lines->Add(msg.SetLength(Univ.Length));
-			else
-				Out->Lines->Add(msg); }
-	}
-	void ToLog(String msg, const char *param = NULL)
-	{
-		if (LogUp) {
-		if (param)
-		{
-			msg = "="+msg;
-			Out->Lines->Add(param+msg);
-		}
-		else
-			Out->Lines->Add(msg); }
-	}
-	void ToLogS(String msg, String param)
-	{
-		if (LogUp)
-		if (param.IsEmpty() == false)
-		{
-			msg = "="+msg;
-			Out->Lines->Add(param+msg);
-		}
-		else
-		Out->Lines->Add(msg);
-	}
-	void char4ToLog(char* msg, const char *param = NULL)
-	{
-		if (LogUp)
-			ToLog(String(msg).SetLength(4), param);
-	}
+	void CreateTags();
+	void tolog(String msg);
+	void tologi(String msg, int i);
+	void ToLogLen(String msg, int Len=-1);
+	void ToLog(String msg, const char *param = NULL);
+	void ToLogS(String msg, String param);
+	void char4ToLog(char* msg, const char *param = NULL);
 	Set <char, 0, 255> TagSymb;
 	std::set<long> Deleted;
 	int DeletedSize;
@@ -272,19 +239,34 @@ public:		// User declarations
 	void RefreshData(FILE* &file, int Start=0);
 	TStringList *Export, *Expo;
 	bool LogUp;
-	bool CompareString;
-	int SortingColumn;
-	void QuickSort(int iLo, int iHi);
+	// Структура строки данных
+	struct RowData
+	{
+		String cells[4];
+		int sizeVal;
+		int endVal;
+	};
+	// Структура-компоратор для std::stable_sort
+	struct RowComparator
+	{
+		int col;
+		bool isString;
+		bool isAscending;
+		RowComparator(int c, bool s, bool asc) : col(c), isString(s), isAscending(asc) {}
+		bool operator()(const RowData& a, const RowData& b) const;
+	};
+
 	void DeleteRecord(int Row);
 	void Ready(bool ready);
-	struct TAGTYPES
+	// Описание свойств тега
+	struct TagInfo
 	{
-		char Name[4];
-		char Type;
-		char MainTag[4];
-	} TagTypes[TAGSS];
-	int nTypes;
-	void AddTagType(char *name, char type, char *maintag = NULL);
+		char type;
+		String mainTag;
+	};
+	std::map<String, TagInfo> tagMap;
+	void AddTagType(const String& name, char type, const String& maintag = "");
+	void PrintAllTags();
 	String PluginName;
 	String *THeader;
 	String *TSubHeader;
