@@ -7,6 +7,7 @@
 #include <algorithm>
 //#include <float.h>
 #include "Headers.h"
+#include <cmath> // Для функций std::roundf и std::fabsf
 #include "TableLoader.h"
 #pragma hdrstop
 #include "Parser_code.h"
@@ -1246,53 +1247,14 @@ void __fastcall TForm1::TestPClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::ExportSPELClick(TObject *Sender)
-{
-	if (List->Row == -1)	return;
-	Export = new TStringList;
-	Export->Append("id	name	type	cost	flags	Effect1	Effect2	Range	Area	Time	Min	Max");
-	LogUp = false;
-	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-	{
-		int go = List->Cells[CSTART][i].ToInt();
-		fseek(file, go, SEEK_SET);
-		SPELreadClick(Sender);
-	}
-	Export->SaveToFile("EXPORT.txt");
-	ShowMessage("Saved EXPORT.txt");
-	List->Row = List->Row;
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::rplusbClick(TObject *Sender)
-{
-	if (file)
-	{
-		ToLog("file->curp",reinterpret_cast<const char*>(file->curp));
-		ToLog("file->buffer",reinterpret_cast<const char*>(file->buffer));
-		ToLog(file->level,"level");
-		ToLog(file->bsize,"bsize");
-		ToLog(file->istemp,"bsize");
-		ToLog(file->flags,"flags");
-		ToLog(file->hold,"hold");
-		ToLog(file->fd,"fd");
-		ToLog(file->token,"token");
-	}
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::DelDialsClick(TObject *Sender)
 {
 	if (List->Row < 0)
 		return;
-//	if (SortingColumn != CSTART)
-//	{
-//		SortingColumn = CSTART;
-//		CompareString = false;
-//		List->ScrollBars = ssNone;
-//		QuickSort(0, List->RowCount-1);
-//		List->ScrollBars = ssVertical;
-//	}
+	// чтобы логика гарантированно запустила сортировку ПО ВОЗРАСТАНИЮ
+	LastSortingColumn = -1;
+	// Вызываем обработчик события для столбца CSTART
+	HeaderControl1SectionClick(HeaderControl1, HeaderControl1->Sections->Items[CSTART]);
 	int Row = 0;
 	int End = List->RowCount;
 	if (List->Selection.Top != List->Selection.Bottom)
@@ -1556,113 +1518,6 @@ void __fastcall TForm1::ProModeCKClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::SPLMreadClick(TObject *Sender)
-{
-	//Go16Click(Sender);
-	char Name[4];
-	int Length;
-	String Data;
-	struct SPDT //вроде это спелл который чтото дает
-	{
-		int i1; //int
-		char str[32]; //enchant or spell
-		float a; //tochno float
-		float b;
-		float hz;
-		int in; //int
-		char str2[32]; //na kogo
-		char str3[32]; //kakoi predmet eto daet
-		float fl;
-		int nuls[10];
-
-	} s;
-	struct NPDT //это эффекты которые дает тот спелл
-	{
-		char who[32]; //na kogo
-		int a; //0 для первого нпдт, 1 для второго итд
-		int b;
-		int c; //сила спелла
-		float fl; //вроде одно для всех нпдт
-		int end[2];
-
-	} n;
-	Out->Lines->BeginUpdate();
-	int Coun[5];
-	for (int i = 0; i < 5; ++i)
-		Coun[i] = 0;
-	ToLog("------------------->"+List2->Cells[CSTART][List2->Row]);
-	for (int i = List2->Row; i < List2->RowCount; ++i)
-	{
-		fseek(file, List2->Cells[CSTART][i].ToInt(), SEEK_SET);
-		fread(Name, 4, 1, file);
-		fread(&Length, 4, 1, file);
-		unsigned char *st = file->curp;
-		if (strncmp(Name, "NAME", 4) == 0)
-		{
-			Data = IntToStr(*(int*)&st[0]);
-			ToLogS(Data, "NAME");
-			Coun[0]++;
-		}
-		else if (strncmp(Name, "NAM0", 4) == 0)
-		{
-			Data = IntToStr(Byte(st[0]));
-			//List2->Cells[CDATA2][i] = Data;
-			ToLogS(Data, "NAM0");
-			Coun[1]++;
-		}
-		else if (strncmp(Name, "XNAM", 4) == 0)
-		{
-			Data = IntToStr(Byte(st[0]));
-			//List2->Cells[CDATA2][i] = Data;
-			ToLogS(Data, "XNAM");
-			Coun[2]++;
-			break;
-		}
-		else if (strncmp(Name, "SPDT", 4) == 0)
-		{
-			fread(&s, 160, 1, file);
-			ToLog("SPDT");
-			ToLog(s.i1);
-			ToLog(s.str);
-			ToLog(s.a); ToLog(s.b);
-			ToLog(s.hz);
-			ToLog(s.in);
-			ToLog(s.str2);
-			ToLog(s.str3);
-			ToLog(s.fl);
-			for (int un = 0; un < 10; ++un)
-				ToLog(s.nuls[un]);
-			Coun[3]++;
-			List2->Cells[CDATA2][i] = s.str;
-		}
-		else if (strncmp(Name, "NPDT", 4) == 0)
-		{
-			fread(&n, 56, 1, file);
-			ToLog("NPDT");
-			ToLog(n.who);
-			//ToLog(n.vozms[0]); ToLog(n.vozms[1]);
-			ToLog(n.a, "№");
-			ToLog(n.b);
-			ToLog(n.c, "Strength");
-			ToLog(n.fl, "Time");
-			ToLog(n.end[0]); ToLog(n.end[1]);
-			Coun[4]++;
-		}
-		else if (strncmp(Name, "TNAM", 4) == 0)
-		{
-			ToLogS((char*)st, "TNAM");
-		}
-		else
-			return ShowMessage(Name);
-		fseek(file, Length, SEEK_CUR);
-	}
-	//Out->Lines->Add("Count of NAME="+IntToStr(Coun[0])+" NAM0="
-	//	+IntToStr(Coun[1])+" XNAM="+IntToStr(Coun[2])+" SPDT="
-	//	+IntToStr(Coun[3])+" NPDT="+IntToStr(Coun[4]));
-	Out->Lines->EndUpdate();
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 {
 	if (List->Row < 0)
@@ -1746,57 +1601,10 @@ void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 	EFinds->SetFocus();
 }
 //---------------------------------------------------------------------------
-int TForm1::GetOkrugl(int x)
-{
-	int pr, min;
-	bool otr = x < 0 ? true : false;
-	if (otr)
-		x = -x;
-	pr = x / 512;
-	min = pr * 512;
-	if ((x - min) < 32)
-		return otr ? -min : min;
-	else if ((min + 512 - x) < 32)
-		return otr ? -(min + 512) : (min + 512);
-	pr = x / 256;
-	min = pr * 256;
-	if ((x - min) < 28)
-		return otr ? -min : min;
-	else if ((min + 256 - x) < 28)
-		return otr ? -(min + 256) : (min + 256);
-	pr = x / 128;
-	min = pr * 128;
-	if ((x - min) < 20)
-		return otr ? -min : min;
-	else if ((min + 128 - x) < 20)
-		return otr ? -(min + 128) : (min + 128);
-	pr = x / 32;
-	min = pr * 32;
-	if ((x - min) <= 16)
-		return otr ? -min : min; //макс расхожд 16
-	else
-		return otr ? -(min + 32) : (min + 32);
-}
-//---------------------------------------------------------------------------
 
 void __fastcall TForm1::CloseClick(TObject *Sender)
 {
 	fclose (file);
-}
-//---------------------------------------------------------------------------
-
-float TForm1::Check999(float x)
-{
-	float d = x - int(x);
-	if (d > 0.98)
-		return int(x)+1;
-	if (d < -0.98)
-		return int(x)-1;
-	if (d < 0.02 && d > 0)
-		return int(x);
-	if (d > -0.02 && d < 0)
-		return int(x);
-	return x;
 }
 //---------------------------------------------------------------------------
 

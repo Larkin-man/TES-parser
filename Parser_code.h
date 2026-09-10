@@ -252,28 +252,8 @@ public:		// User declarations
 		int col;
 		bool isString;
 		bool isAscending;
-
 		RowComparator(int c, bool s, bool asc) : col(c), isString(s), isAscending(asc) {}
-
-		bool operator()(const RowData& a, const RowData& b) const
-		{
-			if (isString)
-			{
-				if (isAscending)
-					return a.cells[col] < b.cells[col];
-				else
-					return a.cells[col] > b.cells[col];
-			} else
-			{
-				int valA = a.cells[col].ToIntDef(0);
-				int valB = b.cells[col].ToIntDef(0);
-
-				if (isAscending)
-					return valA < valB;
-				else
-					return valA > valB;
-			}
-		}
+		bool operator()(const RowData& a, const RowData& b) const;
 	};
 
 	void DeleteRecord(int Row);
