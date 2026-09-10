@@ -73,6 +73,7 @@
 
 # Delphi history and backups
 Debug/
+Release/
 __history/
 __recovery/
 __astcache/

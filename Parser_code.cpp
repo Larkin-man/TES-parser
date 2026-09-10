@@ -118,7 +118,7 @@ void TForm1::Ready(bool ready)
 
 void TForm1::Setup(int SubLenSize, int MainLenSize, int CountOffset)
 {
-	LENSIZE = 4;           //M O S
+	LENSIZE = 4;		   //M O S
 	MAINLENSIZE = MainLenSize;//12 16 20
 	MOVERLENTOSNAME = MAINLENSIZE - 4;//main overlen to subname 8 12 16
 	SLENSIZE = SubLenSize;
@@ -1515,90 +1515,6 @@ void __fastcall TForm1::List2SelectCell(TObject *Sender, int ACol, int ARow, boo
 void __fastcall TForm1::ProModeCKClick(TObject *Sender)
 {
 	PanelPRO->Visible = ProModeCK->Checked;
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::SwapCoordClick(TObject *Sender)
-{
-	if (List->Row < 0)
-		return;
-	String Base(List->Cells[CHEADER][List->Row]);
-	int IsCell;
-	if (Base == "CELL")
-		IsCell = true;
-	else if (Base == "PGRD")
-		IsCell = false;
-	else
-		return ShowMessage("Нужно выделить ячейку CELL или PGRD");
-	if (EFinds->Text.Length() < 2)
-		return ShowMessage("Поле ввода должно содержать координаты X Y Z через пробел из редактора");
-	Coord6 in;
-	if	(in.TextToFloat3(EFinds->Text))
-		return ShowMessage("Поле ввода должно содержать координаты X Y Z");
-	Out->Lines->Add(FloatToStr(in.x)+FloatToStr(in.y)+FloatToStr(in.z));
-	if (IsCell)
-	{
-		Coord6 xyz;
-		float xm1 = in.x-1; float xp1 = in.x+1;
-		float ym1 = in.y-1; float yp1 = in.y+1;
-		float zm1 = in.z-1; float zp1 = in.z+1;
-		for (int i = 0; i < List2->RowCount; ++i)
-			if (List2->Cells[CHEADER][i] == "DATA")
-				if (List2->Cells[CSIZE][i].ToInt() == 24)
-				{
-					int adr = List2->Cells[CSTART][i].ToInt();
-					fseek(file, adr + 8, SEEK_SET);
-					fread(&xyz, sizeof(float), 3, file);
-					if (xyz.x > xm1 && xyz.x < xp1)
-						xyz.x = 0;
-					else
-						xyz.x = Check999(xyz.x - in.x);
-					if (xyz.y > ym1 && xyz.y < yp1)
-						xyz.y = 0;
-					else
-						xyz.y = Check999(xyz.y - in.y);
-					if (xyz.z > zm1 && xyz.z < zp1)
-						xyz.z = 0;
-					else
-						xyz.z = Check999(xyz.z - in.z);
-					if (Wordwrap->Checked)
-						Out->Lines->Add(IntToStr(adr)+":"+xyz.ToStr());
-					fseek(file, -12, SEEK_CUR);
-					fwrite(&xyz, sizeof(float), 3, file);
-				}
-	}
-	else
-	{
-		int xyzpop[3];
-		xyzpop[0] = (int)in.x; xyzpop[1] = (int)in.y; xyzpop[2] = (int)in.z;
-		int xyzh[4];
-		for (int i = 0; i < List2->RowCount; ++i)
-			if (List2->Cells[CHEADER][i] == "PGRP")
-			{
-				int adr = List2->Cells[CSTART][i].ToInt();
-				fseek(file, adr + 8, SEEK_SET);
-				int size = List2->Cells[CSIZE][i].ToInt();
-				int end = adr + 8 + size;
-				for (int p = adr + 8; p < end; p += 16)
-				{
-					fseek(file, p, SEEK_SET);
-					fread(xyzh, sizeof(int), 3, file);
-					//Out->Lines->Add(IntToStr(p)+":"+IntToStr(ddd)+"f"+IntToStr(xyzh[0])+"*"+IntToStr(xyzh[1])+"*"+IntToStr(xyzh[2]));
-					xyzh[0] -= xyzpop[0];
-					xyzh[1] -= xyzpop[1];
-					xyzh[2] -= xyzpop[2];
-					xyzh[0] = GetOkrugl(xyzh[0]);
-					xyzh[1] = GetOkrugl(xyzh[1]);
-					xyzh[2] = GetOkrugl(xyzh[2]);
-					if (Wordwrap->Checked)
-						Out->Lines->Add(IntToStr(p)+" To "+IntToStr(xyzh[0])+"*"+IntToStr(xyzh[1])+"*"+IntToStr(xyzh[2]));
-					fseek(file, -12, SEEK_CUR);
-					fwrite(xyzh, sizeof(int), 3, file);
-				}
-			}
-	}
-	EFinds->SelectAll();
-	EFinds->SetFocus();
 }
 //---------------------------------------------------------------------------
 
@@ -3119,7 +3035,7 @@ void __fastcall TForm1::DropMasterClick(TObject *Sender)
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::DropMasterContextPopup(TObject *Sender, TPoint &MousePos,
-      bool &Handled)
+	  bool &Handled)
 {
 	for (ED el = Edited.begin(); el != Edited.end(); ++el)
 		tolog(IntToStr((int)el->first)+" "+IntToStr(el->second));

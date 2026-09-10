@@ -349,6 +349,7 @@ public:		// User declarations
 	std::vector<long>Ends;
 	std::set<String>Loc1;
 	std::set<String>LocFrmr;
+	void RotateBooks();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

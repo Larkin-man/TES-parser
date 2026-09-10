@@ -5,26 +5,38 @@
 //---------------------------------------------------------------------------
 void MHeader::Read(FILE* &file, int lensize)
 {
+	// 1. Читаем имя тега и его длину из файла
 	fread(&Name, 4, 1, file);
-	fread(&Length, lensize, 1, file);
+    unsigned int actualLength = 0;
+    fread(&actualLength, lensize, 1, file);
+	Length = actualLength;
+    // 2. Исправление Бага 3: Обработка превышения лимита
 	if (Length > LENSTOP)
 	{
-		ShowMessage("Length is over "+IntToStr((int)LENSTOP));
-		Length = LENSTOP / 4;
-		LENSTOP *= 2;
-		//fseek(file, -(4+lensize), SEEK_CUR);
-		//return;
+        ShowMessage("Предупреждение: Длина блока (" + IntToStr((int)Length) +
+                    ") превышает лимит " + IntToStr((int)LENSTOP));
+        // Расширяем лимит, чтобы программа не падала на больших файлах
+		while (LENSTOP <= Length)
+			LENSTOP *= 2;
 	}
-	if (Length > Capacity)
-	{
-		Data = realloc(Data, Length);//TODO:bug22
-		Capacity = Length;
+    // 3. Исправление Багов 1 и 2: Выделение памяти с запасом под нуль-терминатор (+1)
+    if (Length + 1 > Capacity)
+    {
+        // Выделяем память временному указателю, чтобы не потерять старый при ошибке
+        void* newData = realloc(Data, Length + 1);
+        if (newData == NULL)
+		{
+			ShowMessage("Критическая ошибка: Не удалось выделить " + IntToStr((int)(Length + 1)) + " байт памяти!");
+			return; // Выходим, сохранив старый Data целым
+		}
+        Data = newData;
+        Capacity = Length + 1;
 	}
-	fread(Data, Length, 1, file);
-	if (Capacity > Length)
-		//Data[Length].c = 0;
-		//(char*)(Data)[Length] = 0;
-		reinterpret_cast<char*>(Data)[Length] = 0;
+    // 4. Читаем ровно столько байт, сколько написано в файле
+	if (Length > 0)
+		fread(Data, Length, 1, file);
+    // 5. Безопасно ставим нуль-терминатор. Теперь под него ТОЧНО есть место в рамках Capacity
+    reinterpret_cast<char*>(Data)[Length] = '\0';
 }
 //---------------------------------------------------------------------------
 void MHeader::Write(FILE* &file)

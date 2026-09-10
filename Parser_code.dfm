@@ -399,6 +399,7 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
+        ExplicitWidth = 53
       end
     end
     object FlowPanel1: TFlowPanel
@@ -1145,8 +1146,6 @@ object Form1: TForm1
       OnSectionResize = HeaderControl1SectionResize
       ParentFont = False
       OnResize = HeaderControl1Resize
-      ExplicitLeft = 2
-      ExplicitTop = 48
     end
     object List: TStringGrid
       Left = 1
@@ -1389,7 +1388,7 @@ object Form1: TForm1
     Left = 96
     Top = 128
     Bitmap = {
-      494C010105000A00000210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000A000C0210001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

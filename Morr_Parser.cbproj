@@ -153,8 +153,8 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
         <Defines>_DEBUG;$(Defines)</Defines>
-        <VerInfo_Build>382</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.382;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>389</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.389;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
         <ILINK_AllWarnings>true</ILINK_AllWarnings>
         <ILINK_SelectedWarnings>false</ILINK_SelectedWarnings>
     </PropertyGroup>
@@ -175,8 +175,8 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
         <Defines>NDEBUG;$(Defines)</Defines>
-        <VerInfo_Build>374</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.374;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>375</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.375;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>
@@ -185,6 +185,9 @@
         <CppCompile Include="Headers.cpp">
             <DependentOn>Headers.h</DependentOn>
             <BuildOrder>2</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Locations.cpp">
+            <BuildOrder>11</BuildOrder>
         </CppCompile>
         <CppCompile Include="Logging.cpp">
             <BuildOrder>8</BuildOrder>
@@ -196,6 +199,7 @@
         <ResFiles Include="Morr_Parser.res">
             <BuildOrder>1</BuildOrder>
         </ResFiles>
+        <None Include="Morr_Parser.todo"/>
         <CppCompile Include="Parser_code.cpp">
             <Form>Form1</Form>
             <DependentOn>Parser_code.h</DependentOn>
@@ -212,6 +216,9 @@
             <Form>textin.res</Form>
             <BuildOrder>0</BuildOrder>
         </ResourceCompile>
+        <CppCompile Include="Utils.cpp">
+            <BuildOrder>9</BuildOrder>
+        </CppCompile>
         <FormResources Include="Parser_code.dfm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -323,6 +330,12 @@
                 </DeployFile>
                 <DeployFile Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin\borlndmm.dll" Class="DependencyModule">
                     <Platform Name="Win32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Morr_Parser.todo" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
