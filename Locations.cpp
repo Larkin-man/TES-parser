@@ -106,5 +106,339 @@ void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 	EFinds->SetFocus();
 }
 //---------------------------------------------------------------------------
+void __fastcall TForm1::CheckCELLClick(TObject *Sender)
+{
+	if (List->Row < 0)
+		return;
+	if (List->Cells[CHEADER][List->Row].Compare("CELL") != 0)
+		return;
+	String CellName = List->Cells[CDATA][List->Row];
+	int Idx;
+	if ((Idx=CellName.Pos(')')) > 0)
+		CellName.SetLength(Idx);
+	Idx = 0;
+	int Start = -1;
+	int End = basecel.RowCount;
+	if (LocFrmr.size() > 0) //ƒл€ округлени€ координат Locationname/FRMR
+	{
+		if (Loc1.find(CellName) == Loc1.end())
+			return;
+	}
+	else
+	{
+		for (int i = 0; i < basecel.RowCount; i++)
+			if (Mor.N[i] != Idx) //нашел первую строку новой €чеки
+			{
+				Idx = Mor.N[i];
+				if (Mor.Name[i].Compare(CellName) == 0) //ее название совпало
+				{
+					Start = i;
+					i++;
+					for (; i < basecel.RowCount; i++)
+						if (Mor.N[i] != Idx)
+						{
+							End = i;
+							break;
+						}
+					break;
+				}
+			}
+		if (Start == -1)
+			return tolog("Nothing");
+		tolog("\t"+CellName);
+		tolog("\t"+IntToStr(Start)+" do "+IntToStr(End));
+	}
+	Coord curr;
+
+	std::set<String>::iterator currFrmr;
+	for (int Row = 2; Row < List2->RowCount; Row++)
+	{
+		if (List2->Cells[CHEADER][Row].Compare("FRMR") == 0)
+		{
+			curr.FRMR = List2->Cells[CDATA2][Row].SubString(1, List2->Cells[CDATA2][Row].Pos(' ')-1).ToInt();
+			if (curr.Dodt.Length() > 0)
+				curr.Dodt.SetLength(0);
+			if (LocFrmr.size() > 0)
+				currFrmr = LocFrmr.find(CellName+curr.FRMR);
+		} else
+		if (List2->Cells[CHEADER][Row].Compare("NAME") == 0)
+		{
+			curr.Name = List2->Cells[CDATA2][Row];
+		} else
+		if (List2->Cells[CHEADER][Row].Compare("DATA") == 0
+			&& List2->Cells[CSIZE][Row].ToInt() == 24)
+		{
+			if (LocFrmr.size() > 0)
+			{
+				if	(currFrmr != LocFrmr.end())
+				{
+					int adr = List2->Cells[CSTART][Row].ToInt();
+					fseek(file, adr + 8, SEEK_SET);
+					fread(&curr, sizeof(float), 3, file);
+					curr.Round();
+					fseek(file, -3 * sizeof(float), SEEK_CUR);
+					fwrite(&curr, sizeof(float), 3, file);
+					tolog(IntToStr(curr.FRMR)+curr.Name+curr.ToStr());
+				}
+				continue;
+			}
+			curr.TextToFloat6(List2->Cells[CDATA2][Row]);
+			for (int i = Start; i < End; i++)
+			{
+				if (Mor.Size[i] == 24 && Mor.Subheader[i].Compare("DATA") == 0)
+				{
+					if (Coords[Mor.CoordRef[i]].FRMR == curr.FRMR)
+					{
+						String str = IntToStr(curr.FRMR)+" "+curr.Name;
+						float sum = 0;
+						for (int co = 0; co < 6; co++)
+						{
+							curr.all[co] -= Coords[Mor.CoordRef[i]].all[co];
+							str += " " + FloatToStrF(curr.all[co], ffGeneral, 6, 6);
+							if (co >= 3)
+								curr.all[co] * 180 / 3.141593;
+							sum += (curr.all[co] >= 0 ? curr.all[co] : -curr.all[co]);
+						}
+						if (curr.Dodt.Length() > 0 && Coords[Mor.CoordRef[i]].Dodt != curr.Dodt)
+						{
+							str += "\t"+Coords[Mor.CoordRef[i]].Dodt;
+							str += ";\t\t"+curr.Dodt;
+						}
+						if (sum < 0.2)
+							str = "NO CHANGED\t"+ str;
+						else if (sum <= 2.0)
+							str = "<2.0!\t"+ str;
+						else
+							str = ">"+FloatToStrF(sum, ffGeneral, 6, 6)+"\t"+ str;
+						if (Coords[Mor.CoordRef[i]].Name != curr.Name)
+							str = "   >>>"+Coords[Mor.CoordRef[i]].Name +" " + str;
+						tolog(str);
+					}
+				}
+			}
+		} else
+		if (List2->Cells[CHEADER][Row].Compare("DODT") == 0)
+		{
+			curr.Dodt = List2->Cells[CDATA2][Row];
+			if (List2->Cells[CHEADER][Row+1].Compare("DNAM") == 0)
+			{
+				Row++;
+				curr.Dodt = curr.Dodt + List2->Cells[CDATA2][Row];
+			}
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FindCELLmastClick(TObject *Sender)
+{
+	bool CanSelect = true;
+	for (int i = 0; i < List->RowCount; ++i)
+		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
+		{
+			ListSelectCell(Sender, 0, i, CanSelect);
+			for (int Row = 0; Row < List2->RowCount; ++Row)
+				if	(List2->Cells[CHEADER][Row].Compare("FRMR") == 0)
+				{
+					int p = List2->Cells[CDATA][Row].Pos(' ');
+					int master = List2->Cells[CDATA][Row].SubString(p+1, List2->Cells[CDATA][Row].Length() - p).ToInt();
+					if (master > 3)
+					{
+						tolog(List->Cells[CDATA][i]+List2->Cells[CDATA][Row+1]);
+						break;
+					}
+				}
+		}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::LoadCellsClick(TObject *Sender)
+{
+	if (FileExists("BASECELLS.txt"))
+	{
+		int p;
+		for (int i = 0; i < Out->Lines->Count; i++)
+		{
+			p = Out->Lines->Strings[i].Pos('\t');
+			String L(Out->Lines->Strings[i].SubString(1, p-1));
+			String F(Out->Lines->Strings[i].SubString(p+1, Out->Lines->Strings[i].Length()-p));
+			Loc1.insert(L);
+			LocFrmr.insert(L+F);
+		}
+		tolog("Total "+IntToStr((int)LocFrmr.size()));
+		return;
+	}
+	basecel.IgnoreFirstString = true;
+	basecel.IgnoreDelimitersPack = false;
+	//є	!Header!	Name	Subheader	Size	Type	Data
+	basecel.LoadFromFile("BASECELLS.txt", "i0ssicsI", &Mor.N, &Mor.Name, &Mor.Subheader
+		, &Mor.Size, &Mor.Type, &Mor.Data, &Mor.CoordRef);
+	//tolog(Mor.Cell[32]); tolog(Mor.Subheader[32]); tolog(Mor.Data[32]); tolog(Mor.Size[32]);
+	Coords.clear();
+	Coords.reserve(basecel.RowCount / 5);
+	Coord curr;
+	///float *co[6] = {&xyz.x, &xyz.y, &xyz.z, &xyz.rx, &xyz.ry, &xyz.rz};
+	int CurIdx = 0;
+	int StartCell;
+	for (int i = 0; i < basecel.RowCount; i++)
+	{
+		Mor.CoordRef[i] = -1;
+		if (Mor.N[i] != CurIdx) //ƒл€ Mor.Name[i] экстерьеров
+		{
+			if ( (StartCell=Mor.Name[i].Pos(')')) > 0 )
+				Mor.Name[i].SetLength(StartCell);
+			CurIdx = Mor.N[i];
+		}
+		if (Mor.Size[i] == 4 && Mor.Subheader[i].Compare("FRMR") == 0)
+		{
+			curr.FRMR = Mor.Data[i].SubString(1, Mor.Data[i].Pos(' ')-1).ToInt();
+			if (curr.Dodt.Length() > 0)
+				curr.Dodt.SetLength(0);
+		} else
+		if (Mor.Subheader[i].Compare("NAME") == 0)
+		{
+			curr.Name = Mor.Data[i];
+		} else
+		if (Mor.Size[i] == 24 && Mor.Subheader[i].Compare("DATA") == 0)
+		{
+			curr.TextToFloat6(Mor.Data[i]);
+			Mor.CoordRef[i] = Coords.size();
+			Coords.push_back(curr);
+		} else
+		if (Mor.Size[i] == 24 && Mor.Subheader[i].Compare("DODT") == 0)
+		{
+			curr.Dodt = Mor.Data[i];
+			if (Mor.Subheader[i+1] == "DNAM")
+			{
+				i++;
+				curr.Dodt = curr.Dodt + Mor.Data[i];
+			}
+		}
+	}
+	tolog("Total "+IntToStr((int)basecel.RowCount)+String(" loaded."));
+	tolog("FRMR count = "+IntToStr((int)Coords.size()));
+//	for (std::vector<Coord>::iterator el=Coords.begin(); el != Coords.end(); ++el)
+//		Out->Lines->Add(IntToStr(el->FRMR)+el->Name+FloatToStr(el->x)+"="+FloatToStr(el->all[0]));
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::MVRFClick(TObject *Sender)
+{
+	int ende = 0;
+	ShowAll = false;
+	bool CanSelect = true;
+	String tcell("CELL"); String tmvrf("MVRF");
+	tolog("Finding MVRF & CNDT ...");
+	std::vector<Exterior> Locs;
+	Exterior Curr;
+	Locs.reserve(16);
+	for (int i = 0; i < List->RowCount; ++i)
+	{
+		if (ende > 999)
+			return;
+		if (List->Cells[CHEADER][i].Compare(tcell) != 0)
+			continue;
+		Curr.X = List->Cells[CDATA][i].Pos('(');
+		if (Curr.X == 0)
+			continue; //interior
+		String mdata = List->Cells[CDATA][i].SubString(Curr.X+1, 128);
+		Curr.Y = mdata.Pos(',');
+		Curr.X = mdata.SubString(1, Curr.Y-1).ToInt();
+		Curr.Y = mdata.SubString(Curr.Y+1, mdata.Pos(')')-Curr.Y-1).ToInt();
+		Curr.MainLenOffset = List->Cells[CSTART][i].ToInt()+4;
+		Curr.MainLen = Sizes[i];
+		Curr.PasteOffset = -1;
+		ListSelectCell(Sender, 0, i, CanSelect);
+		bool HasMvrf = false;
+		for (int Row = 0; Row < List2->RowCount; ++Row)
+		{
+			if (Curr.PasteOffset == -1 && List2->Cells[CHEADER][Row].Compare("RGNN") == 0)
+			{
+				if (List2->RowCount > Row+1)
+				{
+					if (List2->Cells[CHEADER][Row+1].Compare("NAM5") == 0)
+					{
+						Row++;
+						if (List2->RowCount <= Row+1)
+						{
+							Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+							continue;
+						}
+					}
+					if (List2->Cells[CHEADER][Row+1].Compare("NAM0") == 0)
+					{
+						Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row+1].ToInt()+List2->Cells[CSIZE][Row+1].ToInt();
+						continue;
+					}
+				}
+				Curr.PasteOffset = 4+LENSIZE + List2->Cells[CSTART][Row].ToInt()+List2->Cells[CSIZE][Row].ToInt();
+				continue;
+			}
+//		continue;
+			if	(List2->Cells[CHEADER][Row].Compare(tmvrf) == 0)
+			{
+				ende++;
+				HasMvrf = true;
+				Out->Lines->Append("");
+				Out->Lines->Add(List->Cells[CDATA][i]+"\t"+List2->Cells[CDATA2][Row]);
+				continue;
+			}
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("NAME") == 0)
+				Out->Lines->Add(List2->Cells[CDATA2][Row]);
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("CNDT") == 0)
+				Out->Lines->Add(List2->Cells[CDATA2][Row]);
+
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DELE") == 0)
+			{
+				if (NEnableList2Delete->Checked)
+					if (Reinter->Checked)
+					{
+						DeleteItem ea(List->Cells[CSTART][i].ToInt()+4 , List->Cells[CSIZE][i].ToInt()
+							, List2->Cells[CSTART][Row].ToInt(), -32); //int mlo, int ml, int o, int s)
+						byte *store = new byte[32];
+						//memcpy(store, Data, 32);
+						ea.Addon = store;
+						SubDelete.push_back(ea);
+					}
+					else
+						DeleteSublist(Row, i);
+				HasMvrf = false;
+				continue;
+			} else
+			if (HasMvrf && List2->Cells[CHEADER][Row].Compare("DATA") == 0)
+			{
+				if (NShowData->Checked == false)
+					continue;
+				Out->Lines->Add(List2->Cells[CDATA2][Row]);
+				if (NEnableList2Delete->Checked) //у CNDT z+=1000
+				{
+					fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
+					float z;
+					fread(&z, sizeof(float), 1, file);
+					z += 1000.0f;
+					fseek(file, List2->Cells[CSTART][Row].ToInt()+16, SEEK_SET);
+					fwrite(&z, sizeof(float), 1, file);
+				}
+				HasMvrf = false;
+				continue;
+			}
+		}
+		if (Curr.PasteOffset == -1)
+			tolog("Error in CELL, no RGNN:" + List->Cells[CDATA][i]);
+		else
+			Locs.push_back(Curr);
+	}
+	for (std::vector<Exterior>::iterator el = Locs.begin(); el != Locs.end(); ++el)
+		tolog(IntToStr(el->X)+" "+IntToStr(el->Y)+" "+IntToStr(el->MainLenOffset)+" "
+			+IntToStr(el->MainLen)+" "+IntToStr(el->PasteOffset));
+	tolog("Construct Exteriors ...");
+	ShowAll = true;
+	if (NEnableList2Delete->Checked)
+	{
+		LDele->Visible = true;
+		Save2->Enabled = true;
+	}
+}
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------

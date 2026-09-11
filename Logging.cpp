@@ -202,3 +202,51 @@ void __fastcall TForm1::SPLMreadClick(TObject *Sender)
 	Out->Lines->EndUpdate();
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
+{
+	int expAll = ID_YES;
+	if (List->Row != -1 || List->Selection.Bottom - List->Selection.Top + 1 != List->RowCount)
+		if ( (expAll=Application->MessageBox(L"Export all scripts?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
+			return;
+	int i = ( expAll == ID_YES)? 0 : List->Selection.Top;
+	int end = ( expAll == ID_YES)? List->RowCount : List->Selection.Bottom + 1;
+	int len;
+	char 	Name[5];	Name[4] = '\0';
+	FILE *scpt = NULL;
+	int cap = 1024;
+	char *buf = new char[cap];
+	for (; i < end; i++)
+	{
+		if (List->Cells[0][i] == "SCPT")
+		{
+			int ende = List->Cells[CSTART][i].ToInt();
+			fseek(file, ende + MLENTOSLEN, SEEK_SET);
+			ende += Sizes[i];
+			len = 0;
+			do
+			{
+				fseek(file, len, SEEK_CUR);
+				if (ftell(file) > ende)
+					break;
+				fread(Name, 4, 1, file);
+				fread(&len, LENSIZE, 1, file);
+			} while (strncmp(Name, "SCTX", 4) != 0);
+
+			if (ftell(file) <= ende)
+			{
+				if (len > cap)
+				{
+					cap = len;
+					buf = new char[cap];
+				}
+				scpt = _wfopen((List->Cells[CDATA][i]+".txt").w_str(), L"wb");
+				fread(buf, len, 1, file);
+				fwrite(buf, len, 1, scpt);
+				fclose(scpt);
+			}
+		}
+	}
+	delete []buf;
+}
+//---------------------------------------------------------------------------
