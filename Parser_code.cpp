@@ -1291,126 +1291,154 @@ void __fastcall TForm1::DelDialsClick(TObject *Sender)
 void __fastcall TForm1::ExportBtnClick(TObject *Sender)
 {
 	if (List->Row == -1)
-		return ShowMessage("No one selected");
-	static Char expo1[] = L"Export";
-	static Char expo2[] = L"Export all";
-	Char *Expo;
-	bool expAll = false;
-	if (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1)
-	{
-		Expo = expo2;
-		expAll = true;
-	}
-	else
-		Expo = expo1;
-	int type = 0;
-	if (List->Selection.Top == List->Selection.Bottom)
-		type = ID_NO;
-	else
-		if ( (type=Application->MessageBoxA(L"Export subheaders to string?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
-			return;
-	int expTab = 0;
-	if (expAll && type == ID_YES)
-		if ( (expTab=Application->MessageBox(L"Export only table?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
-			return;
-	if (expTab == ID_YES)
-	{
-		ExportBtn->Tag = 1;
-		Export = new TStringList;
-		Export->Append("Header\tOffset\tSize\tData");
-		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-			Export->Append(List->Cells[CHEADER][i]+"\t" + List->Cells[CSTART][i]+"\t"
-				+ List->Cells[CSIZE][i]+"\t" + List->Cells[CDATA][i]);
-		Export->SaveToFile(PluginName+".txt");
-		ShowMessage("Saved:"+PluginName+".txt");
-		return;
-	}
-	int expOff = 0;
-	if ( (expOff=Application->MessageBox(L"Export Offset?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
-		return;
-	int expSize = 0;
-	if ( (expSize=Application->MessageBox(L"Export Size?", Expo, MB_YESNOCANCEL))== ID_CANCEL)
-		return;
-	Export = new TStringList;
-	LogUp = false;
-	bool stup = true;
+		return ShowMessage(L"No one selected"); // Используем Юникод-префикс L
 
-	if (type == ID_NO) //Ровная таблица
+	// Названия окон для Unicode-окружения RAD Studio
+	String expoTitle = (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1)
+					   ? L"Export all" : L"Export";
+	bool expAll = (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1);
+
+	int type = ID_NO;
+	if (List->Selection.Top != List->Selection.Bottom)
 	{
-		ExportBtn->Tag = 1;
-		int num = 1;
-		int count = 1;
-		if (expOff == ID_YES)
-			if (expSize == ID_YES)
-				Export->Append("№\tHeader\tName\tSubheader\tOffset\tSize\tType\tData");
-			else Export->Append("№\tHeader\tName\tSubheader\tOffset\tType\tData");
-		else if (expSize == ID_YES)
-				Export->Append("№\tHeader\tName\tSubheader\tSize\tType\tData");
-			else Export->Append("№\tHeader\tName\tSubheader\tType\tData");
-		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+		// Используем стандартный MessageBox без суффикса 'A' для поддержки Юникода
+		type = Application->MessageBox(L"Export subheaders to string?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (type == ID_CANCEL) return;
+	}
+
+	int expTab = ID_NO;
+	if (expAll && type == ID_YES)
+	{
+		expTab = Application->MessageBox(L"Export only table?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (expTab == ID_CANCEL) return;
+	}
+	TStringList* exportList = new TStringList();
+	ExportBtn->Tag = 1;
+
+	try
+	{
+		// СЦЕНАРИЙ 1: Экспорт только главной таблицы
+		if (expTab == ID_YES)
 		{
-			String Head = IntToStr(num)+"\t"+List->Cells[CHEADER][i]+"\t"+List->Cells[CDATA][i]+"\t";
-			ListSelectCell(Sender, 0, i, stup); //(TObject *Sender, int ACol, int ARow, bool &CanSelect)
-			for (int j = 0; j < List2->RowCount; ++j)
-				if (expOff == ID_YES)
-					if (expSize == ID_YES)
-						Export->Append(Head + List2->Cells[0][j] + "\t"+List2->Cells[1][j]
-							+"\t"+List2->Cells[2][j]+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
-					else
-						Export->Append(Head + List2->Cells[0][j] + "\t"+List2->Cells[1][j]
-							+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
-				else
-					if (expSize == ID_YES)
-						Export->Append(Head + List2->Cells[0][j]	+"\t"+List2->Cells[2][j]
-							+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
-					else
-						Export->Append(Head + List2->Cells[0][j]+"\t"+List2->Cells[3][j]+"\t"+List2->Cells[CDATA2][j]);
-			num++;
-			count += List2->RowCount;
-			if (count >= 50000)
+			exportList->Append(L"Header\tOffset\tSize\tData");
+			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
 			{
-				Export->SaveToFile(PluginName+IntToStr(i-1)+".txt");
-				Export->Clear();
-				tolog("Saved:"+PluginName+IntToStr(i-1)+".txt");
-				count = 1;
+				exportList->Append(List->Cells[CHEADER][i] + L"\t" +
+								   List->Cells[CSTART][i]  + L"\t" +
+								   List->Cells[CSIZE][i]   + L"\t" +
+								   List->Cells[CDATA][i]);
+			}
+			exportList->SaveToFile(PluginName + L".txt");
+			ShowMessage(L"Saved: " + PluginName + L".txt");
+
+			delete exportList; // Освобождаем память
+			ExportBtn->Tag = 0;
+			return;
+		}
+
+		// Опрашиваем опции для детального экспорта подзаписей
+		int expOff = Application->MessageBox(L"Export Offset?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (expOff == ID_CANCEL) { delete exportList; ExportBtn->Tag = 0; return; }
+
+		int expSize = Application->MessageBox(L"Export Size?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (expSize == ID_CANCEL) { delete exportList; ExportBtn->Tag = 0; return; }
+
+		LogUp = false;
+		bool stup = true;
+		bool hasOffset = (expOff == ID_YES);
+		bool hasSize = (expSize == ID_YES);
+
+		// СЦЕНАРИЙ 2: Ровная таблица (type == ID_NO)
+		if (type == ID_NO)
+		{
+			// Формируем шапку один раз на основе флагов без лесенки if-else
+			String headerStr = L"№\tHeader\tName\tSubheader";
+			if (hasOffset) headerStr += L"\tOffset";
+			if (hasSize)   headerStr += L"\tSize";
+			headerStr += L"\tType\tData";
+			exportList->Append(headerStr);
+
+			int num = 1;
+			int totalLinesInFile = 1;
+			int fileIndex = 1;
+
+			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+			{
+				String head = IntToStr(num) + L"\t" + List->Cells[CHEADER][i] + L"\t" + List->Cells[CDATA][i] + L"\t";
+
+				// Вызываем функцию формирования строк во втором гриде (List2)
+				ListSelectCell(Sender, 0, i, stup);
+
+				int list2Rows = List2->RowCount;
+				for (int j = 0; j < list2Rows; ++j)
+				{
+					// Собираем строку подзаписи динамически
+					String rowStr = head + List2->Cells[0][j]; // Subheader
+					if (hasOffset) rowStr += L"\t" + List2->Cells[1][j];
+					if (hasSize)   rowStr += L"\t" + List2->Cells[2][j];
+
+					rowStr += L"\t" + List2->Cells[3][j] + L"\t" + List2->Cells[CDATA2][j];
+					exportList->Append(rowStr);
+				}
+
+				num++;
+				totalLinesInFile += list2Rows;
+
+				// Если накопилось больше 50 000 строк — сбрасываем в файл-чанк
+				if (totalLinesInFile >= 50000)
+				{
+					String partName = PluginName + L"_part_" + IntToStr(fileIndex++) + L".txt";
+					exportList->SaveToFile(partName);
+					exportList->Clear();
+					exportList->Append(headerStr); // возвращаем шапку в новый файл
+					tolog(L"Saved partial: " + partName);
+					totalLinesInFile = 1;
+				}
 			}
 		}
-	}
-	else //в строку subheaders
-	{
-		ExportBtn->Tag = 1;
-		if (expOff == ID_YES)
-			if (expSize == ID_YES)
-				Export->Append("Header\tName\tSubheader[Offset]{Size}\tData");
-			else Export->Append("Header\tName\tSubheader[Offset]\tData");
-		else if (expSize == ID_YES)
-				Export->Append("Header\tName\tSubheader{Size}\tData");
-			else Export->Append("Header\tName\tSubheader\tData");
-		for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+		// СЦЕНАРИЙ 3: Экспорт в одну строчку (Subheaders в строку)
+		else
 		{
-			String Str = List->Cells[CHEADER][i]+"\t"+List->Cells[CDATA][i];
-			ListSelectCell(Sender, 0, i, stup); //(TObject *Sender, int ACol, int ARow, bool &CanSelect)
-			for (int j = 0; j < List2->RowCount; ++j)
-				if (expOff == ID_YES)
-					if (expSize == ID_YES)
-						Str += "\t"+ List2->Cells[0][j] + "["+List2->Cells[1][j]
-						+"]{"+List2->Cells[2][j]+"}\t"+List2->Cells[CDATA2][j];
-					else
-						Str += "\t"+ List2->Cells[0][j] + "["+List2->Cells[1][j]
-						+"]\t"+List2->Cells[CDATA2][j];
-				else
-					if (expSize == ID_YES)
-						Str += "\t"+ List2->Cells[0][j]
-						+"{"+List2->Cells[2][j]+"}\t"+List2->Cells[CDATA2][j];
-					else
-						Str += "\t"+ List2->Cells[0][j]
-						+"\t"+List2->Cells[CDATA2][j];
-			Export->Append(Str);
+			String headerStr = L"Header\tName";
+			if (hasOffset && hasSize)  headerStr += L"\tSubheader[Offset]{Size}";
+			else if (hasOffset)		headerStr += L"\tSubheader[Offset]";
+			else if (hasSize)		  headerStr += L"\tSubheader{Size}";
+			else					   headerStr += L"\tSubheader";
+			headerStr += L"\tData";
+			exportList->Append(headerStr);
+
+			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+			{
+				String mainRowStr = List->Cells[CHEADER][i] + L"\t" + List->Cells[CDATA][i];
+				ListSelectCell(Sender, 0, i, stup);
+
+				int list2Rows = List2->RowCount;
+				for (int j = 0; j < list2Rows; ++j)
+				{
+					mainRowStr += L"\t" + List2->Cells[0][j];
+					if (hasOffset) mainRowStr += L"[" + List2->Cells[1][j] + L"]";
+					if (hasSize)   mainRowStr += L"{" + List2->Cells[2][j] + L"}";
+					mainRowStr += L"\t" + List2->Cells[CDATA2][j];
+				}
+				exportList->Append(mainRowStr);
+			}
+		}
+
+		// Сохраняем финальный файл, только если в буфере что-то осталось (защита от перезаписи пустотой)
+		if (exportList->Count > 1)
+		{
+			exportList->SaveToFile(PluginName + L".txt");
+			ShowMessage(L"Saved: " + PluginName + L".txt");
 		}
 	}
+	catch (...)
+	{
+		ShowMessage(L"Критическая ошибка во время экспорта!");
+	}
+
+	// ГАРАНТИРОВАННОЕ очищение ресурсов
 	LogUp = true;
-	Export->SaveToFile(PluginName+".txt");
-	ShowMessage("Saved:"+PluginName+".txt");
+	delete exportList;
 	ExportBtn->Tag = 0;
 }
 //---------------------------------------------------------------------------
