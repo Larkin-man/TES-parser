@@ -10,6 +10,8 @@
 #include "TableLoader.h"
 #include "Headers.h"
 #include "Parser_code.h"
+
+//---------------------------------------------------------------------------
 // Вспомогательный метод для красивого и безопасного добавления
 void TForm1::AddTagType(const String& name, char type, const String& maintag)
 {
@@ -18,7 +20,7 @@ void TForm1::AddTagType(const String& name, char type, const String& maintag)
 	info.mainTag = maintag; // Если maintag не передан, сюда запишется пустая строка ""
 	tagMap[name] = info;
 }
-
+//---------------------------------------------------------------------------
 void TForm1::CreateTags()
 {
 	tagMap.clear();

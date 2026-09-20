@@ -7,12 +7,155 @@
 #include <algorithm>
 #include <float.h>
 //#include <cmath> // Для функций std::roundf и std::fabsf
-#include <math.h> // Подключаем классический заголовок Си вместо <cmath>
+#include <math.h> // классический заголовок Си вместо <cmath>
 #pragma hdrstop
 #include "TableLoader.h"
 #include "Headers.h"
 #include "Parser_code.h"
+//---------------------------------------------------------------------------
 
+void __fastcall TForm1::DelTrashClick(TObject *Sender)
+{
+	for (int i = 0; i < List->RowCount; ++i)
+		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
+		{
+			if (i < List->RowCount-1 && List->Cells[CHEADER][i+1].Compare("PGRD") == 0)
+				continue;
+			int Row = 0;
+			int Offset = List->Cells[CSTART][i].ToInt();
+			std::map<int, PACK>::iterator el;
+			if ( (el=ListStore.find(Offset)) != ListStore.end())
+				Row = el->second.RowCount;
+			else
+			{
+				unsigned int Len;
+				fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
+				int Pos = ftell(file);
+				while (Pos < Ends[i])
+				{
+					fseek(file, 4, SEEK_CUR); //fread(Name, 4, 1, file);
+					fread(&Len, SLENSIZE, 1, file);
+					fseek(file, Len, SEEK_CUR);
+					Pos = ftell(file);
+					Row++;
+				}
+			}
+			if (Row <= 4) //todo: to optimal
+				DeleteRecord(i);
+			else if (Row == 5)
+				tolog("CELL 5 string:"+List->Cells[CDATA][i]);
+		}
+	List->Row = 0;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::DelDialsClick(TObject *Sender)
+{
+	if (List->Row < 0)
+		return;
+	// чтобы логика гарантированно запустила сортировку ПО ВОЗРАСТАНИЮ
+	LastSortingColumn = -1;
+	// Вызываем обработчик события для столбца CSTART
+	HeaderControl1SectionClick(HeaderControl1, HeaderControl1->Sections->Items[CSTART]);
+	int Row = 0;
+	int End = List->RowCount;
+	if (List->Selection.Top != List->Selection.Bottom)
+	{
+		Row = List->Selection.Top;
+		End = List->Selection.Bottom;
+		ToLog("Finding trash DIAL's from "+IntToStr(Row)+" to "+IntToStr(End));
+	}
+	int DialRow = -1;
+	bool NeedDel = false;
+	for (; Row < End; ++Row)
+	{
+		if (List->Cells[CHEADER][Row] == "DIAL")
+		{
+			if (NeedDel)
+				DeleteRecord(DialRow);
+			DialRow = Row;
+			NeedDel = true;
+			//DialStart = List->Cells[CSTART][Row].ToInt();
+		}
+		else
+		if (List->Cells[CHEADER][Row] == "INFO")
+		{
+			int Offset = List->Cells[CSTART][Row].ToInt();
+			if (Deleted.find(Offset) == Deleted.end()) //его нет в списке удаления
+				NeedDel = false;
+		}
+	}
+	if (LDele->Visible == false)
+		tolog("It has no trash DIAL");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::SPELreadClick(TObject *Sender)
+{
+	String exp;
+	SPEL Spel;
+	fread(&Spel, 4*4, 1, file);
+	char4ToLog(Spel.Name);
+	ToLog(Spel.i[0],"Length");
+	fread(&Spel.NAME, 2*4, 1, file);
+	char4ToLog(Spel.NAME);
+	ToLog(Spel.Length,"Length");
+	if	(Spel.Create() == false)
+		return;
+	fread(Spel.Data, Spel.Length, 1, file);
+	ToLog(Spel.Data);
+	exp = Spel.Data;
+	fread(&Spel.FNAM, 2*4, 1, file);
+	char4ToLog(Spel.FNAM);
+	ToLog(Spel.FNAMLen,"Length");
+	if (Spel.FNAMLen < 1024) Spel.FNAMData = new char[Spel.FNAMLen];
+	fread(Spel.FNAMData, Spel.FNAMLen, 1, file);
+	ToLog(Spel.FNAMData);
+	exp += '\t';exp += Spel.FNAMData;
+	fread(&Spel.SPDT, 13*4, 1, file);
+	char4ToLog(Spel.SPDT);	ToLog(Spel.SPDTLen,"Length");
+	ToLog(Spel.Type,"Type"); ToLog(Spel.Cost,"Cost"); ToLog(Spel.Flags,"Flags");
+	char4ToLog(Spel.ENAM); ToLog(Spel.ENAMLen,"ENAMLen"); ToLog(Spel.Eff,"Eff");
+	ToLog(Spel.Eff2,"Eff2");
+	ToLog(Spel.Range,"Range"); ToLog(Spel.Area,"Area"); ToLog(Spel.Dura,"Dura");
+	ToLog(Spel.Min,"Min"); ToLog(Spel.Max,"Max");
+	exp += '\t';
+	exp+=Spel.Type; exp+='\t';exp+=Spel.Cost; exp+='\t';exp+=Spel.Flags;
+	exp+='\t';exp+=Spel.Eff; exp+='\t';exp+=Spel.Eff2; exp+='\t';exp+=Spel.Range;
+	exp+='\t';exp+=Spel.Area; exp+='\t';exp+=Spel.Dura; exp+='\t';exp+=Spel.Min;
+	exp+='\t';exp+=Spel.Max;
+	if (LogUp)
+		Out->Lines->Add(exp);
+	else if (Export)
+		Export->Add(exp);
+	NextSClick(Sender);
+}
+//---------------------------------------------------------------------------
+//Удаляет из листа 2 все до следующего заголовка FRMR NAM0 DATA
+void __fastcall TForm1::DeleteExtraDataClick(TObject *Sender)
+{
+	bool FindingName = true;
+	int Row = List2->Row + 1;
+	String Head;
+	for (; Row < List2->RowCount; ++Row)
+		if (FindingName)
+		{
+			if (List2->Cells[CHEADER][Row] == "NAME")
+				FindingName = false;
+		}
+		else if (List2->Cells[CHEADER][Row] == "DATA")
+			FindingName = true;
+		else
+		{
+			Head = List2->Cells[CHEADER][Row];
+			if (Head=="ANAM" || Head=="INTV" || Head=="NAM9" || Head=="CNAM"
+				|| Head=="INDX" )
+				Delete2(Row);
+		}
+	//return FindinList2Click(Sender);
+}
+//---------------------------------------------------------------------------
+// Для стабильной сортировки
 bool TForm1::RowComparator::operator()(const RowData& a, const RowData& b) const
 {
 	if (isString)
@@ -25,7 +168,6 @@ bool TForm1::RowComparator::operator()(const RowData& a, const RowData& b) const
 	{
 		int valA = a.cells[col].ToIntDef(0);
 		int valB = b.cells[col].ToIntDef(0);
-
 		if (isAscending)
 			return valA < valB;
 		else
@@ -36,7 +178,8 @@ bool TForm1::RowComparator::operator()(const RowData& a, const RowData& b) const
 
 void __fastcall TForm1::ExportSPELClick(TObject *Sender)
 {
-	if (List->Row == -1)	return;
+	if (List->Row == -1)
+		return;
 	Export = new TStringList;
 	Export->Append("id	name	type	cost	flags	Effect1	Effect2	Range	Area	Time	Min	Max");
 	LogUp = false;
@@ -54,42 +197,39 @@ void __fastcall TForm1::ExportSPELClick(TObject *Sender)
 // Ультра-быстрая проверка близости к сетке на битовых масках
 static inline bool TrySnapBitwise(int x, int step, int tolerance, int& result)
 {
-    // step - это степень двойки (например, 512, 256).
-    // Маска для получения остатка от деления: (step - 1)
+	// step - это степень двойки (например, 512, 256).
+	// Маска для получения остатка от деления: (step - 1)
 	int mask = step - 1;
 	int remainder = x & mask; // Заменяет операцию (x % step)
-    int minVal = x & ~mask;   // Заменяет операцию ((x / step) * step)
-
+	int minVal = x & ~mask;   // Заменяет операцию ((x / step) * step)
 	if (remainder < tolerance)
 	{
 		result = minVal;
-        return true;
-    }
+		return true;
+	}
 	if ((step - remainder) < tolerance)
 	{
-        result = minVal + step;
-        return true;
-    }
+		result = minVal + step;
+		return true;
+	}
     return false;
 }
+//---------------------------------------------------------------------------
 
 int TForm1::GetOkrugl(int x)
 {
-    int absX = (x < 0) ? -x : x;
+	int absX = (x < 0) ? -x : x;
 	int result = 0;
-
     // Проверяем каскад адаптивных сеток с помощью побитовой логики
     if (TrySnapBitwise(absX, 512, 32, result)) goto sub_return;
     if (TrySnapBitwise(absX, 256, 28, result)) goto sub_return;
-    if (TrySnapBitwise(absX, 128, 20, result)) goto sub_return;
-
+	if (TrySnapBitwise(absX, 128, 20, result)) goto sub_return;
     // Финальная сетка 32 (обычное округление к ближайшей степени)
     {
         int remainder = absX & 31;  // absX % 32
         int minVal = absX & ~31;    // (absX / 32) * 32
         result = (remainder <= 16) ? minVal : (minVal + 32);
-    }
-
+	}
 sub_return:
     return (x < 0) ? -result : result;
 }
@@ -388,7 +528,6 @@ void __fastcall TForm1::FindOwnersClick(TObject *Sender)
 		}
 	Out->Lines->EndUpdate();
 }
-
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::MassDeleteClick(TObject *Sender)
@@ -745,3 +884,4 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	fclose(conf);
 }
 //---------------------------------------------------------------------------
+

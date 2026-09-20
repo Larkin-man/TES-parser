@@ -106,6 +106,140 @@ void __fastcall TForm1::SwapCoordClick(TObject *Sender)
 	EFinds->SetFocus();
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TForm1::CheckCoordClick(TObject *Sender)
+{
+	int Param[3];
+	bool Ext;
+	float max, min;
+	int maxi, mini;
+	String maxs, mins;
+	int isx, isy;
+	float Data[6];
+	bool CanSel = false;
+	if (List->Row <= -1)
+		return;
+	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+	{
+		if (List->Cells[CHEADER][i] != "CELL")
+			continue;
+		maxi = -1;
+		ListSelectCell(Sender, 0, i, CanSel);
+		Out->Lines->Add("-------"+List->Cells[CDATA][i]);
+		for (int j = 0; j < List2->RowCount; ++j)
+			if (List2->Cells[CHEADER][j] == "DATA")
+			{
+				int Offset = List2->Cells[CSTART][j].ToInt();
+				fseek(file, Offset + 4, SEEK_SET);
+				int Length;
+				fread(&Length, 4, 1, file);
+				if (List2->Cells[CSIZE][j].ToInt() == 12) //location
+				{
+					fread(Param, 4, 3, file);
+					pbit = reinterpret_cast<BITS*> (&(Param[0]));
+					if ((pbit) && (pbit->b1 == 1)) //interior
+						Ext = false;
+					else
+						Ext = true;
+					min = INT_MAX;
+					max = INT_MIN;
+				} //coord
+				else
+				{
+					fread(Data, 4, 6, file);
+					tolog(FloatToStr(Data[0])+" "+FloatToStr(Data[1])+" "+FloatToStr(Data[2])+" "
+						+FloatToStr(Data[3])+" "+FloatToStr(Data[4])+" "+FloatToStr(Data[5]));
+					if (Ext)
+					{
+						isx = static_cast<int>(Data[0] / 8192.0f);
+						if (Data[0] < 0)	isx--;
+						if (isx != Param[1])
+							Out->Lines->Add(IntToStr(isx)+"!!!X:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[0]/8192)+"\t"+List2->Cells[CDATA2][j]);
+						isy = static_cast<int>(Data[1] / 8192.0f);
+						if (Data[1] < 0)	isy--;
+						if (isy != Param[2])
+							Out->Lines->Add(IntToStr(isy)+" !!Y:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[1]/8192)+"\t"+List2->Cells[CDATA2][j]);
+					}
+					if (Data[2] > max)
+					{
+						max = Data[2];
+						maxi = List2->Cells[CSTART][j].ToInt();
+						if (List2->Cells[CHEADER][j-1] == "NAME")
+							maxs = List2->Cells[CDATA2][j-1];
+						else
+							maxs = List2->Cells[CDATA2][j-2];
+					}
+					if (Data[2] < min)
+					{
+						min = Data[2];
+						mini = List2->Cells[CSTART][j].ToInt();
+						if (List2->Cells[CHEADER][j-1] == "NAME")
+							mins = List2->Cells[CDATA2][j-1];
+						else
+							mins = List2->Cells[CDATA2][j-2];
+					}
+				}
+			}
+		if (maxi != -1 && maxi != mini)
+		{
+			Out->Lines->Add(maxs+"\tMax:"+FloatToStr(max)+" in "+IntToStr(maxi));
+			Out->Lines->Add(mins+"\tMin:"+FloatToStr(min)+" in "+IntToStr(mini));
+			Out->Lines->Add("Z Diff="+IntToStr((int)max-(int)min));
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CheckCoordContextPopup(TObject *Sender, TPoint &MousePos,
+			 bool &Handled)
+{
+	if (CheckCoord->Tag == 0)
+	{
+		CheckCoord->Tag = 1;
+		Out->Lines->Add("Auto check coordinates.");
+	}
+	else
+		CheckCoord->Tag = 0;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CellReadClick(TObject *Sender)
+{
+	MData_Cell Cell;
+	fseek(file, ToE->Text.ToIntDef(0), SEEK_SET);
+	fread(&Cell, Cell.SIZE, 1, file);
+	char4ToLog(Cell.Name);
+	ToLog(Cell.i[0],"AllFieldsLengtg");
+	ToLog(Cell.i[1],"Unc1");
+	ToLog(Cell.i[2],"Unc2");
+	char4ToLog(Cell.NAME); //NAME
+	ToLog(Cell.Length,"Length");
+	if	(Cell.Create() == false)
+		return;
+	fread(Cell.Data, Cell.Length, 1, file);
+	ToLog(Cell.Data);
+	fread(&Cell.MData_Cell::Data, 4, 5, file);
+	char4ToLog(Cell.MData_Cell::Data);
+	ToLog(Cell.Data_Length[0],"Length");
+	ToLog(Cell.Data_Length[1],"This is *");
+	ToLog(Cell.GridX,"GridX");
+	ToLog(Cell.GridY,"GridY");
+	int Stop = Cell.i[0] - CELLNAMEDATALEN - Cell.Length;
+	if (Stop == 0)
+	{
+		Out->Lines->Add("NO RGNN!");
+		return;
+	}
+	Stop -= CELLRGNNLEN;
+//	Stop -= Stri.Length; RECORD1INT1STR Stri;
+	if (Stop == 0)
+		Out->Lines->Add("END!");
+	else
+		Out->Lines->Add(Stop);
+	List->Row = List->Row;
+	NextSClick(Sender);
+}
+//---------------------------------------------------------------------------
 void __fastcall TForm1::CheckCELLClick(TObject *Sender)
 {
 	if (List->Row < 0)

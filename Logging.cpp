@@ -56,6 +56,161 @@ void TForm1::char4ToLog(char* msg, const char *param)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TForm1::ExportBtnClick(TObject *Sender)
+{
+	if (List->Row == -1)
+		return ShowMessage(L"No one selected"); // Используем Юникод-префикс L
+
+	// Названия окон для Unicode-окружения RAD Studio
+	String expoTitle = (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1)
+					   ? L"Export all" : L"Export";
+	bool expAll = (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1);
+
+	int type = ID_NO;
+	if (List->Selection.Top != List->Selection.Bottom)
+	{
+		// Используем стандартный MessageBox без суффикса 'A' для поддержки Юникода
+		type = Application->MessageBox(L"Export subheaders to string?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (type == ID_CANCEL) return;
+	}
+
+	int expTab = ID_NO;
+	if (expAll && type == ID_YES)
+	{
+		expTab = Application->MessageBox(L"Export only table?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (expTab == ID_CANCEL) return;
+	}
+	TStringList* exportList = new TStringList();
+	ExportBtn->Tag = 1;
+
+	try
+	{
+		// СЦЕНАРИЙ 1: Экспорт только главной таблицы
+		if (expTab == ID_YES)
+		{
+			exportList->Append(L"Header\tOffset\tSize\tData");
+			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+			{
+				exportList->Append(List->Cells[CHEADER][i] + L"\t" +
+								   List->Cells[CSTART][i]  + L"\t" +
+								   List->Cells[CSIZE][i]   + L"\t" +
+								   List->Cells[CDATA][i]);
+			}
+			exportList->SaveToFile(PluginName + L".txt");
+			ShowMessage(L"Saved: " + PluginName + L".txt");
+
+			delete exportList; // Освобождаем память
+			ExportBtn->Tag = 0;
+			return;
+		}
+
+		// Опрашиваем опции для детального экспорта подзаписей
+		int expOff = Application->MessageBox(L"Export Offset?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (expOff == ID_CANCEL) { delete exportList; ExportBtn->Tag = 0; return; }
+
+		int expSize = Application->MessageBox(L"Export Size?", expoTitle.c_str(), MB_YESNOCANCEL);
+		if (expSize == ID_CANCEL) { delete exportList; ExportBtn->Tag = 0; return; }
+
+		LogUp = false;
+		bool stup = true;
+		bool hasOffset = (expOff == ID_YES);
+		bool hasSize = (expSize == ID_YES);
+
+		// СЦЕНАРИЙ 2: Ровная таблица (type == ID_NO)
+		if (type == ID_NO)
+		{
+			// Формируем шапку один раз на основе флагов без лесенки if-else
+			String headerStr = L"№\tHeader\tName\tSubheader";
+			if (hasOffset) headerStr += L"\tOffset";
+			if (hasSize)   headerStr += L"\tSize";
+			headerStr += L"\tType\tData";
+			exportList->Append(headerStr);
+
+			int num = 1;
+			int totalLinesInFile = 1;
+			int fileIndex = 1;
+
+			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+			{
+				String head = IntToStr(num) + L"\t" + List->Cells[CHEADER][i] + L"\t" + List->Cells[CDATA][i] + L"\t";
+
+				// Вызываем функцию формирования строк во втором гриде (List2)
+				ListSelectCell(Sender, 0, i, stup);
+
+				int list2Rows = List2->RowCount;
+				for (int j = 0; j < list2Rows; ++j)
+				{
+					// Собираем строку подзаписи динамически
+					String rowStr = head + List2->Cells[0][j]; // Subheader
+					if (hasOffset) rowStr += L"\t" + List2->Cells[1][j];
+					if (hasSize)   rowStr += L"\t" + List2->Cells[2][j];
+
+					rowStr += L"\t" + List2->Cells[3][j] + L"\t" + List2->Cells[CDATA2][j];
+					exportList->Append(rowStr);
+				}
+
+				num++;
+				totalLinesInFile += list2Rows;
+
+				// Если накопилось больше 50 000 строк — сбрасываем в файл-чанк
+				if (totalLinesInFile >= 50000)
+				{
+					String partName = PluginName + L"_part_" + IntToStr(fileIndex++) + L".txt";
+					exportList->SaveToFile(partName);
+					exportList->Clear();
+					exportList->Append(headerStr); // возвращаем шапку в новый файл
+					tolog(L"Saved partial: " + partName);
+					totalLinesInFile = 1;
+				}
+			}
+		}
+		// СЦЕНАРИЙ 3: Экспорт в одну строчку (Subheaders в строку)
+		else
+		{
+			String headerStr = L"Header\tName";
+			if (hasOffset && hasSize)  headerStr += L"\tSubheader[Offset]{Size}";
+			else if (hasOffset)		headerStr += L"\tSubheader[Offset]";
+			else if (hasSize)		  headerStr += L"\tSubheader{Size}";
+			else					   headerStr += L"\tSubheader";
+			headerStr += L"\tData";
+			exportList->Append(headerStr);
+
+			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
+			{
+				String mainRowStr = List->Cells[CHEADER][i] + L"\t" + List->Cells[CDATA][i];
+				ListSelectCell(Sender, 0, i, stup);
+
+				int list2Rows = List2->RowCount;
+				for (int j = 0; j < list2Rows; ++j)
+				{
+					mainRowStr += L"\t" + List2->Cells[0][j];
+					if (hasOffset) mainRowStr += L"[" + List2->Cells[1][j] + L"]";
+					if (hasSize)   mainRowStr += L"{" + List2->Cells[2][j] + L"}";
+					mainRowStr += L"\t" + List2->Cells[CDATA2][j];
+				}
+				exportList->Append(mainRowStr);
+			}
+		}
+
+		// Сохраняем финальный файл, только если в буфере что-то осталось (защита от перезаписи пустотой)
+		if (exportList->Count > 1)
+		{
+			exportList->SaveToFile(PluginName + L".txt");
+			ShowMessage(L"Saved: " + PluginName + L".txt");
+		}
+	}
+	catch (...)
+	{
+		ShowMessage(L"Критическая ошибка во время экспорта!");
+	}
+
+	// ГАРАНТИРОВАННОЕ очищение ресурсов
+	LogUp = true;
+	delete exportList;
+	ExportBtn->Tag = 0;
+}
+//---------------------------------------------------------------------------
+
 void __fastcall TForm1::TES3ReadClick(TObject *Sender)
 {	//(TES3 + HEDR ++?)
 	Tes3Header hTes3;
@@ -76,6 +231,27 @@ void __fastcall TForm1::TES3ReadClick(TObject *Sender)
 	if (save)
 		fwrite(&hTes3, sizeof(hTes3), 1, save);
 	NextSClick(Sender);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::GMDTReadClick(TObject *Sender)
+{
+	char 	Name[5];	Name[4] = '\0';
+	int 	Len;
+	float Cord[6];
+	char whe[68];
+	char Player[32];
+	fseek(file, ToE->Text.ToIntDef(0), SEEK_SET);
+	fread(Name, 4, 1, file);
+	fread(&Len, SLENSIZE, 1, file);
+	fread(Cord, 4, 6, file);
+	fread(whe, 1, 68, file);
+	fread(Player, 1, 32, file);
+	ToLog(String(Name)+"("+IntToStr(Len)+")");
+	for (int i = 0; i < 6; ++i)
+		ToLog(Cord[i]);
+	ToLog(whe);
+	ToLog(Player);
 }
 //---------------------------------------------------------------------------
 

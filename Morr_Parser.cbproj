@@ -153,8 +153,8 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
         <Defines>_DEBUG;$(Defines)</Defines>
-        <VerInfo_Build>390</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.390;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>393</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.393;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
         <ILINK_AllWarnings>true</ILINK_AllWarnings>
         <ILINK_SelectedWarnings>false</ILINK_SelectedWarnings>
     </PropertyGroup>

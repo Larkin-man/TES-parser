@@ -466,44 +466,6 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::CellReadClick(TObject *Sender)
-{
-	MData_Cell Cell;
-	fseek(file, ToE->Text.ToIntDef(0), SEEK_SET);
-	fread(&Cell, Cell.SIZE, 1, file);
-	char4ToLog(Cell.Name);
-	ToLog(Cell.i[0],"AllFieldsLengtg");
-	ToLog(Cell.i[1],"Unc1");
-	ToLog(Cell.i[2],"Unc2");
-	char4ToLog(Cell.NAME); //NAME
-	ToLog(Cell.Length,"Length");
-	if	(Cell.Create() == false)
-		return;
-	fread(Cell.Data, Cell.Length, 1, file);
-	ToLog(Cell.Data);
-	fread(&Cell.MData_Cell::Data, 4, 5, file);
-	char4ToLog(Cell.MData_Cell::Data);
-	ToLog(Cell.Data_Length[0],"Length");
-	ToLog(Cell.Data_Length[1],"This is *");
-	ToLog(Cell.GridX,"GridX");
-	ToLog(Cell.GridY,"GridY");
-	int Stop = Cell.i[0] - CELLNAMEDATALEN - Cell.Length;
-	if (Stop == 0)
-	{
-		Out->Lines->Add("NO RGNN!");
-		return;
-	}
-	Stop -= CELLRGNNLEN;
-//	Stop -= Stri.Length; RECORD1INT1STR Stri;
-	if (Stop == 0)
-		Out->Lines->Add("END!");
-	else
-		Out->Lines->Add(Stop);
-	List->Row = List->Row;
-	NextSClick(Sender);
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 {
 	if (!Reinter->Checked)
@@ -674,48 +636,6 @@ void __fastcall TForm1::GoClick(TObject *Sender)
 void __fastcall TForm1::ToESubLabelClick(TObject *Sender)
 {
 	ToE->Hint = ftell(file);
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::SPELreadClick(TObject *Sender)
-{
-	String exp;
-	SPEL Spel;
-	fread(&Spel, 4*4, 1, file);
-	char4ToLog(Spel.Name);
-	ToLog(Spel.i[0],"Length");
-	fread(&Spel.NAME, 2*4, 1, file);
-	char4ToLog(Spel.NAME);
-	ToLog(Spel.Length,"Length");
-	if	(Spel.Create() == false)
-		return;
-	fread(Spel.Data, Spel.Length, 1, file);
-	ToLog(Spel.Data);
-	exp = Spel.Data;
-	fread(&Spel.FNAM, 2*4, 1, file);
-	char4ToLog(Spel.FNAM);
-	ToLog(Spel.FNAMLen,"Length");
-	if (Spel.FNAMLen < 1024) Spel.FNAMData = new char[Spel.FNAMLen];
-	fread(Spel.FNAMData, Spel.FNAMLen, 1, file);
-	ToLog(Spel.FNAMData);
-	exp += '\t';exp += Spel.FNAMData;
-	fread(&Spel.SPDT, 13*4, 1, file);
-	char4ToLog(Spel.SPDT);	ToLog(Spel.SPDTLen,"Length");
-	ToLog(Spel.Type,"Type"); ToLog(Spel.Cost,"Cost"); ToLog(Spel.Flags,"Flags");
-	char4ToLog(Spel.ENAM); ToLog(Spel.ENAMLen,"ENAMLen"); ToLog(Spel.Eff,"Eff");
-	ToLog(Spel.Eff2,"Eff2");
-	ToLog(Spel.Range,"Range"); ToLog(Spel.Area,"Area"); ToLog(Spel.Dura,"Dura");
-	ToLog(Spel.Min,"Min"); ToLog(Spel.Max,"Max");
-	exp += '\t';
-	exp+=Spel.Type; exp+='\t';exp+=Spel.Cost; exp+='\t';exp+=Spel.Flags;
-	exp+='\t';exp+=Spel.Eff; exp+='\t';exp+=Spel.Eff2; exp+='\t';exp+=Spel.Range;
-	exp+='\t';exp+=Spel.Area; exp+='\t';exp+=Spel.Dura; exp+='\t';exp+=Spel.Min;
-	exp+='\t';exp+=Spel.Max;
-	if (LogUp)
-		Out->Lines->Add(exp);
-	else if (Export)
-		Export->Add(exp);
-	NextSClick(Sender);
 }
 //---------------------------------------------------------------------------
 
@@ -1246,202 +1166,6 @@ void __fastcall TForm1::TestPClick(TObject *Sender)
 	PrintAllTags();
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TForm1::DelDialsClick(TObject *Sender)
-{
-	if (List->Row < 0)
-		return;
-	// чтобы логика гарантированно запустила сортировку ПО ВОЗРАСТАНИЮ
-	LastSortingColumn = -1;
-	// Вызываем обработчик события для столбца CSTART
-	HeaderControl1SectionClick(HeaderControl1, HeaderControl1->Sections->Items[CSTART]);
-	int Row = 0;
-	int End = List->RowCount;
-	if (List->Selection.Top != List->Selection.Bottom)
-	{
-		Row = List->Selection.Top;
-		End = List->Selection.Bottom;
-		ToLog("Finding trash DIAL's from "+IntToStr(Row)+" to "+IntToStr(End));
-	}
-	int DialRow = -1;
-	bool NeedDel = false;
-	for (; Row < End; ++Row)
-	{
-		if (List->Cells[CHEADER][Row] == "DIAL")
-		{
-			if (NeedDel)
-				DeleteRecord(DialRow);
-			DialRow = Row;
-			NeedDel = true;
-			//DialStart = List->Cells[CSTART][Row].ToInt();
-		}
-		else
-		if (List->Cells[CHEADER][Row] == "INFO")
-		{
-			int Offset = List->Cells[CSTART][Row].ToInt();
-			if (Deleted.find(Offset) == Deleted.end()) //его нет в списке удаления
-				NeedDel = false;
-		}
-	}
-	if (LDele->Visible == false)
-		tolog("It has no trash DIAL");
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::ExportBtnClick(TObject *Sender)
-{
-	if (List->Row == -1)
-		return ShowMessage(L"No one selected"); // Используем Юникод-префикс L
-
-	// Названия окон для Unicode-окружения RAD Studio
-	String expoTitle = (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1)
-					   ? L"Export all" : L"Export";
-	bool expAll = (List->Selection.Top == 0 && List->Selection.Bottom == List->RowCount - 1);
-
-	int type = ID_NO;
-	if (List->Selection.Top != List->Selection.Bottom)
-	{
-		// Используем стандартный MessageBox без суффикса 'A' для поддержки Юникода
-		type = Application->MessageBox(L"Export subheaders to string?", expoTitle.c_str(), MB_YESNOCANCEL);
-		if (type == ID_CANCEL) return;
-	}
-
-	int expTab = ID_NO;
-	if (expAll && type == ID_YES)
-	{
-		expTab = Application->MessageBox(L"Export only table?", expoTitle.c_str(), MB_YESNOCANCEL);
-		if (expTab == ID_CANCEL) return;
-	}
-	TStringList* exportList = new TStringList();
-	ExportBtn->Tag = 1;
-
-	try
-	{
-		// СЦЕНАРИЙ 1: Экспорт только главной таблицы
-		if (expTab == ID_YES)
-		{
-			exportList->Append(L"Header\tOffset\tSize\tData");
-			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-			{
-				exportList->Append(List->Cells[CHEADER][i] + L"\t" +
-								   List->Cells[CSTART][i]  + L"\t" +
-								   List->Cells[CSIZE][i]   + L"\t" +
-								   List->Cells[CDATA][i]);
-			}
-			exportList->SaveToFile(PluginName + L".txt");
-			ShowMessage(L"Saved: " + PluginName + L".txt");
-
-			delete exportList; // Освобождаем память
-			ExportBtn->Tag = 0;
-			return;
-		}
-
-		// Опрашиваем опции для детального экспорта подзаписей
-		int expOff = Application->MessageBox(L"Export Offset?", expoTitle.c_str(), MB_YESNOCANCEL);
-		if (expOff == ID_CANCEL) { delete exportList; ExportBtn->Tag = 0; return; }
-
-		int expSize = Application->MessageBox(L"Export Size?", expoTitle.c_str(), MB_YESNOCANCEL);
-		if (expSize == ID_CANCEL) { delete exportList; ExportBtn->Tag = 0; return; }
-
-		LogUp = false;
-		bool stup = true;
-		bool hasOffset = (expOff == ID_YES);
-		bool hasSize = (expSize == ID_YES);
-
-		// СЦЕНАРИЙ 2: Ровная таблица (type == ID_NO)
-		if (type == ID_NO)
-		{
-			// Формируем шапку один раз на основе флагов без лесенки if-else
-			String headerStr = L"№\tHeader\tName\tSubheader";
-			if (hasOffset) headerStr += L"\tOffset";
-			if (hasSize)   headerStr += L"\tSize";
-			headerStr += L"\tType\tData";
-			exportList->Append(headerStr);
-
-			int num = 1;
-			int totalLinesInFile = 1;
-			int fileIndex = 1;
-
-			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-			{
-				String head = IntToStr(num) + L"\t" + List->Cells[CHEADER][i] + L"\t" + List->Cells[CDATA][i] + L"\t";
-
-				// Вызываем функцию формирования строк во втором гриде (List2)
-				ListSelectCell(Sender, 0, i, stup);
-
-				int list2Rows = List2->RowCount;
-				for (int j = 0; j < list2Rows; ++j)
-				{
-					// Собираем строку подзаписи динамически
-					String rowStr = head + List2->Cells[0][j]; // Subheader
-					if (hasOffset) rowStr += L"\t" + List2->Cells[1][j];
-					if (hasSize)   rowStr += L"\t" + List2->Cells[2][j];
-
-					rowStr += L"\t" + List2->Cells[3][j] + L"\t" + List2->Cells[CDATA2][j];
-					exportList->Append(rowStr);
-				}
-
-				num++;
-				totalLinesInFile += list2Rows;
-
-				// Если накопилось больше 50 000 строк — сбрасываем в файл-чанк
-				if (totalLinesInFile >= 50000)
-				{
-					String partName = PluginName + L"_part_" + IntToStr(fileIndex++) + L".txt";
-					exportList->SaveToFile(partName);
-					exportList->Clear();
-					exportList->Append(headerStr); // возвращаем шапку в новый файл
-					tolog(L"Saved partial: " + partName);
-					totalLinesInFile = 1;
-				}
-			}
-		}
-		// СЦЕНАРИЙ 3: Экспорт в одну строчку (Subheaders в строку)
-		else
-		{
-			String headerStr = L"Header\tName";
-			if (hasOffset && hasSize)  headerStr += L"\tSubheader[Offset]{Size}";
-			else if (hasOffset)		headerStr += L"\tSubheader[Offset]";
-			else if (hasSize)		  headerStr += L"\tSubheader{Size}";
-			else					   headerStr += L"\tSubheader";
-			headerStr += L"\tData";
-			exportList->Append(headerStr);
-
-			for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-			{
-				String mainRowStr = List->Cells[CHEADER][i] + L"\t" + List->Cells[CDATA][i];
-				ListSelectCell(Sender, 0, i, stup);
-
-				int list2Rows = List2->RowCount;
-				for (int j = 0; j < list2Rows; ++j)
-				{
-					mainRowStr += L"\t" + List2->Cells[0][j];
-					if (hasOffset) mainRowStr += L"[" + List2->Cells[1][j] + L"]";
-					if (hasSize)   mainRowStr += L"{" + List2->Cells[2][j] + L"}";
-					mainRowStr += L"\t" + List2->Cells[CDATA2][j];
-				}
-				exportList->Append(mainRowStr);
-			}
-		}
-
-		// Сохраняем финальный файл, только если в буфере что-то осталось (защита от перезаписи пустотой)
-		if (exportList->Count > 1)
-		{
-			exportList->SaveToFile(PluginName + L".txt");
-			ShowMessage(L"Saved: " + PluginName + L".txt");
-		}
-	}
-	catch (...)
-	{
-		ShowMessage(L"Критическая ошибка во время экспорта!");
-	}
-
-	// ГАРАНТИРОВАННОЕ очищение ресурсов
-	LogUp = true;
-	delete exportList;
-	ExportBtn->Tag = 0;
-}
-//---------------------------------------------------------------------------
 bool TForm1::Find(String find)
 {
 	if (find.Length() <= 0)
@@ -1595,41 +1319,6 @@ void __fastcall TForm1::NClearOutClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::DelTrashClick(TObject *Sender)
-{
-	for (int i = 0; i < List->RowCount; ++i)
-		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
-		{
-			if (i < List->RowCount-1 && List->Cells[CHEADER][i+1].Compare("PGRD") == 0)
-				continue;
-			int Row = 0;
-			int Offset = List->Cells[CSTART][i].ToInt();
-			std::map<int, PACK>::iterator el;
-			if ( (el=ListStore.find(Offset)) != ListStore.end())
-				Row = el->second.RowCount;
-			else
-			{
-				unsigned int Len;
-				fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
-				int Pos = ftell(file);
-				while (Pos < Ends[i])
-				{
-					fseek(file, 4, SEEK_CUR); //fread(Name, 4, 1, file);
-					fread(&Len, SLENSIZE, 1, file);
-					fseek(file, Len, SEEK_CUR);
-					Pos = ftell(file);
-					Row++;
-				}
-			}
-			if (Row <= 4) //todo: to optimal
-				DeleteRecord(i);
-			else if (Row == 5)
-				tolog("CELL 5 string:"+List->Cells[CDATA][i]);
-		}
-	List->Row = 0;
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::SelClick(TObject *Sender)
 {
 	bool CanSel = true;
@@ -1721,7 +1410,7 @@ void TForm1::DeleteSublist(int Row2, int MainRow)
 	}
 }
 //---------------------------------------------------------------------------
-///subheaderlen = 4+4+len
+//subheaderlen = 4+4+len
 bool Compa(DeleteItem a, DeleteItem b)
 {
 	return a.Offset < b.Offset;
@@ -1815,138 +1504,10 @@ void __fastcall TForm1::FindinList2Click(TObject *Sender)
 	ListEnter(Sender);
 }
 //---------------------------------------------------------------------------
-//Удаляет из листа 2 все до следующего заголовка FRMR NAM0 DATA
-void __fastcall TForm1::DeleteExtraDataClick(TObject *Sender)
-{
-	bool FindingName = true;
-	int Row = List2->Row + 1;
-	String Head;
-	for (; Row < List2->RowCount; ++Row)
-		if (FindingName)
-		{
-			if (List2->Cells[CHEADER][Row] == "NAME")
-				FindingName = false;
-		}
-		else if (List2->Cells[CHEADER][Row] == "DATA")
-			FindingName = true;
-		else
-		{
-			Head = List2->Cells[CHEADER][Row];
-			if (Head=="ANAM" || Head=="INTV" || Head=="NAM9" || Head=="CNAM"
-				|| Head=="INDX" )
-				Delete2(Row);
-		}
-	//return FindinList2Click(Sender);
-}
-//---------------------------------------------------------------------------
 
 void __fastcall TForm1::NextTagContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled)
 {
 	DeleteClick(Sender);
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::CheckCoordClick(TObject *Sender)
-{
-	int Param[3];
-	bool Ext;
-	float max, min;
-	int maxi, mini;
-	String maxs, mins;
-	int isx, isy;
-	float Data[6];
-	bool CanSel = false;
-	if (List->Row <= -1)
-		return;
-	for (int i = List->Selection.Top; i <= List->Selection.Bottom; ++i)
-	{
-		if (List->Cells[CHEADER][i] != "CELL")
-			continue;
-		maxi = -1;
-		ListSelectCell(Sender, 0, i, CanSel);
-		Out->Lines->Add("-------"+List->Cells[CDATA][i]);
-		for (int j = 0; j < List2->RowCount; ++j)
-			if (List2->Cells[CHEADER][j] == "DATA")
-			{
-				int Offset = List2->Cells[CSTART][j].ToInt();
-				fseek(file, Offset + 4, SEEK_SET);
-				int Length;
-				fread(&Length, 4, 1, file);
-				if (List2->Cells[CSIZE][j].ToInt() == 12) //location
-				{
-					fread(Param, 4, 3, file);
-					pbit = reinterpret_cast<BITS*> (&(Param[0]));
-					if ((pbit) && (pbit->b1 == 1)) //interior
-						Ext = false;
-					else
-						Ext = true;
-					min = INT_MAX;
-					max = INT_MIN;
-				} //coord
-				else
-				{
-					fread(Data, 4, 6, file);
-					tolog(FloatToStr(Data[0])+" "+FloatToStr(Data[1])+" "+FloatToStr(Data[2])+" "
-						+FloatToStr(Data[3])+" "+FloatToStr(Data[4])+" "+FloatToStr(Data[5]));
-					if (Ext)
-					{
-						isx = static_cast<int>(Data[0] / 8192.0f);
-						if (Data[0] < 0)	isx--;
-						if (isx != Param[1])
-							Out->Lines->Add(IntToStr(isx)+"!!!X:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[0]/8192)+"\t"+List2->Cells[CDATA2][j]);
-						isy = static_cast<int>(Data[1] / 8192.0f);
-						if (Data[1] < 0)	isy--;
-						if (isy != Param[2])
-							Out->Lines->Add(IntToStr(isy)+" !!Y:"+List2->Cells[CSTART][j]+"\t"+FloatToStr(Data[1]/8192)+"\t"+List2->Cells[CDATA2][j]);
-					}
-					if (Data[2] > max)
-					{
-						max = Data[2];
-						maxi = List2->Cells[CSTART][j].ToInt();
-						if (List2->Cells[CHEADER][j-1] == "NAME")
-							maxs = List2->Cells[CDATA2][j-1];
-						else
-							maxs = List2->Cells[CDATA2][j-2];
-					}
-					if (Data[2] < min)
-					{
-						min = Data[2];
-						mini = List2->Cells[CSTART][j].ToInt();
-						if (List2->Cells[CHEADER][j-1] == "NAME")
-							mins = List2->Cells[CDATA2][j-1];
-						else
-							mins = List2->Cells[CDATA2][j-2];
-					}
-				}
-			}
-		if (maxi != -1 && maxi != mini)
-		{
-			Out->Lines->Add(maxs+"\tMax:"+FloatToStr(max)+" in "+IntToStr(maxi));
-			Out->Lines->Add(mins+"\tMin:"+FloatToStr(min)+" in "+IntToStr(mini));
-			Out->Lines->Add("Z Diff="+IntToStr((int)max-(int)min));
-		}
-	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::GMDTReadClick(TObject *Sender)
-{
-	char 	Name[5];	Name[4] = '\0';
-	int 	Len;
-	float Cord[6];
-	char whe[68];
-	char Player[32];
-	fseek(file, ToE->Text.ToIntDef(0), SEEK_SET);
-	fread(Name, 4, 1, file);
-	fread(&Len, SLENSIZE, 1, file);
-	fread(Cord, 4, 6, file);
-	fread(whe, 1, 68, file);
-	fread(Player, 1, 32, file);
-	ToLog(String(Name)+"("+IntToStr(Len)+")");
-	for (int i = 0; i < 6; ++i)
-		ToLog(Cord[i]);
-	ToLog(whe);
-	ToLog(Player);
 }
 //---------------------------------------------------------------------------
 
@@ -1961,19 +1522,6 @@ void __fastcall TForm1::AddMainFieldsClick(TObject *Sender)
 		for (int j = 0; j < count; ++j)
 			List->Cells[CHEADER][i] = List->Cells[CHEADER][i] + " "+IntToStr(fi[j]);
 	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::CheckCoordContextPopup(TObject *Sender, TPoint &MousePos,
-			 bool &Handled)
-{
-	if (CheckCoord->Tag == 0)
-	{
-		CheckCoord->Tag = 1;
-		Out->Lines->Add("Auto check coordinates.");
-	}
-	else
-		CheckCoord->Tag = 0;
 }
 //---------------------------------------------------------------------------
 
