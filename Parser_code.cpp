@@ -35,7 +35,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	else
 		HeaderControl1->Sections->Items[0]->Width -= List->Font->Height / 2;
 	HeaderControl2->Sections->Items[0]->Width = HeaderControl1->Sections->Items[0]->Width;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < HeaderControl1->Sections->Count; ++i)
 	{
 		List->ColWidths[i] = HeaderControl1->Sections->Items[i]->Width - 1;
 		List2->ColWidths[i] = HeaderControl2->Sections->Items[i]->Width - 1;
@@ -94,6 +94,31 @@ void TForm1::Clear()
 	Edited.clear();
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
+{
+	if (file) { fclose(file); file = NULL; }
+	if (save) { fclose(save); save = NULL; }
+	delete []SubIndexes;
+	if (Expo)
+	Expo->SaveToFile("Expo.txt");
+	delete Expo;
+	delete Export;
+	delete what;
+	std::map<int, PACK>::iterator el;
+	if (ListStore.size() > 0)
+		for (el = ListStore.begin(); el != ListStore.end(); ++el)
+		{
+			delete el->second.col[0];
+			delete el->second.col[1];
+			delete el->second.col[2];
+			delete el->second.col[3];
+			delete el->second.col[4];
+		}
+	ListStore.clear();
+	delete [] SecretData;
+}
+//---------------------------------------------------------------------------
 void TForm1::Ready(bool ready)
 {
 	PanelSubRead->Enabled = false;
@@ -118,13 +143,18 @@ void TForm1::Ready(bool ready)
 
 void TForm1::Setup(int SubLenSize, int MainLenSize, int CountOffset)
 {
-	LENSIZE = 4;		   //M O S
+	LENSIZE = 4;			//M O S
 	MAINLENSIZE = MainLenSize;//12 16 20
 	MOVERLENTOSNAME = MAINLENSIZE - 4;//main overlen to subname 8 12 16
 	SLENSIZE = SubLenSize;
 	MLENTOSLEN = LENSIZE + MAINLENSIZE;//16 20 24
 	MNAMETOSUBLEN = MLENTOSLEN + 4; //20 24 28
 	SecretLen = MOVERLENTOSNAME / 4;
+	if (SecretData)
+	{
+		delete [] SecretData;
+		SecretData = NULL;
+	}
 	SecretData = new int[SecretLen];
 	POSNRECORDS = CountOffset;
 }
@@ -143,36 +173,47 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 {
 	if (OpenDialog1->Execute() != ID_OK)
 		return;
+	// Открываем во временный указатель
+	FILE* tempFile = NULL;
+	if (NRewrites->Checked)
+	{
+		tempFile = _wfopen(OpenDialog1->FileName.w_str(), L"r+b");
+		Save->Enabled = true;
+	}
+	else
+	{
+		tempFile = _wfopen(OpenDialog1->FileName.w_str(), L"rb");
+	}
+
+	if (!tempFile)
+	{
+		return ShowMessage("Cannot open binary file.");
+	}
+
+	// Проверяем размер файла
+	fseek(tempFile, 0, SEEK_END);
+	long tempEoF = ftell(tempFile);
+	if (tempEoF < 48)
+	{
+		fclose(tempFile);
+		return ShowMessage("File is empty.");
+	}
+	// --- ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ УСПЕШНО ---
+	// Теперь безопасно закрываем старый файл и очищаем память предыдущего сеанса
 	if (file)
 	{
 		fclose(file);
 		Ready(false);
 	}
-	if (NRewrites->Checked)
-	{
-		file = _wfopen(OpenDialog1->FileName.w_str(), L"r+b");
-		Save->Enabled = true;
-	}
-	else
-		file = _wfopen(OpenDialog1->FileName.w_str(), L"rb");
-	if (!file)
-		return ShowMessage( "Cannot open binary file.");
-	fseek(file, 0, SEEK_END);
-	EoF = ftell(file);
-	if (EoF < 48)
-		return ShowMessage( "File is empty.");
 	Clear();
+	file = tempFile;
+	EoF = tempEoF;
 	Save->Enabled = false;
 	LDele->Visible = false;
-	for (int i=OpenDialog1->FileName.Length(); i>1; --i)
-		if (OpenDialog1->FileName[i] == '\\')
-		{
-			OpenedFileName = OpenDialog1->FileName;
-			PluginName = OpenedFileName.SubString(i+1, OpenedFileName.Length());
-			Form1->Caption = PluginName + " - TES parser";
-			break;
-		}
 
+	OpenedFileName = OpenDialog1->FileName;
+	PluginName = ExtractFileName(OpenedFileName);
+	Form1->Caption = PluginName + " - TES parser";
 	Opening = true;
 	if (Out->Lines->Count > 2)
 		Out->Lines->Add("----------------------");
@@ -202,14 +243,8 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 			tolog("Unknown file structure("+String(Name)+")");
 			Tell = 666; //SubLenSize="+IntToStr(SLENSIZE)+" MainLenSize="+IntToStr(MAINLENSIZE));
 		}
-		int mls;
-		for (mls = 4; mls < 44; mls += 4)
-		{
-			fread(Name, 4, 1, file);
-			if (strncmp(Name, "HEDR", 4) == 0)
-				break;
-		}
-		if (mls >= 44 && Tell == 666)
+		int mls = FindTES4HEDROffset(file, "HEDR");
+		if (mls < 0 || mls >= 44 && Tell == 666)
 		{
 			Ready(false);
 			fclose(file);
@@ -251,20 +286,28 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		}
 	}
 	TES3Read->Enabled = Tes3;
-	fseek(file, MLENTOSLEN-4-SLENSIZE, SEEK_SET);
+	fseek(file, MLENTOSLEN-4-SLENSIZE, SEEK_SET); //TODO: need test
 	Tell = MLENTOSLEN + Len;
 	String Req = " ";
-	unsigned char *st = NULL;
+	char* tempBuf = new char[64]; int templen = 64;
 	while (ftell(file) < Tell)
 	{
 		fread(Name, 4, 1, file);
 		fread(&Len, SLENSIZE, 1, file);
 		if (strncmp(Name,"MAST", 4)==0)
 		{
-			st = file->curp;
-			Req += String(reinterpret_cast<const char*>(st))+", ";
+			if (Len >= templen)
+			{
+				delete[] tempBuf;
+				tempBuf = new char[Len+1];
+				templen = Len+1;
+			}
+			fread(tempBuf, Len, 1, file);
+			tempBuf[Len] = '\0'; // Безопасный нуль-терминатор
+			Req += String(tempBuf) + ", ";
 		}
-		fseek(file, Len, SEEK_CUR);	//Tell2 = ftell(file);
+		else
+			fseek(file, Len, SEEK_CUR);	//Tell2 = ftell(file);
 	}
 	Req.SetLength(Req.Length()-2);
 	tolog("Required:"+Req);
@@ -278,14 +321,16 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		fread(Name, 4, 1, file);
 		fread(&Len, 4, 1, file);
 		AddRow(Name, Len, Tell);
+		Sizes.push_back(Len);
+		Ends.push_back(Tell + Len + 4 + MAINLENSIZE);
 		fseek(file, MOVERLENTOSNAME, SEEK_CUR);
-			if (Tes3 || strncmp(Name,"GRUP", 4)!=0 )
-				fseek(file, Len, SEEK_CUR);
-			else //its GRUP
-			{
-				List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
-				Sizes[AddedRow-1] = MLENTOSLEN;
-			}
+		if (Tes3 || strncmp(Name,"GRUP", 4) != 0)
+			fseek(file, Len, SEEK_CUR);
+		else //its GRUP
+		{
+			List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
+			Sizes[AddedRow-1] = MLENTOSLEN;
+		}
 		if (Len <= 0 && BreakIf0Len->Checked)
 		{
 			BreakIf0Len->Checked = false;
@@ -298,12 +343,6 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		List->RowCount = AddedRow;
 	Sizes.reserve(AddedRow);
 	Ends.reserve(AddedRow);
-	for (int i = 0; i < List->RowCount; i++)
-	{
-		Len = List->Cells[CSIZE][i].ToInt();
-		Sizes.push_back(Len);
-		Ends.push_back(List->Cells[CSTART][i].ToInt() + Len + 4 + MAINLENSIZE);
-	}
 	fseek(file, POSNRECORDS, SEEK_SET);
 	fread(&RecordCount, 4, 1, file);
 	if (NShowData->Checked)
@@ -337,6 +376,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	if (NClearOut->Checked)
 		Out->Lines->Clear();
 	Opening = false;
+	delete[] tempBuf;
 }
 //---------------------------------------------------------------------------
 void TForm1::RefreshData(FILE* &file, int Start)
@@ -440,28 +480,6 @@ void TForm1::RefreshData(FILE* &file, int Start)
 			DATA[Len] = 0;
 			List->Cells[CDATA][i] = DATA;
 		}
-	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
-{
-	fclose(file);
-	fclose(save);
-	delete []SubIndexes;
-	if (Expo)
-	Expo->SaveToFile("Expo.txt");
-	delete Expo;
-	delete Export;
-	delete what;
-	std::map<int, PACK>::iterator el;
-	for (el = ListStore.begin(); el != ListStore.end(); ++el)
-	{
-		delete el->second.col[0];
-		delete el->second.col[1];
-		delete el->second.col[2];
-		delete el->second.col[3];
-		delete el->second.col[4];
 	}
 }
 //---------------------------------------------------------------------------
@@ -1130,12 +1148,12 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 	for (int i = 0; i < totalRows; ++i)
 	{
 		RowData row;
-		row.cells[CHEADER] = List->Cells[CHEADER][i];
-		row.cells[CSTART]  = List->Cells[CSTART][i];
-		row.cells[CSIZE]   = List->Cells[CSIZE][i];
-		row.cells[CDATA]   = List->Cells[CDATA][i];
-		row.sizeVal		= Sizes[i];
-		row.endVal		 = Ends[i];
+		row.cells[CHEADER]	= List->Cells[CHEADER][i];
+		row.cells[CSTART]	= List->Cells[CSTART][i];
+		row.cells[CSIZE]	= List->Cells[CSIZE][i];
+		row.cells[CDATA]	= List->Cells[CDATA][i];
+		row.sizeVal	= Sizes[i];
+		row.endVal	= Ends[i];
 		rows.push_back(row);
 	}
 	// 3. Стабильная сортировка (сохраняет порядок дубликатов) с учетом направления
@@ -1143,12 +1161,12 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 	// 4. Записываем результат обратно
 	for (int i = 0; i < totalRows; ++i)
 	{
-		List->Cells[CHEADER][i] = rows[i].cells[CHEADER];
-		List->Cells[CSTART][i]  = rows[i].cells[CSTART];
-		List->Cells[CSIZE][i]   = rows[i].cells[CSIZE];
-		List->Cells[CDATA][i]   = rows[i].cells[CDATA];
-		Sizes[i]				= rows[i].sizeVal;
-		Ends[i]				 = rows[i].endVal;
+		List->Cells[CHEADER][i]	= rows[i].cells[CHEADER];
+		List->Cells[CSTART][i]	= rows[i].cells[CSTART];
+		List->Cells[CSIZE][i]	= rows[i].cells[CSIZE];
+		List->Cells[CDATA][i]	= rows[i].cells[CDATA];
+		Sizes[i]	= rows[i].sizeVal;
+		Ends[i]		= rows[i].endVal;
 	}
 	// 5. Размораживаем и обновляем экран
 	List->ScrollBars = ssVertical;

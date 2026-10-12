@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <Dialogs.hpp>
-#include <cstdlib> // для работы функций malloc / free   _wtof
+#include <cstdlib> // для работы функций malloc / free _wtof
 #include <stdlib.h> // memset / memcpy
 #include <cwchar> // Для функции wcstof
 #include <stdio.h>
@@ -14,17 +14,6 @@ struct MHeader
 {
 	char Name[4];
 	unsigned int Length;
-//	union HeaderData
-//	{
-//		int i;
-//		float f;
-//		short w[2];
-//		unsigned short uw[2];
-//		Byte b[4];
-//		char c;
-//		unsigned char u;
-//		wchar_t t;
-//	}
 	unsigned int LENSTOP;
 	void *Data;
 	unsigned int Capacity;
@@ -49,7 +38,6 @@ struct MHeader
 
 private:
 	// Запрещаем копирование структуры, чтобы компилятор Borland сразу выдал ошибку,
-	// если вы случайно попытаетесь скопировать объект и вызвать двойное освобождение памяти
 	MHeader(const MHeader&);
 	MHeader& operator=(const MHeader&);
 };
@@ -92,10 +80,10 @@ struct Tes3Header : public TRECORD3INT
 	int	Unknown;	//[4];
 	char	Author_Name	[32];
 	char	Description	[256];
-	int   NumRecords; //этого всего записей в ФАЙЛЕ
-};  //(1+3+1+1+1+1)*4+32+256
+	int	NumRecords; //этого всего записей в ФАЙЛЕ
+}; //(1+3+1+1+1+1)*4+32+256
 
-struct MData_Cell : public RECORD4INT1STR    //Это INTV на самомаделе
+struct MData_Cell : public RECORD4INT1STR	//Это INTV на самомаделе
 {
 	char	Data[4]; //DATA
 	int	Data_Length[2];//	16
@@ -125,7 +113,7 @@ struct SPEL : public RECORD4INT1STR
 } ;
 
 struct BITS //sizeof=4
-{  //если тип инт то там хранится 0 или -1
+{	//если тип инт то там хранится 0 или -1
 	unsigned int b1 : 1;
 	unsigned int b2 : 1;
 	unsigned int b3 : 1;

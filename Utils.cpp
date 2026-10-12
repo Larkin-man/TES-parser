@@ -13,7 +13,37 @@
 #include "Headers.h"
 #include "Parser_code.h"
 //---------------------------------------------------------------------------
+// Возвращает размер заголовка записи (mls), если HEDR найден, или -1 в случае ошибки
+int TForm1::FindTES4HEDROffset(FILE* tempFile, const char _FAR *find)
+{
+	if (!tempFile)
+		return -1;
+	// В TES4+ заголовок записи (например, "TES4") всегда равен 24 байтам.
+	// Перемещаемся в начало первой подзаписи (сразу за 24 байтами заголовка)
+	fseek(tempFile, 24, SEEK_SET);
+	char subName[5];
+	subName[4] = '\0';
+	unsigned short subLen = 0; // В TES4+ размер подзаписи ВСЕГДА равен 2 байтам (unsigned short)
 
+	// Ограничим поиск первыми 512 байтами файла, чтобы не уйти в бесконечный цикл на битом файле
+	while (ftell(tempFile) < 512)
+	{
+		if (fread(subName, 4, 1, tempFile) != 1) break;
+		if (fread(&subLen, 2, 1, tempFile) != 1) break;
+
+		if (strncmp(subName, find, 4) == 0)
+		{
+			// Возвращаем размер заголовка записи.
+			// В Fallout3/Skyrim/NV первая запись (включая HEDR) дает смещение mls = 20, в Oblivion = 16.
+			// Для совместимости возвращаем это значение.
+			return (subLen == 12) ? 20 : 16;
+		}
+		// Корректно пропускаем данные этой подзаписи, чтобы встать на начало следующей
+		fseek(tempFile, subLen, SEEK_CUR);
+	}
+	return -1; // HEDR не найден
+}
+//---------------------------------------------------------------------------
 void __fastcall TForm1::DelTrashClick(TObject *Sender)
 {
 	for (int i = 0; i < List->RowCount; ++i)
@@ -212,7 +242,7 @@ static inline bool TrySnapBitwise(int x, int step, int tolerance, int& result)
 		result = minVal + step;
 		return true;
 	}
-    return false;
+		return false;
 }
 //---------------------------------------------------------------------------
 
@@ -220,28 +250,28 @@ int TForm1::GetOkrugl(int x)
 {
 	int absX = (x < 0) ? -x : x;
 	int result = 0;
-    // Проверяем каскад адаптивных сеток с помощью побитовой логики
-    if (TrySnapBitwise(absX, 512, 32, result)) goto sub_return;
-    if (TrySnapBitwise(absX, 256, 28, result)) goto sub_return;
+	// Проверяем каскад адаптивных сеток с помощью побитовой логики
+	if (TrySnapBitwise(absX, 512, 32, result)) goto sub_return;
+	if (TrySnapBitwise(absX, 256, 28, result)) goto sub_return;
 	if (TrySnapBitwise(absX, 128, 20, result)) goto sub_return;
-    // Финальная сетка 32 (обычное округление к ближайшей степени)
-    {
-        int remainder = absX & 31;  // absX % 32
-        int minVal = absX & ~31;    // (absX / 32) * 32
-        result = (remainder <= 16) ? minVal : (minVal + 32);
+	// Финальная сетка 32 (обычное округление к ближайшей степени)
+	{
+		int remainder = absX & 31;  // absX % 32
+		int minVal = absX & ~31;	// (absX / 32) * 32
+		result = (remainder <= 16) ? minVal : (minVal + 32);
 	}
 sub_return:
-    return (x < 0) ? -result : result;
+	return (x < 0) ? -result : result;
 }
 //---------------------------------------------------------------------------
 
 float TForm1::Check999(float x)
 {
-    // Классическая формула округления к ближайшему целому (аналог round)
-    // Она корректно работает как для положительных, так и для отрицательных чисел
+	// Классическая формула округления к ближайшему целому (аналог round)
+	// Она корректно работает как для положительных, так и для отрицательных чисел
 	float rounded = (x >= 0.0f) ? floor(x + 0.5f) : ceil(x - 0.5f);
-    // Используем глобальную функцию fabs для вычисления модуля разности.
-    // Если расстояние до целого числа меньше 0.02, возвращаем округленное значение.
+	// Используем глобальную функцию fabs для вычисления модуля разности.
+	// Если расстояние до целого числа меньше 0.02, возвращаем округленное значение.
 	if (::fabs(x - rounded) < 0.02)
 		return rounded;
 	return x;

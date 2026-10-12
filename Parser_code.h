@@ -203,12 +203,12 @@ __published:	// IDE-managed Components
 private:	// User declarations
 	// Внутри класса TForm1:
 	int LastSortingColumn; // Запоминает, какую колонку кликали прошлым шагом
-	bool AscendingOrder;   // Флаг направления сортировки
+	bool AscendingOrder; // Флаг направления сортировки
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
-					 //Morr   //podliv	 sku
-	int LENSIZE; //4	  //sublen 2  2
-	int MAINLENSIZE; //12  16		 20
+					 //Morr	//podliv	 sku
+	int LENSIZE; //4	//sublen 2 2
+	int MAINLENSIZE; //12 16		 20
 	int MOVERLENTOSNAME; //8
 	int SLENSIZE; //4
 	int MLENTOSLEN;//16
@@ -219,6 +219,7 @@ public:		// User declarations
 	void Setup(int SubLenSize, int MainLenSize, int CountOffset);
 	FILE *file, *save;
 	long EoF;
+	int FindTES4HEDROffset(FILE* tempFile, const char _FAR *find);
 	MHeader Univ;
 	BITS *pbit;
 	void Clear();
