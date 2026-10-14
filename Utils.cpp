@@ -13,35 +13,58 @@
 #include "Headers.h"
 #include "Parser_code.h"
 //---------------------------------------------------------------------------
-// Возвращает размер заголовка записи (mls), если HEDR найден, или -1 в случае ошибки
-int TForm1::FindTES4HEDROffset(FILE* tempFile, const char _FAR *find)
+//Поиск строки 4 в файле
+long TForm1::FindTextInFile(FILE* tempFile, const char *find, long StartOffset, long EndOffset)
 {
-	if (!tempFile)
-		return -1;
-	// В TES4+ заголовок записи (например, "TES4") всегда равен 24 байтам.
-	// Перемещаемся в начало первой подзаписи (сразу за 24 байтами заголовка)
-	fseek(tempFile, 24, SEEK_SET);
-	char subName[5];
-	subName[4] = '\0';
-	unsigned short subLen = 0; // В TES4+ размер подзаписи ВСЕГДА равен 2 байтам (unsigned short)
+	// Базовая проверка входных параметров
+	if (!tempFile || !find || StartOffset < 0 || EndOffset < StartOffset)
+		return -2;
 
-	// Ограничим поиск первыми 512 байтами файла, чтобы не уйти в бесконечный цикл на битом файле
-	while (ftell(tempFile) < 512)
+	// 1. Устанавливаем указатель в файле на начальную позицию поиска
+	if (fseek(tempFile, StartOffset, SEEK_SET) != 0)
+		return -3; // Ошибка позиционирования
+
+	// Фиксируем длину искомой строки (4 байта)
+	const int searchLen = 4;
+
+	int firstByte;
+	long currentPos = StartOffset;
+
+	// Сканируем файл, пока до границы EndOffset помещается 4 байта
+	while (currentPos <= (EndOffset - searchLen))
 	{
-		if (fread(subName, 4, 1, tempFile) != 1) break;
-		if (fread(&subLen, 2, 1, tempFile) != 1) break;
+		firstByte = fgetc(tempFile);
+		if (firstByte == EOF)
+			break; // Достигнут неожиданный конец файла
 
-		if (strncmp(subName, find, 4) == 0)
+		// Если первый байт совпал
+		if ((char)firstByte == find[0])
 		{
-			// Возвращаем размер заголовка записи.
-			// В Fallout3/Skyrim/NV первая запись (включая HEDR) дает смещение mls = 20, в Oblivion = 16.
-			// Для совместимости возвращаем это значение.
-			return (subLen == 12) ? 20 : 16;
+			long matchPos = currentPos; // Запоминаем позицию начала совпадения
+			bool isFound = true;
+
+			// Проверяем оставшиеся 3 байта
+			for (int i = 1; i < searchLen; i++)
+			{
+				int nextByte = fgetc(tempFile);
+				if (nextByte == EOF || (char)nextByte != find[i])
+				{
+					isFound = false;
+					break;
+				}
+			}
+			// Если вся 4-байтовая последовательность совпала
+			if (isFound)
+				return matchPos; // УСПЕХ: Возвращаем точную позицию начала строки в файле
+
+			// Если совпадение ложное, возвращаем указатель файла на (matchPos + 1)
+			currentPos = matchPos + 1;
+			fseek(tempFile, currentPos, SEEK_SET);
 		}
-		// Корректно пропускаем данные этой подзаписи, чтобы встать на начало следующей
-		fseek(tempFile, subLen, SEEK_CUR);
+		else
+			currentPos++;
 	}
-	return -1; // HEDR не найден
+	return -1; // Строка не найдена в указанном диапазоне
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::DelTrashClick(TObject *Sender)

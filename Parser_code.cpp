@@ -137,7 +137,11 @@ void TForm1::Ready(bool ready)
 			delete el->second.col[4];
 		}
 	if (ready == false)
+	{
 		ListStore.clear();
+		fclose(file);
+		file = NULL;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -156,7 +160,7 @@ void TForm1::Setup(int SubLenSize, int MainLenSize, int CountOffset)
 		SecretData = NULL;
 	}
 	SecretData = new int[SecretLen];
-	POSNRECORDS = CountOffset;
+	POSNRECORDS = CountOffset; //Позиция где записано количество записей файла
 }
 //---------------------------------------------------------------------------
 void TForm1::AddRow(char *Header, int Length, long Start)
@@ -202,105 +206,139 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	// Теперь безопасно закрываем старый файл и очищаем память предыдущего сеанса
 	if (file)
 	{
-		fclose(file);
 		Ready(false);
 	}
-	Clear();
+	// Присваиваем проверенные значения глобальным переменным
 	file = tempFile;
 	EoF = tempEoF;
+	
+	// Тотальная очистка всех контейнеров, векторов и гридов перед заполнением
+	Clear();
+
 	Save->Enabled = false;
 	LDele->Visible = false;
 
+	// Безопасное извлечение имени плагина встроенными средствами VCL
 	OpenedFileName = OpenDialog1->FileName;
 	PluginName = ExtractFileName(OpenedFileName);
 	Form1->Caption = PluginName + " - TES parser";
+
 	Opening = true;
 	if (Out->Lines->Count > 2)
 		Out->Lines->Add("----------------------");
-	Out->Lines->Add(PluginName + ", size="+IntToStr((int)EoF));
-	char 	Name[5];	Name[4] = '\0';
-	int 	Len;
-	long 	Tell=0;
-	float 	Ver;
+	Out->Lines->Add(PluginName + ", size=" + IntToStr((int)EoF));
+
+	char	Name[5];	Name[4] = '\0';
+	int		Len;
+	long	Pos = 0;
+	float	Ver = 0.0f;
+
 	fseek(file, 0, SEEK_SET);
 	fread(Name, 4, 1, file);
 	fread(&Len, 4, 1, file);
-	NextS->Caption = "Next="+String(Name)+"[" + IntToStr(Len) + "]";
-	//fseek(file, -(4+SLENSIZE), SEEK_CUR);
+	NextS->Caption = "Next=" + String(Name) + "[" + IntToStr(Len) + "]";
+	long End;
+
 	if (strncmp(Name, "TES3", 4) == 0)
 	{
-		Setup(4, 12, 320); //TES3
+		Setup(4, 12, 320); // TES3 Morrowind
 		fseek(file, MLENTOSLEN, SEEK_CUR);
 		fread(&Ver, 4, 1, file);
-		ToLog("Elder Scrolls 3 Morrowind file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
+		ToLog("Elder Scrolls 3 Morrowind file structure.");
 		Tes3 = true;
+		End = 4 + MAINLENSIZE + Len; //Name+12+Len
+		//Пропустим подзапись HEDR(Len=300) и встаем на следующую подзапись
+		fseek(file, 4 + MAINLENSIZE + 4 + LENSIZE + 300, SEEK_SET);
+		Pos = ftell(file);
 	}
 	else
 	{
 		Tes3 = false;
-		if (strncmp(Name, "TES4", 4) != 0)
+		End = 4 + Len; //Name+Len+...
+		// Используем функцию для поиска HEDR
+		Pos = FindTextInFile(file, "HEDR", 0, 512);
+		if (Pos < 0)
 		{
-			tolog("Unknown file structure("+String(Name)+")");
-			Tell = 666; //SubLenSize="+IntToStr(SLENSIZE)+" MainLenSize="+IntToStr(MAINLENSIZE));
-		}
-		int mls = FindTES4HEDROffset(file, "HEDR");
-		if (mls < 0 || mls >= 44 && Tell == 666)
-		{
+			tolog("Unknown file structure(" + String(Name) + ") or HEDR missing.");
 			Ready(false);
-			fclose(file);
-			file = NULL;
 			return;
 		}
-		fseek(file, 2, SEEK_CUR);
+		int mls = Pos - 4; //MainLenSize это длина от позиции после TES# до HEDR
+		// go + 4 байта имя подзаписи 'HEDR' байта размер подзаписи
+		//Определим длина поля Len 4 или 2
+		fseek(file, Pos + 4, SEEK_SET); //Встали после HEDR
+		int NewLenSize = 2;
+		fread(&Len, 2, 1, file);
+		//После поля Length всегда идет версия, если она больше нуля значит это правильный файл движка
 		fread(&Ver, 4, 1, file);
+		if (Ver < 0. || Ver > 9000. || Len < 4 || Len > 9000)
+		{
+			//Длина не 2, значит 4
+			NewLenSize = 4;
+			fseek(file, Pos + 4, SEEK_SET);
+			fread(&Len, 4, 1, file);
+			fread(&Ver, 4, 1, file);
+			if (Ver <= 0. && Ver > 9000. || Len < 4 || Len > 9000)
+			{
+				ToLog("Unknown file type. HEDR pos =" + IntToStr((int)Pos) +" Version="+FloatToStr(Ver));
+				return;
+			}
+		}
+
 		POSNRECORDS = 8;
-		if (Ver > 0.1 && Ver <= 0.97 && mls == 20)
+		if (Ver > 0. && Ver <= 0.97)
 		{
-			ToLog("Fallout 3 file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
-			Setup(2, mls, 34);
+			ToLog("Fallout 3 file structure.");
+			Setup(NewLenSize, mls, 34);
 		}
-		if (Ver > 0.97 && Ver <= 1.15 && mls == 16)
+		else if (Ver > 0.97 && Ver <= 1.15)
 		{
-			ToLog("Elder Scrolls 4 Oblivion file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
-			Setup(2, mls, 30);
+			ToLog("Elder Scrolls 4 Oblivion file structure.");
+			Setup(NewLenSize, mls, 30);
 		}
-		if (Ver > 1.32 && Ver <= 1.5 && mls == 20)
+		else if (Ver > 1.32 && Ver <= 1.5)
 		{
-			ToLog("Fallout New Vegas file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
-			Setup(2, mls, 34);
+			ToLog("Fallout New Vegas file structure.");
+			Setup(NewLenSize, mls, 34);
 		}
-		if (Ver > 1.5 && Ver <= 1.9 && mls == 20)
+		else if (Ver > 1.5 && Ver <= 1.9)
 		{
-			ToLog("Elder Scrolls 5 Skyrim file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
-			Setup(2, mls, 34); //sky=34
+			ToLog("Elder Scrolls 5 Skyrim file structure.");
+			Setup(NewLenSize, mls, 34);
 		}
-		if (mls == 12)
+		else if (mls <= 30) // Страховочный вариант для модификаций TES3
 		{
-			ToLog("Elder Scrolls 3 Morrowind file structure.");// ("+FloatToStrF(Ver,ffGeneral, 4,4)+").");
-			Setup(4, 12, 320); //TES3
+			ToLog("Elder Scrolls ??? file structure. Version ="+FloatToStr(Ver));
+			Setup(NewLenSize, mls, 320); //TODO: Позицию записи количетсва файлов нужно искать
 			Tes3 = true;
 		}
-		if (POSNRECORDS == 8)
+		else
 		{
-			ToLog("Unknown file type "+IntToStr(MAINLENSIZE));
+			ToLog("Unknown file type " + IntToStr(mls) + " Version ="+FloatToStr(Ver));
+			Setup(NewLenSize, mls, 34); // Дефолтный фоллбек для предотвращения падений
 		}
+		End += MAINLENSIZE;
+		//Встаем на следующую подзапись после HEDR
+		fseek(file, Pos + 4 + SLENSIZE + Len, SEEK_SET);
+		Pos = ftell(file);
 	}
 	TES3Read->Enabled = Tes3;
-	fseek(file, MLENTOSLEN-4-SLENSIZE, SEEK_SET); //TODO: need test
-	Tell = MLENTOSLEN + Len;
+	// Пройдем до конца подзаписей записи TES# для поиска MAST
 	String Req = " ";
-	char* tempBuf = new char[64]; int templen = 64;
-	while (ftell(file) < Tell)
+	// Выделяем буфер под имя мастера динамически
+	char* tempBuf = new char[64];
+	int tempLen = 64;
+	while (ftell(file) < End)
 	{
 		fread(Name, 4, 1, file);
 		fread(&Len, SLENSIZE, 1, file);
-		if (strncmp(Name,"MAST", 4)==0)
+		if (strncmp(Name,"MAST", 4) == 0)
 		{
-			if (Len >= templen)
+			if (Len >= tempLen)
 			{
 				delete[] tempBuf;
 				tempBuf = new char[Len+1];
-				templen = Len+1;
+				tempLen = Len+1;
 			}
 			fread(tempBuf, Len, 1, file);
 			tempBuf[Len] = '\0'; // Безопасный нуль-терминатор
@@ -309,20 +347,38 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		else
 			fseek(file, Len, SEEK_CUR);	//Tell2 = ftell(file);
 	}
-	Req.SetLength(Req.Length()-2);
-	tolog("Required:"+Req);
+	if (Req.Length() > 1)
+	{
+		Req.SetLength(Req.Length() - 2); //", "
+		tolog("Required:" + Req);
+	}
+	//. Закончили поиск MAST
+	//Правильно ли задана позиция Количетсва записей
+	fseek(file, POSNRECORDS, SEEK_SET);
+	fread(&RecordCount, 4, 1, file);
+	if (RecordCount <= 0) //||>32000
+	{
+		tolog(IntToStr(POSNRECORDS)+" The RecordCount field is set incorrectly: " + IntToStr(RecordCount));
+		//TODO: fallout 3 wrong
+	}
+	else
+	{
+		Sizes.reserve(RecordCount+1);
+		Ends.reserve(RecordCount+1);
+	}
+	//Остальное
 	DoUpdateList(true);
 	List2->RowCount = 1;
 	List2->Rows[0]->Clear();
 	fseek(file, 0, SEEK_SET);
 	AddedRow = 0;
-	while ((Tell = ftell(file)) < EoF)
+	while ((Pos = ftell(file)) < EoF)
 	{
 		fread(Name, 4, 1, file);
 		fread(&Len, 4, 1, file);
-		AddRow(Name, Len, Tell);
+		AddRow(Name, Len, Pos);
 		Sizes.push_back(Len);
-		Ends.push_back(Tell + Len + 4 + MAINLENSIZE);
+		Ends.push_back(Pos + Len + 4 + MAINLENSIZE);
 		fseek(file, MOVERLENTOSNAME, SEEK_CUR);
 		if (Tes3 || strncmp(Name,"GRUP", 4) != 0)
 			fseek(file, Len, SEEK_CUR);
@@ -341,10 +397,6 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		Out->Lines->Add("End on "+IntToStr((int)ftell(file))+". This file may be corrupt.");
 	if (List->RowCount > AddedRow)
 		List->RowCount = AddedRow;
-	Sizes.reserve(AddedRow);
-	Ends.reserve(AddedRow);
-	fseek(file, POSNRECORDS, SEEK_SET);
-	fread(&RecordCount, 4, 1, file);
 	if (NShowData->Checked)
 	{
 		if (List->RowCount >= 1)
@@ -366,8 +418,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 	//NextSClick(Sender);
 	if (RecordCount != List->RowCount - 1)
 		ToLog("Wrong Record Count " +IntToStr(RecordCount)+"("+IntToStr(List->RowCount - 1)+")");
-	//fal 3 wrong
-		Ready(true);
+	Ready(true);
 	//SortingColumn = CSTART;
 	if (NRewrites->Checked)
 		NRewrites->Enabled = false;
@@ -375,110 +426,173 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		NRewrites->Visible = false;
 	if (NClearOut->Checked)
 		Out->Lines->Clear();
-	Opening = false;
 	delete[] tempBuf;
+	Opening = false;
 }
 //---------------------------------------------------------------------------
 void TForm1::RefreshData(FILE* &file, int Start)
 {
 	const int MAXSIZE = 64;
-	static char DATA[MAXSIZE+1];
+	static char DATA[MAXSIZE + 1];
+
+	// Временный буфер для безопасного считывания заголовков подзаписей (4 байта имя + 4 байта длина)
+	char subName[5]; subName[4] = '\0';
+	unsigned int subLen = 0;
+
 	for (int i = Start; i < List->RowCount; ++i)
 	{
 		int start = List->Cells[CSTART][i].ToInt();
 		fseek(file, start, SEEK_SET);
 		String Header = List->Cells[CHEADER][i];
+
 		if (Header == "GRUP")
 		{
 			fseek(file, LENSIZE, SEEK_CUR);
-			int Data[5] ={0,0,0,0,0};
+			int Data[5] = {0,0,0,0,0};
 			fread(&Data[0], 4, 1, file);
 			fread(DATA, 4, 1, file); DATA[4] = 0;
-			if (MOVERLENTOSNAME == 12) //obla
+
+			if (MOVERLENTOSNAME == 12) // Oblivion
 				fread(&Data[1], 4, 2, file);
-			else
+			else					// Skyrim / Fallout
 				fread(&Data[1], 4, 3, file);
+
 			Data[4] = start + Data[0];
-			List->Cells[CDATA][i] = String(DATA)+"["+IntToStr(Data[0])+
-				+ "]("+IntToStr(Data[1])+","+IntToStr(Data[2])+","+IntToStr(Data[3])+") To "+IntToStr(Data[4]);
+			List->Cells[CDATA][i] = String(DATA) + "[" + IntToStr(Data[0]) +
+				"](" + IntToStr(Data[1]) + "," + IntToStr(Data[2]) + "," + IntToStr(Data[3]) + ") To " + IntToStr(Data[4]);
 			continue;
-		} else
+		}
+
 		if (Header == "CELL" && Tes3)
 		{
+			// Прыгаем за заголовок записи CELL (20 байт для TES3) к первой подзаписи (обычно NAME)
 			fseek(file, MNAMETOSUBLEN, SEEK_CUR);
-			int Length;
 
-			fread(&Length, 4, 1, file);
-			if (Length > MAXSIZE)
-				Length = MAXSIZE;
-			fread(DATA, Length, 1, file);
-			int Data[5];
-			fread(Data, 4, 5, file);
-			pbit = reinterpret_cast<BITS*> (&(Data[2]));
-			String Str;// = "w2i4m6b8";
-			if (NExtreriorFlagsPrint->Checked)
+			// Считываем реальную длину строки имени ячейки
+			int nameLength = 0;
+			fread(&nameLength, 4, 1, file);
+
+			int readLength = (nameLength > MAXSIZE) ? MAXSIZE : nameLength;
+			fread(DATA, readLength, 1, file);
+			DATA[readLength] = '\0'; // Безопасный нуль-терминатор!
+
+			// Если имя было длиннее MAXSIZE, аккуратно допропускаем остаток строки в файле
+			if (nameLength > MAXSIZE)
+				fseek(file, nameLength - MAXSIZE, SEEK_CUR);
+
+			// Теперь ищем подзапись флагов "DATA" внутри ячейки CELL
+			bool dataFound = false;
+			// Ограничиваем поиск, чтобы не уйти в бесконечный цикл
+			for (int check = 0; check < 5; ++check)
 			{
-				if	(pbit->b2 == 1) Str += 'w';
-				if	(pbit->b3 == 1) Str += 'i';
-				if	(pbit->b7 == 1) Str += 'm';
-				if	(pbit->b8 == 1) Str += 'b';
-				static int iknow = 0x38; ///111000
-				int idontknow = Data[2]&iknow;
-				if (idontknow != 0)
-					Str += idontknow;
+				fread(subName, 4, 1, file);
+				fread(&subLen, 4, 1, file);
+				if (strncmp(subName, "DATA", 4) == 0)
+				{
+					dataFound = true;
+					break;
+				}
+				fseek(file, subLen, SEEK_CUR); // Пропускаем чужие подзаписи (например, flags)
 			}
-			if ((pbit) && (pbit->b1 == 1)) //interior
-				//Interpret ti; //ti.i = Data[4];ЭТО floaт ДЕНСИТИ!!!!!!!!!!!!!!!!!
-				List->Cells[CDATA][i] = String(DATA);// + "["+)float+"]"+Str;
+
+			if (dataFound && subLen >= 12) // DATA в CELL содержит как минимум 12 байт (флаги + координаты)
+			{
+				unsigned int cellFlags = 0;
+				int cellX = 0, cellY = 0;
+
+				fread(&cellFlags, 4, 1, file); // Читаем 4 байта флагов из файла
+				fread(&cellX, 4, 1, file);
+				fread(&cellY, 4, 1, file);
+
+				// Просто берем адрес переменной cellFlags, приводим к указателю на BITS
+				// и работаем напрямую. Теперь данные гарантированно на месте!
+				BITS* pbit = reinterpret_cast<BITS*>(&cellFlags);
+
+				String Str = "";
+				bool isInterior = (cellFlags & 0x01) != 0;
+				if (NExtreriorFlagsPrint->Checked)
+				{
+					if (pbit->b2 == 1) Str += 'w'; // Вода
+					if (pbit->b3 == 1) Str += 'i'; // Сон — преступление
+				}
+
+				if (isInterior == false)
+					List->Cells[CDATA][i] = String(DATA) + " (" + IntToStr(cellX) + "," + IntToStr(cellY) + ")" + Str;
+			}
 			else
-				List->Cells[CDATA][i] = String(DATA) + "("+IntToStr(Data[3])+","+IntToStr(Data[4])+")"+Str;
+			{
+				List->Cells[CDATA][i] = String(DATA) + " [No DATA subrecord]";
+			}
 			continue;
-		} else
+		}
+
 		if (Header == "LAND" && Tes3)
 		{
-			fseek(file, MNAMETOSUBLEN, SEEK_CUR);
-			int Data[6];
-			fread(Data, 4, 6, file);
-			List->Cells[CDATA][i] = "("+IntToStr(Data[1])+","+IntToStr(Data[2])+")"+IntToStr(Data[5]);
-		} else
+			fseek(file, start + MNAMETOSUBLEN, SEEK_SET);
+
+			// Ищем подзапись координат ландшафта INTV
+			fread(subName, 4, 1, file);
+			fread(&subLen, 4, 1, file);
+
+			if (strncmp(subName, "INTV", 4) == 0)
+			{
+				int gridX = 0, gridY = 0;
+				fread(&gridX, 4, 1, file);
+				fread(&gridY, 4, 1, file);
+				List->Cells[CDATA][i] = "(" + IntToStr(gridX) + "," + IntToStr(gridY) + ")";
+			}
+			else
+			{
+				List->Cells[CDATA][i] = "LAND data";
+			}
+			continue;
+		}
+
 		if (Header == "PGRD" && Tes3)
 		{
-			fseek(file, MNAMETOSUBLEN, SEEK_CUR); //20
-			//SkipSubheader();
-			//int Length;
-			//fread(&Length, SLENSIZE, 1, file);
-			//fseek(file, Length + 4, SEEK_SET);
-			int Data[3]; short Dat[2];
-			fread(Data, 4, 3, file);
-			fread(Dat, 2, 2, file);
-			List->Cells[CDATA][i] = "("+IntToStr(Data[1])+","+IntToStr(Data[2])+")"+IntToStr((int)Dat[1]);
-		} else
-//		if (Tes3==false && Header == "NPC_")
-//		{
-//			fseek(file, 4+SLENSIZE, SEEK_CUR); //20
-//			short Data[11];
-//			fread(Data, 2, 11, file);
-//			List->Cells[CDATA][i] = IntToStr((int)Data[0])+","+IntToStr((int)Data[1])+","+IntToStr((int)Data[2])+","
-//				+IntToStr((int)Data[3])+","+IntToStr((int)Data[4])+","+IntToStr((int)Data[5])+","+IntToStr((int)Data[6])
-//				+","+IntToStr((int)Data[7])+","+IntToStr((int)Data[8])+","+IntToStr((int)Data[9])+","+IntToStr((int)Data[10]);
-//		}
+			fseek(file, start + MNAMETOSUBLEN, SEEK_SET);
+			// Читаем сетку путей (Pathgrid) DATA подзапись
+			fread(subName, 4, 1, file);
+			fread(&subLen, 4, 1, file);
+
+			if (subLen >= 12)
+			{
+				int gridX = 0, gridY = 0;
+				short pointCount = 0;
+				fread(&gridX, 4, 1, file);
+				fread(&gridY, 4, 1, file);
+				fread(&pointCount, 2, 1, file);
+				List->Cells[CDATA][i] = "(" + IntToStr(gridX) + "," + IntToStr(gridY) + ") Points: " + IntToStr((int)pointCount);
+			}
+			continue;
+		}
+
 		if (Header == "SKIL" || Header == "MGEF")
 		{
-			fseek(file, MNAMETOSUBLEN + SLENSIZE, SEEK_CUR);
-			int INDX;
-			fread(&INDX, SLENSIZE, 1, file);
-			List->Cells[CDATA][i] = INDX;
+			fseek(file, start + MNAMETOSUBLEN + SLENSIZE, SEEK_SET);
+			int INDX = 0;
+			fread(&INDX, 4, 1, file);
+			List->Cells[CDATA][i] = IntToStr(INDX);
+			continue;
 		}
-		else
+
+		// Блок Else (Для всех дефолтных подзаписей)
 		{
-			fseek(file, MNAMETOSUBLEN, SEEK_CUR);
-			int Len = 0;
-			fread(&Len, SLENSIZE, 1, file);
-			if (Len > MAXSIZE)
-				Len = MAXSIZE;
-			fread(DATA, Len, 1, file);
-			DATA[Len] = 0;
-			List->Cells[CDATA][i] = DATA;
+			fseek(file, start + MNAMETOSUBLEN, SEEK_SET);
+			int actualLen = 0;
+			fread(&actualLen, 4, 1, file); // Считываем реальную длину подзаписи
+
+			int readLen = (actualLen > MAXSIZE) ? MAXSIZE : actualLen;
+			if (readLen > 0)
+			{
+				fread(DATA, readLen, 1, file);
+				DATA[readLen] = '\0';
+				List->Cells[CDATA][i] = DATA;
+			}
+			else
+			{
+				List->Cells[CDATA][i] = "";
+			}
 		}
 	}
 }
@@ -814,7 +928,7 @@ void __fastcall TForm1::HeaderControl2SectionResize(THeaderControl *HeaderContro
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::ListSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
+void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow, bool &CanSelect)
 {
 	if (Opening)
 		return;
@@ -1255,7 +1369,7 @@ void __fastcall TForm1::NextSContextPopup(TObject *Sender, TPoint &MousePos, boo
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::List2SelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect)
+void __fastcall TForm1::List2SelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow, bool &CanSelect)
 {
 	DebugL2c++;
 	if (BlockList2Sel)
@@ -1684,7 +1798,7 @@ void TForm1::DoUpdateList(bool begin)
 	else
 	{
 		List->Cols[0]->EndUpdate();
-		List->Cols[1]->EndUpdate();
+		List->Cols[1]->EndUpdate();
 		List->Cols[2]->EndUpdate();
 		List->Cols[3]->EndUpdate();
 		List->ScrollBars = ssVertical;

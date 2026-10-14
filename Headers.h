@@ -112,17 +112,22 @@ struct SPEL : public RECORD4INT1STR
 	int 	Max;
 } ;
 
-struct BITS //sizeof=4
-{	//если тип инт то там хранится 0 или -1
-	unsigned int b1 : 1;
-	unsigned int b2 : 1;
-	unsigned int b3 : 1;
-	unsigned int b4 : 1;
-	unsigned int b5 : 1;
-	unsigned int b6 : 1;
-	unsigned int b7 : 1;
-	unsigned int b8 : 1;
-} ;
+#pragma pack(push, 1)
+struct BITS
+{
+	// Используем unsigned char (1 байт), так как флаги Morrowind занимают
+	// младший байт в 4-байтовом поле флагов ячейки CELL.
+	unsigned char b1 : 1; // Interior (Внутренняя ячейка)
+	unsigned char b2 : 1; // Has Water (Есть вода)
+	unsigned char b3 : 1; // Illegal to Sleep (Нельзя спать / Преступление)
+	unsigned char b4 : 1; // Зарезервировано
+	unsigned char b5 : 1; // Зарезервировано
+	unsigned char b6 : 1; // Зарезервировано
+	unsigned char b7 : 1; // Quicksave / Is Behave (Маркеры движка)
+	unsigned char b8 : 1; // Специфичный флаг Morrowind
+};
+#pragma pack(pop)
+
 
 union Interpret
 {

@@ -15,6 +15,7 @@
 #include <Vcl.Menus.hpp>
 #include <Vcl.ImgList.hpp>
 #include <System.ImageList.hpp>
+#include <Vcl.Mask.hpp>
 //---------------------------------------------------------------------------
 const int CHEADER = 0;
 const int CSTART = 1;
@@ -135,7 +136,8 @@ __published:	// IDE-managed Components
 	void __fastcall DeleteClick(TObject *Sender);
 	void __fastcall SaveClick(TObject *Sender);
 	void __fastcall HeaderControl1SectionResize(THeaderControl *HeaderControl, THeaderSection *Section);
-	void __fastcall ListSelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
+	void __fastcall ListSelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow,
+          bool &CanSelect);
 	void __fastcall HeaderControl1SectionClick(THeaderControl *HeaderControl, THeaderSection *Section);
 	void __fastcall HeaderControl1Resize(TObject *Sender);
 	void __fastcall TestPClick(TObject *Sender);
@@ -145,7 +147,8 @@ __published:	// IDE-managed Components
 	void __fastcall ExportBtnClick(TObject *Sender);
 	void __fastcall FindStrClick(TObject *Sender);
 	void __fastcall NextSContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
-	void __fastcall List2SelectCell(TObject *Sender, int ACol, int ARow, bool &CanSelect);
+	void __fastcall List2SelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow,
+          bool &CanSelect);
 	void __fastcall ProModeCKClick(TObject *Sender);
 	void __fastcall SPLMreadClick(TObject *Sender);
 	void __fastcall SwapCoordClick(TObject *Sender);
@@ -200,11 +203,11 @@ __published:	// IDE-managed Components
 	void __fastcall DropMasterContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
 	void __fastcall MassDelete2Click(TObject *Sender);
 
-private:	// User declarations
+private:
 	// Внутри класса TForm1:
 	int LastSortingColumn; // Запоминает, какую колонку кликали прошлым шагом
 	bool AscendingOrder; // Флаг направления сортировки
-public:		// User declarations
+public:
 	__fastcall TForm1(TComponent* Owner);
 					 //Morr	//podliv	 sku
 	int LENSIZE; //4	//sublen 2 2
@@ -219,7 +222,7 @@ public:		// User declarations
 	void Setup(int SubLenSize, int MainLenSize, int CountOffset);
 	FILE *file, *save;
 	long EoF;
-	int FindTES4HEDROffset(FILE* tempFile, const char _FAR *find);
+	long FindTextInFile(FILE* tempFile, const char *find, long StartOffset, long EndOffset);
 	MHeader Univ;
 	BITS *pbit;
 	void Clear();
