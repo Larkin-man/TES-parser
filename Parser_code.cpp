@@ -79,6 +79,19 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 //---------------------------------------------------------------------------
 void TForm1::Clear()
 {
+	// Проходим по всем строкам таблицы и освобождаем метаданные
+	if (List)
+	{
+		for (int i = 0; i < List->RowCount; ++i)
+		{
+			TRowMetadata* meta = dynamic_cast<TRowMetadata*>(List->Objects[0][i]);
+			if (meta)
+			{
+				delete meta;
+				List->Objects[0][i] = NULL;
+			}
+		}
+	}
 	for (std::vector<DeleteItem>::iterator el = SubDelete.begin(); el != SubDelete.end(); ++el)
 		if (el->Addon)
 			delete [] el->Addon;
@@ -99,6 +112,19 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 {
 	if (file) { fclose(file); file = NULL; }
 	if (save) { fclose(save); save = NULL; }
+	// Проходим по всем строкам таблицы и освобождаем метаданные
+	if (List)
+	{
+		for (int i = 0; i < List->RowCount; ++i)
+		{
+			TRowMetadata* meta = dynamic_cast<TRowMetadata*>(List->Objects[0][i]);
+			if (meta)
+			{
+				delete meta;
+				List->Objects[0][i] = NULL;
+			}
+		}
+	}
 	delete []SubIndexes;
 	if (Expo)
 	Expo->SaveToFile("Expo.txt");
@@ -147,12 +173,12 @@ void TForm1::Ready(bool ready)
 
 void TForm1::Setup(int SubLenSize, int MainLenSize, int CountOffset)
 {
-	LENSIZE = 4;			//M O S
-	MAINLENSIZE = MainLenSize;//12 16 20
-	MOVERLENTOSNAME = MAINLENSIZE - 4;//main overlen to subname 8 12 16
-	SLENSIZE = SubLenSize;
-	MLENTOSLEN = LENSIZE + MAINLENSIZE;//16 20 24
-	MNAMETOSUBLEN = MLENTOSLEN + 4; //20 24 28
+	LENSIZE = 4;						//Mo Ob Sk
+	MAINLENSIZE = MainLenSize;			//12 16 20
+	MOVERLENTOSNAME = MAINLENSIZE - 4;	//8 12 16 main overlen to subname
+	SLENSIZE = SubLenSize;				//4 2 2
+	MLENTOSLEN = LENSIZE + MAINLENSIZE;	//16 20 24
+	MNAMETOSUBLEN = MLENTOSLEN + 4; 	//20 24 28
 	SecretLen = MOVERLENTOSNAME / 4;
 	if (SecretData)
 	{
@@ -167,9 +193,18 @@ void TForm1::AddRow(char *Header, int Length, long Start)
 {
 	if (List->RowCount <= AddedRow)
 		List->RowCount += 8;
+
 	List->Cells[CHEADER][AddedRow] = Header;
-	List->Cells[CSIZE][AddedRow] = Length;
+	List->Cells[CSIZE][AddedRow]  = Length;
 	List->Cells[CSTART][AddedRow] = Start;
+
+	// Рассчитываем конец записи на основе длины и размера заголовка игры
+	long calculatedEnd = Start + Length + 4 + MAINLENSIZE;
+
+	// Создаем структуру метаданных и связываем её со строкой через Objects
+	TRowMetadata* meta = new TRowMetadata(AddedRow, Length, Start, calculatedEnd);
+	List->Objects[0][AddedRow] = meta;
+
 	AddedRow++;
 }
 //---------------------------------------------------------------------------
@@ -177,7 +212,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 {
 	if (OpenDialog1->Execute() != ID_OK)
 		return;
-	// Открываем во временный указатель
+
 	FILE* tempFile = NULL;
 	if (NRewrites->Checked)
 	{
@@ -194,7 +229,6 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		return ShowMessage("Cannot open binary file.");
 	}
 
-	// Проверяем размер файла
 	fseek(tempFile, 0, SEEK_END);
 	long tempEoF = ftell(tempFile);
 	if (tempEoF < 48)
@@ -202,23 +236,21 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		fclose(tempFile);
 		return ShowMessage("File is empty.");
 	}
-	// --- ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ УСПЕШНО ---
-	// Теперь безопасно закрываем старый файл и очищаем память предыдущего сеанса
+
+	// --- УСПЕШНО ---
 	if (file)
 	{
-		Ready(false);
+		Ready(false); // Закрытие файла должно быть внутри Ready или выполняться явно: fclose(file);
 	}
-	// Присваиваем проверенные значения глобальным переменным
+
 	file = tempFile;
 	EoF = tempEoF;
-	
-	// Тотальная очистка всех контейнеров, векторов и гридов перед заполнением
+
 	Clear();
 
 	Save->Enabled = false;
 	LDele->Visible = false;
 
-	// Безопасное извлечение имени плагина встроенными средствами VCL
 	OpenedFileName = OpenDialog1->FileName;
 	PluginName = ExtractFileName(OpenedFileName);
 	Form1->Caption = PluginName + " - TES parser";
@@ -246,16 +278,14 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		fread(&Ver, 4, 1, file);
 		ToLog("Elder Scrolls 3 Morrowind file structure.");
 		Tes3 = true;
-		End = 4 + MAINLENSIZE + Len; //Name+12+Len
-		//Пропустим подзапись HEDR(Len=300) и встаем на следующую подзапись
-		fseek(file, 4 + MAINLENSIZE + 4 + LENSIZE + 300, SEEK_SET);
-		Pos = ftell(file);
+		End = 4 + MAINLENSIZE + Len;
+
+		// Вместо жесткого SEEK_SET возвращаемся на начало подзаписей (байт 16)
+		fseek(file, MLENTOSLEN, SEEK_SET);
 	}
 	else
 	{
 		Tes3 = false;
-		End = 4 + Len; //Name+Len+...
-		// Используем функцию для поиска HEDR
 		Pos = FindTextInFile(file, "HEDR", 0, 512);
 		if (Pos < 0)
 		{
@@ -263,144 +293,168 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 			Ready(false);
 			return;
 		}
-		int mls = Pos - 4; //MainLenSize это длина от позиции после TES# до HEDR
-		// go + 4 байта имя подзаписи 'HEDR' байта размер подзаписи
-		//Определим длина поля Len 4 или 2
-		fseek(file, Pos + 4, SEEK_SET); //Встали после HEDR
+		int mls = Pos - 4;
+
+		fseek(file, Pos + 4, SEEK_SET);
 		int NewLenSize = 2;
 		fread(&Len, 2, 1, file);
-		//После поля Length всегда идет версия, если она больше нуля значит это правильный файл движка
 		fread(&Ver, 4, 1, file);
-		if (Ver < 0. || Ver > 9000. || Len < 4 || Len > 9000)
+
+		// ИСПРАВЛЕНО: корректный логический оператор ИЛИ (||)
+		if (Ver <= 0.0f || Ver > 9000.0f || Len < 4 || Len > 9000)
 		{
-			//Длина не 2, значит 4
 			NewLenSize = 4;
 			fseek(file, Pos + 4, SEEK_SET);
 			fread(&Len, 4, 1, file);
 			fread(&Ver, 4, 1, file);
-			if (Ver <= 0. && Ver > 9000. || Len < 4 || Len > 9000)
+			if (Ver <= 0.0f || Ver > 9000.0f || Len < 4 || Len > 9000)
 			{
 				ToLog("Unknown file type. HEDR pos =" + IntToStr((int)Pos) +" Version="+FloatToStr(Ver));
+				Ready(false);
 				return;
 			}
 		}
 
-		POSNRECORDS = 8;
-		if (Ver > 0. && Ver <= 0.97)
+		// ИСПРАВЛЕНО: Вызываем Setup ДО того, как переменная SLENSIZE потребуется в fseek!
+		if (Ver > 0.0f && Ver <= 0.97f)
 		{
 			ToLog("Fallout 3 file structure.");
-			Setup(NewLenSize, mls, 34);
+			Setup(NewLenSize, mls, Pos + 4 + NewLenSize + 4);
 		}
-		else if (Ver > 0.97 && Ver <= 1.15)
+		else if (Ver > 0.97f && Ver <= 1.15f)
 		{
-			ToLog("Elder Scrolls 4 Oblivion file structure.");
-			Setup(NewLenSize, mls, 30);
+			if (mls >= 20)
+			{
+				ToLog("Fallout 4 file structure.");
+				Setup(NewLenSize, mls, Pos + 4 + NewLenSize + 4);
+			}
+			else
+			{
+				ToLog("Elder Scrolls 4 Oblivion file structure.");
+				Setup(NewLenSize, mls, Pos + 4 + NewLenSize + 4);
+			}
 		}
-		else if (Ver > 1.32 && Ver <= 1.5)
+		else if (Ver > 1.32f && Ver <= 1.5f)
 		{
 			ToLog("Fallout New Vegas file structure.");
-			Setup(NewLenSize, mls, 34);
+			Setup(NewLenSize, mls, Pos + 4 + NewLenSize + 4);
 		}
-		else if (Ver > 1.5 && Ver <= 1.9)
+		else if (Ver > 1.5f && Ver <= 1.9f)
 		{
 			ToLog("Elder Scrolls 5 Skyrim file structure.");
-			Setup(NewLenSize, mls, 34);
-		}
-		else if (mls <= 30) // Страховочный вариант для модификаций TES3
-		{
-			ToLog("Elder Scrolls ??? file structure. Version ="+FloatToStr(Ver));
-			Setup(NewLenSize, mls, 320); //TODO: Позицию записи количетсва файлов нужно искать
-			Tes3 = true;
+			Setup(NewLenSize, mls, Pos + 4 + NewLenSize + 4);
 		}
 		else
 		{
-			ToLog("Unknown file type " + IntToStr(mls) + " Version ="+FloatToStr(Ver));
-			Setup(NewLenSize, mls, 34); // Дефолтный фоллбек для предотвращения падений
+			ToLog("Elder Scrolls ??? file structure. Version =" + FloatToStr(Ver));
+			Setup(NewLenSize, mls, Pos + 4 + NewLenSize + 4);
 		}
-		End += MAINLENSIZE;
-		//Встаем на следующую подзапись после HEDR
+
+		End = 4 + Len + MAINLENSIZE;
+		// Теперь SLENSIZE гарантированно инициализирован правильно
 		fseek(file, Pos + 4 + SLENSIZE + Len, SEEK_SET);
-		Pos = ftell(file);
 	}
+
 	TES3Read->Enabled = Tes3;
-	// Пройдем до конца подзаписей записи TES# для поиска MAST
 	String Req = " ";
-	// Выделяем буфер под имя мастера динамически
+
+	// Безопасное выделение памяти под MAST
 	char* tempBuf = new char[64];
 	int tempLen = 64;
+
 	while (ftell(file) < End)
 	{
-		fread(Name, 4, 1, file);
-		fread(&Len, SLENSIZE, 1, file);
-		if (strncmp(Name,"MAST", 4) == 0)
+		if (fread(Name, 4, 1, file) != 1) break;
+		if (fread(&Len, SLENSIZE, 1, file) != 1) break;
+
+		if (strncmp(Name, "MAST", 4) == 0)
 		{
 			if (Len >= tempLen)
 			{
 				delete[] tempBuf;
-				tempBuf = new char[Len+1];
-				tempLen = Len+1;
+				tempBuf = new char[Len + 1];
+				tempLen = Len + 1;
 			}
 			fread(tempBuf, Len, 1, file);
-			tempBuf[Len] = '\0'; // Безопасный нуль-терминатор
+			tempBuf[Len] = '\0';
 			Req += String(tempBuf) + ", ";
 		}
 		else
-			fseek(file, Len, SEEK_CUR);	//Tell2 = ftell(file);
+		{
+			fseek(file, Len, SEEK_CUR);
+		}
 	}
+
 	if (Req.Length() > 1)
 	{
-		Req.SetLength(Req.Length() - 2); //", "
+		Req.SetLength(Req.Length() - 2);
 		tolog("Required:" + Req);
 	}
-	//. Закончили поиск MAST
-	//Правильно ли задана позиция Количетсва записей
+
+	delete[] tempBuf;
+
 	fseek(file, POSNRECORDS, SEEK_SET);
 	fread(&RecordCount, 4, 1, file);
-	if (RecordCount <= 0) //||>32000
+	if (RecordCount <= 0 || RecordCount > 1000000) // Поднял лимит, так как в крупных модах Skyrim записей больше 32к
 	{
-		tolog(IntToStr(POSNRECORDS)+" The RecordCount field is set incorrectly: " + IntToStr(RecordCount));
-		//TODO: fallout 3 wrong
+		tolog(IntToStr(POSNRECORDS) + " The RecordCount field is set incorrectly: " + IntToStr(RecordCount));
 	}
-	else
-	{
-		Sizes.reserve(RecordCount+1);
-		Ends.reserve(RecordCount+1);
-	}
-	//Остальное
-	DoUpdateList(true);
+
+		List->ScrollBars = ssNone;
+	List->Perform(WM_SETREDRAW, FALSE, 0);
+	List->Row = 0;
+	Out->SetFocus();
 	List2->RowCount = 1;
 	List2->Rows[0]->Clear();
+
 	fseek(file, 0, SEEK_SET);
 	AddedRow = 0;
+
 	while ((Pos = ftell(file)) < EoF)
 	{
 		fread(Name, 4, 1, file);
 		fread(&Len, 4, 1, file);
+
+		// Вызываем обновленный AddRow. Он автоматически создаст TRowMetadata внутри Objects
 		AddRow(Name, Len, Pos);
-		Sizes.push_back(Len);
-		Ends.push_back(Pos + Len + 4 + MAINLENSIZE);
+
+		// Получаем указатель на только что созданные метаданные для возможной корректировки
+		TRowMetadata* meta = dynamic_cast<TRowMetadata*>(List->Objects[0][AddedRow - 1]);
+
 		fseek(file, MOVERLENTOSNAME, SEEK_CUR);
-		if (Tes3 || strncmp(Name,"GRUP", 4) != 0)
-			fseek(file, Len, SEEK_CUR);
-		else //its GRUP
+		if (Tes3 || strncmp(Name, "GRUP", 4) != 0)
 		{
-			List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
-			Sizes[AddedRow-1] = MLENTOSLEN;
+			fseek(file, Len, SEEK_CUR);
 		}
+		else // Это GRUP в TES4+
+		{
+			List->Cells[CSIZE][AddedRow - 1] = MLENTOSLEN;
+
+			// Если это GRUP, корректируем данные прямо внутри связанного объекта структуры
+			if (meta)
+			{
+				meta->Size = MLENTOSLEN;
+				meta->EndPos = Pos + MLENTOSLEN + 4 + MAINLENSIZE;
+			}
+		}
+
 		if (Len <= 0 && BreakIf0Len->Checked)
 		{
 			BreakIf0Len->Checked = false;
 			break;
 		}
 	}
+
 	if (ftell(file) != EoF)
-		Out->Lines->Add("End on "+IntToStr((int)ftell(file))+". This file may be corrupt.");
+		Out->Lines->Add("End on " + IntToStr((int)ftell(file)) + ". This file may be corrupt.");
+
 	if (List->RowCount > AddedRow)
 		List->RowCount = AddedRow;
+
 	if (NShowData->Checked)
 	{
 		if (List->RowCount >= 1)
-			List->Cells[CDATA][0] = "Number of records: "+IntToStr(RecordCount);
+			List->Cells[CDATA][0] = "Number of records: " + IntToStr(RecordCount);
 		RefreshData(file, 1);
 		NShowData->Tag = 1;
 	}
@@ -413,20 +467,26 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 				List->Cells[CDATA][i] = "";
 		}
 	}
-	DoUpdateList(false);
+
+	HeaderControl1Resize(NULL);
+	List->Perform(WM_SETREDRAW, TRUE, 0);
+	List->ScrollBars = ssVertical;
+	List->Invalidate();
+
 	fseek(file, 0, SEEK_SET);
-	//NextSClick(Sender);
 	if (RecordCount != List->RowCount - 1)
-		ToLog("Wrong Record Count " +IntToStr(RecordCount)+"("+IntToStr(List->RowCount - 1)+")");
+		ToLog("Wrong Record Count " + IntToStr(RecordCount) + "(" + IntToStr(List->RowCount - 1) + ")");
+
 	Ready(true);
-	//SortingColumn = CSTART;
+
 	if (NRewrites->Checked)
 		NRewrites->Enabled = false;
 	else
 		NRewrites->Visible = false;
+
 	if (NClearOut->Checked)
 		Out->Lines->Clear();
-	delete[] tempBuf;
+
 	Opening = false;
 }
 //---------------------------------------------------------------------------
@@ -1781,30 +1841,6 @@ void __fastcall TForm1::NRewritesClick(TObject *Sender)
 {
 	SwapCoord->Visible = NRewrites->Checked;
 	MVRF->Visible = NRewrites->Checked;
-}
-//---------------------------------------------------------------------------
-void TForm1::DoUpdateList(bool begin)
-{
-	if (begin)
-	{
-		List->Row = 0; //Tick = ::GetTickCount();
-		Out->SetFocus();
-		List->Cols[0]->BeginUpdate();
-		List->Cols[1]->BeginUpdate();
-		List->Cols[2]->BeginUpdate();
-		List->Cols[3]->BeginUpdate();
-		List->ScrollBars = ssNone; //List->Items->BeginUpdate();
-	}
-	else
-	{
-		List->Cols[0]->EndUpdate();
-		List->Cols[1]->EndUpdate();
-		List->Cols[2]->EndUpdate();
-		List->Cols[3]->EndUpdate();
-		List->ScrollBars = ssVertical;
-		HeaderControl1Resize(NULL);
-		//HeaderControl2Resize(NULL);
-	}
 }
 //---------------------------------------------------------------------------
 

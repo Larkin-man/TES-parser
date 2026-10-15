@@ -830,7 +830,10 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	int 	Len;
 	char 	sName[5]; sName[4] = '\0';
 	long 	Tell;
-	DoUpdateList(true);
+    List->ScrollBars = ssNone;
+    List->Perform(WM_SETREDRAW, FALSE, 0);
+    List->Row = 0; //Tick = ::GetTickCount();
+    Out->SetFocus();
 	AddedRow = List->RowCount;
 	int StartCon = List->RowCount;
 	fseek(conf, 0, SEEK_SET);
@@ -927,7 +930,9 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 		Out->Lines->Add("No conflicts.");
 	else
 		Out->Lines->Add("--------"+IntToStr(nConf)+" conflicts.");
-	DoUpdateList(false);
+	List->Perform(WM_SETREDRAW, TRUE, 0);
+    List->ScrollBars = ssVertical;
+    List->Invalidate();
 	NEnableList2Delete->Enabled = false;
 	Save2->Visible = false;
 	Save->Visible = false;

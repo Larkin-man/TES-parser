@@ -238,6 +238,24 @@ public:
 	int DeletedSize;
 	bool Tes3;
 	TableLoader types;
+    // Структура для хранения метаданных конкретной записи Morrowind/Skyrim
+    class TRowMetadata : public TObject
+    {
+    public:
+        int  GridRow;     // Индекс строки в StringGrid, к которой привязана структура
+        int  Size;        // Размер записи (Длина данных)
+        long StartPos;    // Абсолютная позиция начала записи в файле (смещение)
+        long EndPos;      // Абсолютная позиция конца записи в файле
+
+        TRowMetadata(int row, int size, long start, long end)
+        {
+            GridRow  = row;
+            Size     = size;
+            StartPos = start;
+            EndPos   = end;
+        }
+    };
+
 	int AddedRow;
 	void AddRow(char *Header, int Length, long Start);
 	void RefreshData(FILE* &file, int Start=0);
@@ -293,7 +311,6 @@ public:
 	int RecordCount;
 	int DebugL2c;
 	void SetDescription(int Num, int Row);
-	void DoUpdateList(bool begin);
 	bool localeinstalled;
 	int bloklist2;
 	String CurrCell;
