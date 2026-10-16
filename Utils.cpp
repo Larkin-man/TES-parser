@@ -69,35 +69,39 @@ long TForm1::FindTextInFile(FILE* tempFile, const char *find, long StartOffset, 
 //---------------------------------------------------------------------------
 void __fastcall TForm1::DelTrashClick(TObject *Sender)
 {
-	for (int i = 0; i < List->RowCount; ++i)
-		if (List->Cells[CHEADER][i].Compare("CELL") == 0)
+	//for (int i = 0; i < List->RowCount; ++i)
+	for (std::vector<TRowMetadata>::iterator el = RecordData.begin(); el != RecordData.end(); ++el)
+	{
+		if (el->Header.Compare("CELL") == 0)
 		{
-			if (i < List->RowCount-1 && List->Cells[CHEADER][i+1].Compare("PGRD") == 0)
+			if (el + 1 != RecordData.end() && (el + 1)->Header.Compare("PGRD") == 0)
 				continue;
-			int Row = 0;
-			int Offset = List->Cells[CSTART][i].ToInt();
-			std::map<int, PACK>::iterator el;
-			if ( (el=ListStore.find(Offset)) != ListStore.end())
-				Row = el->second.RowCount;
+			int RowCount = 0;
+			//int Offset = el.StartPos;
+			if (el->m_SavedGridCache.empty() == false)
+			{
+				RowCount = el->m_SavedGridCache.size();
+			}
 			else
 			{
 				unsigned int Len;
-				fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
+				fseek(file, el->StartPos + 4 + MAINLENSIZE, SEEK_SET);
 				int Pos = ftell(file);
-				while (Pos < Ends[i])
+				while (Pos < el->EndPos)
 				{
 					fseek(file, 4, SEEK_CUR); //fread(Name, 4, 1, file);
 					fread(&Len, SLENSIZE, 1, file);
 					fseek(file, Len, SEEK_CUR);
 					Pos = ftell(file);
-					Row++;
+					RowCount++;
 				}
 			}
-			if (Row <= 4) //todo: to optimal
-				DeleteRecord(i);
-			else if (Row == 5)
-				tolog("CELL 5 string:"+List->Cells[CDATA][i]);
+			if (RowCount <= 4) //todo: to optimal
+				DeleteRecord(el->GridRow);
+			else if (RowCount == 5)
+				tolog("CELL 5 string:"+IntToStr((int)el->StartPos));
 		}
+	}
 	List->Row = 0;
 }
 //---------------------------------------------------------------------------
@@ -736,19 +740,19 @@ void TForm1::PrepareFor(char SYMBS[4])
 	int 	Len;
 	char 	curr;
 	int 	kol = 0;
-	for (int i = 0; i < List->RowCount; i++)
+	for (std::vector<TRowMetadata>::iterator el = RecordData.begin(); el != RecordData.end(); ++el)
 	{
-		if (List->Cells[CHEADER][i].Compare("INFO") == 0)
+		if (el->Header.Compare("INFO") == 0)
 		{
-			int size = Sizes[i];
-			if (size <= MNAMETOSUBLEN)
+			//int size = Sizes[i];
+			if (el->Size <= MNAMETOSUBLEN)
 				continue;
-			int end = List->Cells[CSTART][i].ToInt();
-			if (end > EoF)
+			int end = el->EndPos;
+			if (el->EndPos > EoF)
 				break;
 			fseek(file, end, SEEK_SET);
 			fseek(file, MLENTOSLEN, SEEK_CUR);
-			end += size;
+			end += el->Size;
 			bool nach = false;
 			while (ftell(file) < end)
 			{
@@ -762,7 +766,7 @@ void TForm1::PrepareFor(char SYMBS[4])
 						if (curr == SYMBS[0])
 						{
 							if (nach)
-								tolog("Warning, double of { in " + List->Cells[CDATA][i] +" offset= "+ IntToStr((int)ftell(file)));
+								tolog("Warning, double of { in " + el->Data +" offset= "+ IntToStr((int)ftell(file)));
 							nach = true;
 							RefStarts.push_back(ftell(file)-1);
 							kol++;
@@ -770,14 +774,14 @@ void TForm1::PrepareFor(char SYMBS[4])
 						if (curr == SYMBS[1])
 						{
 							if (!nach)
-								tolog("Warning, double of } in " + List->Cells[CDATA][i] +" offset= "+IntToStr((int)ftell(file)));
+								tolog("Warning, double of } in " + el->Data +" offset= "+IntToStr((int)ftell(file)));
 							nach = false;
 							RefEnds.push_back(ftell(file)-1);
 							kol++;
 						}
 					}
 					if (nach)
-						tolog("Warning, none of } in " + List->Cells[CDATA][i] +" offset= "+ IntToStr((int)ftell(file)));
+						tolog("Warning, none of } in " + el->Data +" offset= "+ IntToStr((int)ftell(file)));
 				} else
 					fseek(file, Len, SEEK_CUR);	//Tell2 = ftell(file);
 			}
@@ -830,7 +834,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	int 	Len;
 	char 	sName[5]; sName[4] = '\0';
 	long 	Tell;
-    List->ScrollBars = ssNone;
+List->ScrollBars = ssNone;
     List->Perform(WM_SETREDRAW, FALSE, 0);
     List->Row = 0; //Tick = ::GetTickCount();
     Out->SetFocus();
@@ -846,8 +850,9 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 				fseek(conf, Len, SEEK_CUR);
 			else //its GRUP
 			{
-				List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
-				Sizes[AddedRow-1] = MLENTOSLEN;
+					List->Cells[CSIZE][AddedRow-1] = MLENTOSLEN;
+				//Sizes[AddedRow-1] = MLENTOSLEN;
+				RecordData[AddedRow-1].Size = MLENTOSLEN;
 			}
 		AddRow(Name, Len, Tell);
 	}
@@ -870,14 +875,14 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 		byte buf[4096];
 		for (int i = StartCon+1; i < List->RowCount; i++)
 		{	//по конфликтному
-			MainLen = Sizes[i];
+			MainLen = RecordData[i].Size;
 			String Hed = List->Cells[CHEADER][i];
 			if (MainLen > 4096)
 				tolog(Hed+StrToInt(MainLen)+" too long");
 			mainbuf[0] = 0;
 			for (int j = 1; j < StartCon; ++j)
 			{
-				Len = Sizes[j];
+				Len = RecordData[j].Size;
 				if (MainLen != Len)
 					continue;
 				if (Hed.Compare(List->Cells[CHEADER][j]) != 0)
@@ -931,7 +936,7 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	else
 		Out->Lines->Add("--------"+IntToStr(nConf)+" conflicts.");
 	List->Perform(WM_SETREDRAW, TRUE, 0);
-    List->ScrollBars = ssVertical;
+List->ScrollBars = ssVertical;
     List->Invalidate();
 	NEnableList2Delete->Enabled = false;
 	Save2->Visible = false;
@@ -942,4 +947,4 @@ void __fastcall TForm1::CheckConflictsClick(TObject *Sender)
 	fclose(conf);
 }
 //---------------------------------------------------------------------------
-
+	

@@ -385,8 +385,8 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 	if (List->Row != -1 || List->Selection.Bottom - List->Selection.Top + 1 != List->RowCount)
 		if ( (expAll=Application->MessageBox(L"Export all scripts?", L"Export", MB_YESNOCANCEL))== ID_CANCEL)
 			return;
-	int i = ( expAll == ID_YES)? 0 : List->Selection.Top;
-	int end = ( expAll == ID_YES)? List->RowCount : List->Selection.Bottom + 1;
+	int i = (expAll == ID_YES)? 0 : List->Selection.Top;
+	int end = (expAll == ID_YES)? List->RowCount : List->Selection.Bottom + 1;
 	int len;
 	char 	Name[5];	Name[4] = '\0';
 	FILE *scpt = NULL;
@@ -398,7 +398,10 @@ void __fastcall TForm1::ExportScriptsBtnClick(TObject *Sender)
 		{
 			int ende = List->Cells[CSTART][i].ToInt();
 			fseek(file, ende + MLENTOSLEN, SEEK_SET);
-			ende += Sizes[i];
+			TRowMetadata* meta = GetRowData(i);
+			if (meta == NULL)
+				continue;
+			ende += meta->Size;
 			len = 0;
 			do
 			{

@@ -137,7 +137,7 @@ __published:	// IDE-managed Components
 	void __fastcall SaveClick(TObject *Sender);
 	void __fastcall HeaderControl1SectionResize(THeaderControl *HeaderControl, THeaderSection *Section);
 	void __fastcall ListSelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow,
-          bool &CanSelect);
+      bool &CanSelect);
 	void __fastcall HeaderControl1SectionClick(THeaderControl *HeaderControl, THeaderSection *Section);
 	void __fastcall HeaderControl1Resize(TObject *Sender);
 	void __fastcall TestPClick(TObject *Sender);
@@ -208,14 +208,14 @@ private:
 	int LastSortingColumn; // Запоминает, какую колонку кликали прошлым шагом
 	bool AscendingOrder; // Флаг направления сортировки
 public:
-	__fastcall TForm1(TComponent* Owner);
-					 //Morr	//podliv	 sku
-	int LENSIZE; //4	//sublen 2 2
-	int MAINLENSIZE; //12 16		 20
-	int MOVERLENTOSNAME; //8
-	int SLENSIZE; //4
-	int MLENTOSLEN;//16
-	int MNAMETOSUBLEN;//20
+		__fastcall TForm1(TComponent* Owner);
+						//Morr  Obl Sky
+	int LENSIZE;		//4
+	int MAINLENSIZE; 	//12 16		 20
+	int MOVERLENTOSNAME;//8
+	int SLENSIZE; 		//4 2   2
+	int MLENTOSLEN;		//16
+	int MNAMETOSUBLEN;	//20
 	int *SecretData;
 	int SecretLen;
 	int POSNRECORDS;
@@ -238,23 +238,32 @@ public:
 	int DeletedSize;
 	bool Tes3;
 	TableLoader types;
-    // Структура для хранения метаданных конкретной записи Morrowind/Skyrim
-    class TRowMetadata : public TObject
-    {
-    public:
-        int  GridRow;     // Индекс строки в StringGrid, к которой привязана структура
-        int  Size;        // Размер записи (Длина данных)
-        long StartPos;    // Абсолютная позиция начала записи в файле (смещение)
-        long EndPos;      // Абсолютная позиция конца записи в файле
+	// Структура для хранения одной строки из 5 столбцов List2
+	struct List2Row
+	{
+		wchar_t col0[256]; //Header (str)
+		wchar_t col1[256]; //Offset (long)
+		wchar_t col2[256]; //Size (int)
+		wchar_t col3[64]; //Type (char)
+		wchar_t col4[256]; //Data (str)
+	};
 
-        TRowMetadata(int row, int size, long start, long end)
-        {
-            GridRow  = row;
-            Size     = size;
-            StartPos = start;
-            EndPos   = end;
-        }
-    };
+	// Структура для хранения метаданных конкретной записи Morrowind/Skyrim
+	struct TRowMetadata
+	{
+		int  GridRow;	// Обратная ссылка на текущую строку в таблице
+		int  Size;		// Размер записи
+		long StartPos;	// Позиция начала
+		long EndPos;	// Позиция конца
+		String Header;
+		String Data;
+		//кэш-вектор для сохранения таблицы подзаписей
+		std::vector<List2Row> m_SavedGridCache;
+	};
+
+	// Объявляем один вектор в классе TForm1 вместо старых векторов Sizes и Ends:
+	std::vector<TRowMetadata> RecordData;
+	TRowMetadata* GetRowData(int Row);
 
 	int AddedRow;
 	void AddRow(char *Header, int Length, long Start);
@@ -265,8 +274,6 @@ public:
 	struct RowData
 	{
 		String cells[4];
-		int sizeVal;
-		int endVal;
 	};
 	// Структура-компоратор для std::stable_sort
 	struct RowComparator
@@ -335,44 +342,18 @@ public:
 	//№	Header	Name	Subheader	Size	Type	Data
 	Basecell Mor;
 	std::vector<Coord> Coords;
-	//void TextToFloat6(String str, Coord &curr);
 	TStringList *what;
 	bool equ(float &value, float rhs)
 	{
 		return (value > rhs-3.0 && value < rhs+3.0);
 	}
-	struct PACK
-	{
-		int Size;
-		int RowCount;
-		TStringList *col[5];
-		PACK()
-		{
-			col[0] = NULL;
-			col[1] = NULL;
-			col[2] = NULL;
-			col[3] = NULL;
-			col[4] = NULL;
-		}
-		~PACK()
-		{
-//			delete col[0];
-//			delete col[1];
-//			delete col[2];
-//			delete col[3];
-//			delete col[4];
-		}
-	};
-	typedef PACK* PPACK;
-	std::map<int, PACK> ListStore;
 	std::set<String> obj;
-	std::vector<int>Sizes;
-	std::vector<long>Ends;
 	std::set<String>Loc1;
 	std::set<String>LocFrmr;
 	void RotateBooks();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
+
 //---------------------------------------------------------------------------
 #endif

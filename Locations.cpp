@@ -480,7 +480,7 @@ void __fastcall TForm1::MVRFClick(TObject *Sender)
 		Curr.X = mdata.SubString(1, Curr.Y-1).ToInt();
 		Curr.Y = mdata.SubString(Curr.Y+1, mdata.Pos(')')-Curr.Y-1).ToInt();
 		Curr.MainLenOffset = List->Cells[CSTART][i].ToInt()+4;
-		Curr.MainLen = Sizes[i];
+		Curr.MainLen = RecordData[i].Size;
 		Curr.PasteOffset = -1;
 		ListSelectCell(Sender, 0, i, CanSelect);
 		bool HasMvrf = false;

@@ -80,18 +80,8 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 void TForm1::Clear()
 {
 	// Проходим по всем строкам таблицы и освобождаем метаданные
-	if (List)
-	{
-		for (int i = 0; i < List->RowCount; ++i)
-		{
-			TRowMetadata* meta = dynamic_cast<TRowMetadata*>(List->Objects[0][i]);
-			if (meta)
-			{
-				delete meta;
-				List->Objects[0][i] = NULL;
-			}
-		}
-	}
+	// Очищаем весь вектор метаданных. Память освобождается автоматически!
+	RecordData.clear();
 	for (std::vector<DeleteItem>::iterator el = SubDelete.begin(); el != SubDelete.end(); ++el)
 		if (el->Addon)
 			delete [] el->Addon;
@@ -102,8 +92,6 @@ void TForm1::Clear()
 	SubDelete.clear();
 	RefStarts.clear();
 	RefEnds.clear();
-	Sizes.clear();
-	Ends.clear();
 	Edited.clear();
 }
 //---------------------------------------------------------------------------
@@ -112,36 +100,14 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 {
 	if (file) { fclose(file); file = NULL; }
 	if (save) { fclose(save); save = NULL; }
-	// Проходим по всем строкам таблицы и освобождаем метаданные
-	if (List)
-	{
-		for (int i = 0; i < List->RowCount; ++i)
-		{
-			TRowMetadata* meta = dynamic_cast<TRowMetadata*>(List->Objects[0][i]);
-			if (meta)
-			{
-				delete meta;
-				List->Objects[0][i] = NULL;
-			}
-		}
-	}
+	// Очищаем весь вектор метаданных. Память освобождается автоматически!
+	RecordData.clear();
 	delete []SubIndexes;
 	if (Expo)
 	Expo->SaveToFile("Expo.txt");
 	delete Expo;
 	delete Export;
 	delete what;
-	std::map<int, PACK>::iterator el;
-	if (ListStore.size() > 0)
-		for (el = ListStore.begin(); el != ListStore.end(); ++el)
-		{
-			delete el->second.col[0];
-			delete el->second.col[1];
-			delete el->second.col[2];
-			delete el->second.col[3];
-			delete el->second.col[4];
-		}
-	ListStore.clear();
 	delete [] SecretData;
 }
 //---------------------------------------------------------------------------
@@ -153,18 +119,8 @@ void TForm1::Ready(bool ready)
 	Panel4->Enabled = ready;
 	List2->Enabled = ready;
 	NEnableList2Delete->Enabled = ready;
-	if (ready == false && ListStore.size() > 0)
-		for (std::map<int, PACK>::iterator el = ListStore.begin(); el != ListStore.end(); ++el)
-		{
-			delete el->second.col[0];
-			delete el->second.col[1];
-			delete el->second.col[2];
-			delete el->second.col[3];
-			delete el->second.col[4];
-		}
 	if (ready == false)
 	{
-		ListStore.clear();
 		fclose(file);
 		file = NULL;
 	}
@@ -198,13 +154,21 @@ void TForm1::AddRow(char *Header, int Length, long Start)
 	List->Cells[CSIZE][AddedRow]  = Length;
 	List->Cells[CSTART][AddedRow] = Start;
 
-	// Рассчитываем конец записи на основе длины и размера заголовка игры
 	long calculatedEnd = Start + Length + 4 + MAINLENSIZE;
 
-	// Создаем структуру метаданных и связываем её со строкой через Objects
-	TRowMetadata* meta = new TRowMetadata(AddedRow, Length, Start, calculatedEnd);
-	List->Objects[0][AddedRow] = meta;
-
+	// Создаем структуру метаданных
+	TRowMetadata meta;
+	meta.GridRow  = AddedRow;
+	meta.Size	 = Length;
+	meta.StartPos = Start;
+	meta.EndPos   = calculatedEnd;
+	meta.Header = Header;
+	// Клади её в конец вектора
+	RecordData.push_back(meta);
+	// Получаем индекс только что добавленного элемента
+	int vectorIndex = RecordData.size() - 1;
+	// Сохраняем ИНДЕКС в Objects строки грида (упаковываем int в указатель)
+	List->Objects[0][AddedRow] = reinterpret_cast<TObject*>(vectorIndex);
 	AddedRow++;
 }
 //---------------------------------------------------------------------------
@@ -395,12 +359,14 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 
 	fseek(file, POSNRECORDS, SEEK_SET);
 	fread(&RecordCount, 4, 1, file);
-	if (RecordCount <= 0 || RecordCount > 1000000) // Поднял лимит, так как в крупных модах Skyrim записей больше 32к
+
+	if (RecordCount > 0 && RecordCount < 2000000)
 	{
-		tolog(IntToStr(POSNRECORDS) + " The RecordCount field is set incorrectly: " + IntToStr(RecordCount));
+		// Выделяем память под весь вектор ОДНИМ блоком заранее!
+		RecordData.reserve(RecordCount + 1);
 	}
 
-		List->ScrollBars = ssNone;
+	List->ScrollBars = ssNone;
 	List->Perform(WM_SETREDRAW, FALSE, 0);
 	List->Row = 0;
 	Out->SetFocus();
@@ -415,27 +381,24 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		fread(Name, 4, 1, file);
 		fread(&Len, 4, 1, file);
 
-		// Вызываем обновленный AddRow. Он автоматически создаст TRowMetadata внутри Objects
+		// Добавляем строку (индекс вектора запишется в Objects автоматически)
 		AddRow(Name, Len, Pos);
-
-		// Получаем указатель на только что созданные метаданные для возможной корректировки
-		TRowMetadata* meta = dynamic_cast<TRowMetadata*>(List->Objects[0][AddedRow - 1]);
 
 		fseek(file, MOVERLENTOSNAME, SEEK_CUR);
 		if (Tes3 || strncmp(Name, "GRUP", 4) != 0)
 		{
 			fseek(file, Len, SEEK_CUR);
 		}
-		else // Это GRUP в TES4+
+		else // Это GRUP в TES4+ (корректируем размер)
 		{
 			List->Cells[CSIZE][AddedRow - 1] = MLENTOSLEN;
 
-			// Если это GRUP, корректируем данные прямо внутри связанного объекта структуры
-			if (meta)
-			{
-				meta->Size = MLENTOSLEN;
-				meta->EndPos = Pos + MLENTOSLEN + 4 + MAINLENSIZE;
-			}
+			// Достаем индекс из Objects для текущей добавленной строки
+			int vIdx = reinterpret_cast<int>(List->Objects[0][AddedRow - 1]);
+
+			// Корректируем данные прямо в векторе по индексу
+			RecordData[vIdx].Size = MLENTOSLEN;
+			RecordData[vIdx].EndPos = Pos + MLENTOSLEN + 4 + MAINLENSIZE;
 		}
 
 		if (Len <= 0 && BreakIf0Len->Checked)
@@ -655,9 +618,28 @@ void TForm1::RefreshData(FILE* &file, int Start)
 			}
 		}
 	}
+	for (int i = Start; i < List->RowCount; ++i)
+		RecordData[i].Data = List->Cells[CDATA][i];
 }
 //---------------------------------------------------------------------------
-
+// Возвращает указатель (чтобы внутри проверить границы)
+TForm1::TRowMetadata* TForm1::GetRowData(int Row)
+{
+	if (Row < 0 || Row >= List->RowCount)
+		return NULL;
+	void* pObj = List->Objects[0][Row];
+	if (pObj == NULL)
+		return NULL;
+	// Безопасно для Win32/Win64 извлекаем индекс
+//	int *pIdx = reinterpret_cast<int*>(List->Objects[0][Row]);
+//	if (pIdx == NULL)
+//		return NULL;
+	int vIdx = static_cast<int>(reinterpret_cast<INT_PTR>(pObj));
+	if (vIdx >= 0 && static_cast<size_t>(vIdx) < RecordData.size())
+		return &RecordData[vIdx];
+	return NULL;
+}
+//---------------------------------------------------------------------------
 void __fastcall TForm1::ButtonGroup1ButtonClicked(TObject *Sender, int Index)
 {
 	if (!Reinter->Checked)
@@ -737,11 +719,16 @@ void TForm1::DeleteRecord(int Row)
 	{
 		if (RefStarts.empty() == false || RefEnds.empty() == false)
 			return;
-		int Offset = List->Cells[CSTART][Row].ToInt();
+
+		TRowMetadata* meta = GetRowData(Row);
+		if (meta == NULL)
+			return;
+		long Offset = meta->StartPos; // Вместо List->Cells[CSTART][i].ToInt() или векторов
 		if	(Deleted.find(Offset) == Deleted.end())
 		{
 			Deleted.insert(Offset);
-			DeletedSize += Sizes[Row];
+			int  Size  = meta->Size;
+			DeletedSize += Size;
 			DeletedSize += MLENTOSLEN;
 			List->Cells[CSIZE][Row] = "-X-";
 			LDele->Caption = "Deleted Size="+IntToStr(DeletedSize)+" Count="+Deleted.size();
@@ -788,15 +775,22 @@ void __fastcall TForm1::NextSClick(TObject *Sender)
 void __fastcall TForm1::GoClick(TObject *Sender)
 {
 	int pos = ToE->Text.ToIntDef(0);
-	if (pos > EoF)
-		pos = EoF;
-	int i, end = -1;
+	if (pos > EoF)	pos = EoF;
+	if (pos < 0)	pos = 0;
+	long start;
+	long end = -1;
 	if (List->Row >= 0)
 	{
-		end = Ends[List->Row];
-		if (pos > end || pos < List->Cells[CSTART][List->Row].ToIntDef(0))
+		TRowMetadata* meta = GetRowData(List->Row);
+		if (meta)
+		{
+			start = meta->StartPos;
+			end   = meta->EndPos;
+		}
+		if (pos > end || pos < start)
 			end = -1;
 	}
+	int i;
 	if (List->Row < 0 || end < 0)
 		for (i = 1; i < List->RowCount; ++i)
 			if (pos < List->Cells[CSTART][i].ToIntDef(0))
@@ -804,8 +798,8 @@ void __fastcall TForm1::GoClick(TObject *Sender)
 				List->Row = i-1;
 				break;
 			}
-		if (i == List->RowCount)
-			List->Row = List->RowCount-1;
+	if (i == List->RowCount)
+		List->Row = List->RowCount-1;
 	//Нашли List.
 	for (i = 1; i < List2->RowCount; ++i)
 		if (pos < List2->Cells[CSTART][i].ToIntDef(0))
@@ -992,8 +986,12 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 {
 	if (Opening)
 		return;
+	TRowMetadata* meta = GetRowData(ARow);
+	if (meta == NULL)
+		return;
+	long Offset = meta->StartPos; // Вместо List->Cells[CSTART][i].ToInt() или векторов
+	long end   = meta->EndPos;
 	//1 Чекнем секрет поле maina
-	int Offset = List->Cells[CSTART][ARow].ToInt();
 	if (ShowAll)
 	{
 		fseek(file, Offset + 4 + LENSIZE, SEEK_SET);
@@ -1061,20 +1059,39 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 	long Pos = ftell(file);
 	int Row = 0;
 	Interpret ish;
-	std::map<int, PACK>::iterator el;
-	if ( (el=ListStore.find(Offset)) != ListStore.end())
+
+	if (meta->m_SavedGridCache.empty() == false)
 	{
-		//int r = el->second.RowCount;
-//		while (List2->RowCount < r)
-//			List2->RowCount++;
-		List2->RowCount = el->second.RowCount;
-		List2->Cols[0]->Assign(el->second.col[0]);
-		List2->Cols[1]->Assign(el->second.col[1]);
-		List2->Cols[2]->Assign(el->second.col[2]);
-		List2->Cols[3]->Assign(el->second.col[3]);
-		List2->Cols[4]->Assign(el->second.col[4]);
+		int totalRows = meta->m_SavedGridCache.size();
+		// 1. ЗАЩИТА: Блокируем скроллбары и перерисовку Windows
+		TScrollStyle originalScrollBars = List2->ScrollBars;
+		List2->ScrollBars = ssNone;
+		List2->Perform(WM_SETREDRAW, FALSE, 0);
+		try
+		{
+			// 2. Сразу выставляем финальный размер таблицы [1, 2]
+			List2->RowCount = totalRows;
+			List2->ColCount = 5;
+			// 3. Выводим данные из кэша памяти в ячейки
+			for (int i = 0; i < totalRows; i++)
+			{
+				const List2Row &cacheRow = meta->m_SavedGridCache[i];
+				// VCL автоматически и очень быстро создаст String из wchar_t*
+				List2->Cells[0][i] = cacheRow.col0;
+				List2->Cells[1][i] = cacheRow.col1;
+				List2->Cells[2][i] = cacheRow.col2;
+				List2->Cells[3][i] = cacheRow.col3;
+				List2->Cells[4][i] = cacheRow.col4;
+			}
+		}
+		__finally {
+			// 4. ВОССТАНОВЛЕНИЕ: Включаем интерфейс обратно
+			List2->Perform(WM_SETREDRAW, TRUE, 0);
+			List2->ScrollBars = originalScrollBars;
+			List2->Invalidate(); // Принудительный рендер обновленной таблицы
+		}
 	} else
-	while (Pos < Ends[ARow])
+	while (Pos < end)
 	{
 		if (List2->RowCount < Row+1)
 			List2->RowCount++;
@@ -1218,25 +1235,23 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 		Pos = ftell(file);
 		Row++;
 	}
-	if (NShowData->Checked && el == ListStore.end()) //Первый клик
+	if (NShowData->Checked && meta->m_SavedGridCache.empty()) //Первый клик
 	{
-		PACK f;
-		f.RowCount = Row;
-		List2->RowCount = Row;
-		f.col[0] = new TStringList;
-		f.col[1] = new TStringList;
-		f.col[2] = new TStringList;
-		f.col[3] = new TStringList;
-		f.col[4] = new TStringList;
-		f.col[0]->Assign(List2->Cols[0]);
-		f.col[1]->Assign(List2->Cols[1]);
-		f.col[2]->Assign(List2->Cols[2]);
-		f.col[3]->Assign(List2->Cols[3]);
-		f.col[4]->Assign(List2->Cols[4]);
-		//EFinds->Text = f.col[4]->Count;
-		//Out->Lines->Assign(f.col[4]);
-		ListStore.insert(std::pair<int, PACK> (Offset, f));
-		//tolog("coxpaHullo:"+IntToStr(f.RowCount));
+		//Запишем все чтобы второй раз не перечитывать file
+		int totalRows = List2->RowCount;
+		// 1. Заранее выделяем память под весь вектор одной командой [1, 2]
+		meta->m_SavedGridCache.resize(totalRows);
+		// 2. Копируем данные из таблицы в кэш памяти
+		for (int i = 0; i < totalRows; i++)
+		{
+			List2Row &cacheRow = meta->m_SavedGridCache[i];
+			// Быстрое копирование текста во внутренние буферы
+			wcsncpy(cacheRow.col0, List2->Cells[0][i].c_str(), 255);
+			wcsncpy(cacheRow.col1, List2->Cells[1][i].c_str(), 255);
+			wcsncpy(cacheRow.col2, List2->Cells[2][i].c_str(), 255);
+			wcsncpy(cacheRow.col3, List2->Cells[3][i].c_str(), 64);
+			wcsncpy(cacheRow.col4, List2->Cells[4][i].c_str(), 255);
+		}
 	}
 	//fseek(file, ToE->Text.ToIntDef(0) - ftell(file), SEEK_CUR);
 	for (Row = 0; Row < List2->RowCount; Row++)
@@ -1326,8 +1341,8 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 		row.cells[CSTART]	= List->Cells[CSTART][i];
 		row.cells[CSIZE]	= List->Cells[CSIZE][i];
 		row.cells[CDATA]	= List->Cells[CDATA][i];
-		row.sizeVal	= Sizes[i];
-		row.endVal	= Ends[i];
+//		row.sizeVal	= Sizes[i];
+ //		row.endVal	= Ends[i];	 TODO: DODELAI
 		rows.push_back(row);
 	}
 	// 3. Стабильная сортировка (сохраняет порядок дубликатов) с учетом направления
@@ -1339,8 +1354,8 @@ void __fastcall TForm1::HeaderControl1SectionClick(THeaderControl *HeaderControl
 		List->Cells[CSTART][i]	= rows[i].cells[CSTART];
 		List->Cells[CSIZE][i]	= rows[i].cells[CSIZE];
 		List->Cells[CDATA][i]	= rows[i].cells[CDATA];
-		Sizes[i]	= rows[i].sizeVal;
-		Ends[i]		= rows[i].endVal;
+//		Sizes[i]	= rows[i].sizeVal;
+//		Ends[i]		= rows[i].endVal;
 	}
 	// 5. Размораживаем и обновляем экран
 	List->ScrollBars = ssVertical;
@@ -1573,6 +1588,10 @@ void TForm1::Delete2(int Row2)
 
 void TForm1::DeleteSublist(int Row2, int MainRow)
 {
+	TRowMetadata* meta = GetRowData(MainRow);
+	if (meta == NULL)
+		return;
+	int  MainLen  = meta->Size;
 	int Offset = List2->Cells[CSTART][Row2].ToInt();
 	if (Deleted.find(Offset) == Deleted.end())
 	{
@@ -1581,8 +1600,8 @@ void TForm1::DeleteSublist(int Row2, int MainRow)
 		del += SLENSIZE;
 		del += 4;
 		DeletedSize += del;
-		int MainLenOffset = List->Cells[CSTART][MainRow].ToInt() + 4;//char4
-		int MainLen = Sizes[MainRow];
+		long MainLenOffset = meta->StartPos + 4;
+
 		if (ShowAll)
 		{
 			LDele->Visible = true;
@@ -1595,7 +1614,7 @@ void TForm1::DeleteSublist(int Row2, int MainRow)
 		SubDelete.push_back(DeleteItem(MainLenOffset, MainLen, Offset, del));
 		//запишем размер header
 		if (List->Cells[CHEADER][MainRow].ToIntDef(-1) == -1) //first del
-			List->Cells[CHEADER][MainRow] = Sizes[MainRow] - del;
+			List->Cells[CHEADER][MainRow] = MainLen - del;
 		else
 			List->Cells[CHEADER][MainRow] = List->Cells[CHEADER][MainRow].ToInt() - del;
 		//List->Cells[CHEADER][MainRow] = List->Cells[CSIZE][MainRow]; //костыль
