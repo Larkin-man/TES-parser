@@ -165,8 +165,8 @@ void TForm1::AddRow(char *Header, int Length, long Start)
 	meta.Header = Header;
 	// Клади её в конец вектора
 	RecordData.push_back(meta);
-	// Получаем индекс только что добавленного элемента
-	int vectorIndex = RecordData.size() - 1;
+	// Получаем индекс только что добавленного элемента, но прибавляем к нему 1 а то если cохранить 0 то вернет NULL
+	int vectorIndex = RecordData.size();
 	// Сохраняем ИНДЕКС в Objects строки грида (упаковываем int в указатель)
 	List->Objects[0][AddedRow] = reinterpret_cast<TObject*>(vectorIndex);
 	AddedRow++;
@@ -416,9 +416,9 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 
 	if (NShowData->Checked)
 	{
+		RefreshData(file, 0);
 		if (List->RowCount >= 1)
 			List->Cells[CDATA][0] = "Number of records: " + IntToStr(RecordCount);
-		RefreshData(file, 1);
 		NShowData->Tag = 1;
 	}
 	else
@@ -629,12 +629,17 @@ TForm1::TRowMetadata* TForm1::GetRowData(int Row)
 		return NULL;
 	void* pObj = List->Objects[0][Row];
 	if (pObj == NULL)
+	{
+		if (Row == 0)
+			return &RecordData[0];
 		return NULL;
+	}
 	// Безопасно для Win32/Win64 извлекаем индекс
 //	int *pIdx = reinterpret_cast<int*>(List->Objects[0][Row]);
 //	if (pIdx == NULL)
 //		return NULL;
 	int vIdx = static_cast<int>(reinterpret_cast<INT_PTR>(pObj));
+	vIdx--; //Сохрааняли с +1
 	if (vIdx >= 0 && static_cast<size_t>(vIdx) < RecordData.size())
 		return &RecordData[vIdx];
 	return NULL;
@@ -1071,7 +1076,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 		{
 			// 2. Сразу выставляем финальный размер таблицы [1, 2]
 			List2->RowCount = totalRows;
-			List2->ColCount = 5;
+			if (List2->ColCount != 5)
+				List2->ColCount = 5;
 			// 3. Выводим данные из кэша памяти в ячейки
 			for (int i = 0; i < totalRows; i++)
 			{
@@ -1090,6 +1096,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 			List2->ScrollBars = originalScrollBars;
 			List2->Invalidate(); // Принудительный рендер обновленной таблицы
 		}
+		Row = totalRows + 1; //for next
 	} else
 	while (Pos < end)
 	{
@@ -1235,6 +1242,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 		Pos = ftell(file);
 		Row++;
 	}
+	if (List2->RowCount > Row)
+		List2->RowCount = Row;
 	if (NShowData->Checked && meta->m_SavedGridCache.empty()) //Первый клик
 	{
 		//Запишем все чтобы второй раз не перечитывать file
