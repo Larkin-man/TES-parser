@@ -259,6 +259,8 @@ public:
 		String Data;
 		//кэш-вектор для сохранения таблицы подзаписей
 		std::vector<List2Row> m_SavedGridCache;
+        // Вектор для хранения системных флагов и FormID/RecordID
+  		std::vector<unsigned int> RecordHeaderData;
 	};
 
 	// Объявляем один вектор в классе TForm1 вместо старых векторов Sizes и Ends:
@@ -268,6 +270,7 @@ public:
 	int AddedRow;
 	void AddRow(char *Header, int Length, long Start);
 	void RefreshData(FILE* &file, int Start=0);
+    void CheckUnknownData(System::LongInt ARow);
 	TStringList *Export, *Expo;
 	bool LogUp;
 	// Структура строки данных
@@ -354,6 +357,5 @@ public:
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
-
 //---------------------------------------------------------------------------
 #endif

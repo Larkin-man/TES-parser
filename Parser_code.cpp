@@ -156,21 +156,33 @@ void TForm1::AddRow(char *Header, int Length, long Start)
 
 	long calculatedEnd = Start + Length + 4 + MAINLENSIZE;
 
-	// Создаем структуру метаданных
 	TRowMetadata meta;
 	meta.GridRow  = AddedRow;
 	meta.Size	 = Length;
 	meta.StartPos = Start;
 	meta.EndPos   = calculatedEnd;
-	meta.Header = Header;
-	// Клади её в конец вектора
+	meta.Header   = Header;
+
+	// Считываем скрытые системные поля (Флаги и ID) напрямую при парсинге
+	if (file && SecretLen > 0)
+	{
+		// Встаем строго за поле Имени (4) и Длины (4)
+		long currentPos = ftell(file);
+		fseek(file, Start + 4 + LENSIZE, SEEK_SET);
+
+		meta.RecordHeaderData.resize(SecretLen);
+		fread(&meta.RecordHeaderData[0], 4, SecretLen, file);
+
+		// Возвращаем указатель файла обратно на место, чтобы не сбить основной цикл
+		fseek(file, currentPos, SEEK_SET);
+	}
+
 	RecordData.push_back(meta);
-	// Получаем индекс только что добавленного элемента, но прибавляем к нему 1 а то если cохранить 0 то вернет NULL
-	int vectorIndex = RecordData.size();
-	// Сохраняем ИНДЕКС в Objects строки грида (упаковываем int в указатель)
-	List->Objects[0][AddedRow] = reinterpret_cast<TObject*>(vectorIndex);
+	int vectorIndex = RecordData.size() - 1;
+	List->Objects[AddedRow] = reinterpret_cast<TObject*>(vectorIndex + 1);
 	AddedRow++;
 }
+
 //---------------------------------------------------------------------------
 void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 {
@@ -458,54 +470,64 @@ void TForm1::RefreshData(FILE* &file, int Start)
 	const int MAXSIZE = 64;
 	static char DATA[MAXSIZE + 1];
 
-	// Временный буфер для безопасного считывания заголовков подзаписей (4 байта имя + 4 байта длина)
 	char subName[5]; subName[4] = '\0';
 	unsigned int subLen = 0;
 
+	// Включаем режим быстрой отрисовки StringGrid
+	List->Perform(WM_SETREDRAW, FALSE, 0);
+
 	for (int i = Start; i < List->RowCount; ++i)
 	{
-		int start = List->Cells[CSTART][i].ToInt();
-		fseek(file, start, SEEK_SET);
-		String Header = List->Cells[CHEADER][i];
+		// 1. Извлекаем индекс вектора из Objects текущей строки таблицы
+		TRowMetadata *meta = GetRowData(i);
 
-		if (Header == "GRUP")
+		// Синхронизируем обратную ссылку на строку (на случай, если была сортировка)
+		meta->GridRow = i;
+		meta->Header = List->Cells[CHEADER][i];
+
+		// Если данные для этой записи уже были однажды прочитаны и закэшированы,
+		// просто выводим их из памяти вектора без обращения к диску!
+		if (!meta->Data.IsEmpty())
 		{
-			fseek(file, LENSIZE, SEEK_CUR);
-			int Data[5] = {0,0,0,0,0};
-			fread(&Data[0], 4, 1, file);
-			fread(DATA, 4, 1, file); DATA[4] = 0;
-
-			if (MOVERLENTOSNAME == 12) // Oblivion
-				fread(&Data[1], 4, 2, file);
-			else					// Skyrim / Fallout
-				fread(&Data[1], 4, 3, file);
-
-			Data[4] = start + Data[0];
-			List->Cells[CDATA][i] = String(DATA) + "[" + IntToStr(Data[0]) +
-				"](" + IntToStr(Data[1]) + "," + IntToStr(Data[2]) + "," + IntToStr(Data[3]) + ") To " + IntToStr(Data[4]);
+			List->Cells[CDATA][i] = meta->Data;
 			continue;
 		}
 
-		if (Header == "CELL" && Tes3)
-		{
-			// Прыгаем за заголовок записи CELL (20 байт для TES3) к первой подзаписи (обычно NAME)
-			fseek(file, MNAMETOSUBLEN, SEEK_CUR);
+		// Если кэш пуст — выполняем чтение из файла
+		long start = meta->StartPos;
+		fseek(file, start, SEEK_SET);
 
-			// Считываем реальную длину строки имени ячейки
+		if (meta->Header == "GRUP")
+		{
+			fseek(file, LENSIZE, SEEK_CUR);
+			int DataArr[5] = {0,0,0,0,0};
+			fread(&DataArr[0], 4, 1, file);
+			fread(DATA, 4, 1, file); DATA[4] = '\0';
+
+			if (MOVERLENTOSNAME == 12) // Oblivion
+				fread(&DataArr[1], 4, 2, file);
+			else					  // Skyrim / Fallout
+				fread(&DataArr[1], 4, 3, file);
+
+			DataArr[4] = start + DataArr[0];
+			meta->Data = String(DATA) + "[" + IntToStr(DataArr[0]) +
+				"](" + IntToStr(DataArr[1]) + "," + IntToStr(DataArr[2]) + "," + IntToStr(DataArr[3]) + ") To " + IntToStr(DataArr[4]);
+		}
+		else if (meta->Header == "CELL" && Tes3)
+		{
+			fseek(file, start + MNAMETOSUBLEN, SEEK_SET);
+
 			int nameLength = 0;
 			fread(&nameLength, 4, 1, file);
 
 			int readLength = (nameLength > MAXSIZE) ? MAXSIZE : nameLength;
 			fread(DATA, readLength, 1, file);
-			DATA[readLength] = '\0'; // Безопасный нуль-терминатор!
+			DATA[readLength] = '\0';
 
-			// Если имя было длиннее MAXSIZE, аккуратно допропускаем остаток строки в файле
 			if (nameLength > MAXSIZE)
 				fseek(file, nameLength - MAXSIZE, SEEK_CUR);
 
-			// Теперь ищем подзапись флагов "DATA" внутри ячейки CELL
 			bool dataFound = false;
-			// Ограничиваем поиск, чтобы не уйти в бесконечный цикл
 			for (int check = 0; check < 5; ++check)
 			{
 				fread(subName, 4, 1, file);
@@ -515,45 +537,43 @@ void TForm1::RefreshData(FILE* &file, int Start)
 					dataFound = true;
 					break;
 				}
-				fseek(file, subLen, SEEK_CUR); // Пропускаем чужие подзаписи (например, flags)
+				fseek(file, subLen, SEEK_CUR);
 			}
 
-			if (dataFound && subLen >= 12) // DATA в CELL содержит как минимум 12 байт (флаги + координаты)
+			if (dataFound && subLen >= 12)
 			{
 				unsigned int cellFlags = 0;
 				int cellX = 0, cellY = 0;
 
-				fread(&cellFlags, 4, 1, file); // Читаем 4 байта флагов из файла
+				fread(&cellFlags, 4, 1, file);
 				fread(&cellX, 4, 1, file);
 				fread(&cellY, 4, 1, file);
 
-				// Просто берем адрес переменной cellFlags, приводим к указателю на BITS
-				// и работаем напрямую. Теперь данные гарантированно на месте!
-				BITS* pbit = reinterpret_cast<BITS*>(&cellFlags);
+				// Используем безопасную побитовую маску
+				bool isInterior = (cellFlags & 0x01) != 0;
+				bool hasWater   = (cellFlags & 0x02) != 0;
+				bool isIllegal  = (cellFlags & 0x04) != 0;
 
 				String Str = "";
-				bool isInterior = (cellFlags & 0x01) != 0;
 				if (NExtreriorFlagsPrint->Checked)
 				{
-					if (pbit->b2 == 1) Str += 'w'; // Вода
-					if (pbit->b3 == 1) Str += 'i'; // Сон — преступление
+					if (hasWater)  Str += 'w';
+					if (isIllegal) Str += 'i';
 				}
 
-				if (isInterior == false)
-					List->Cells[CDATA][i] = String(DATA) + " (" + IntToStr(cellX) + "," + IntToStr(cellY) + ")" + Str;
+				if (isInterior)
+					meta->Data = String(DATA) + " [Interior]" + Str;
+				else
+					meta->Data = String(DATA) + " (" + IntToStr(cellX) + "," + IntToStr(cellY) + ")" + Str;
 			}
 			else
 			{
-				List->Cells[CDATA][i] = String(DATA) + " [No DATA subrecord]";
+				meta->Data = String(DATA) + " [No DATA]";
 			}
-			continue;
 		}
-
-		if (Header == "LAND" && Tes3)
+		else if (meta->Header == "LAND" && Tes3)
 		{
 			fseek(file, start + MNAMETOSUBLEN, SEEK_SET);
-
-			// Ищем подзапись координат ландшафта INTV
 			fread(subName, 4, 1, file);
 			fread(&subLen, 4, 1, file);
 
@@ -562,19 +582,16 @@ void TForm1::RefreshData(FILE* &file, int Start)
 				int gridX = 0, gridY = 0;
 				fread(&gridX, 4, 1, file);
 				fread(&gridY, 4, 1, file);
-				List->Cells[CDATA][i] = "(" + IntToStr(gridX) + "," + IntToStr(gridY) + ")";
+				meta->Data = "Grid: (" + IntToStr(gridX) + "," + IntToStr(gridY) + ")";
 			}
 			else
 			{
-				List->Cells[CDATA][i] = "LAND data";
+				meta->Data = "LAND data";
 			}
-			continue;
 		}
-
-		if (Header == "PGRD" && Tes3)
+		else if (meta->Header == "PGRD" && Tes3)
 		{
 			fseek(file, start + MNAMETOSUBLEN, SEEK_SET);
-			// Читаем сетку путей (Pathgrid) DATA подзапись
 			fread(subName, 4, 1, file);
 			fread(&subLen, 4, 1, file);
 
@@ -585,41 +602,42 @@ void TForm1::RefreshData(FILE* &file, int Start)
 				fread(&gridX, 4, 1, file);
 				fread(&gridY, 4, 1, file);
 				fread(&pointCount, 2, 1, file);
-				List->Cells[CDATA][i] = "(" + IntToStr(gridX) + "," + IntToStr(gridY) + ") Points: " + IntToStr((int)pointCount);
+				meta->Data = "PathGrid: (" + IntToStr(gridX) + "," + IntToStr(gridY) + ") Points: " + IntToStr((int)pointCount);
 			}
-			continue;
 		}
-
-		if (Header == "SKIL" || Header == "MGEF")
+		else if (meta->Header == "SKIL" || meta->Header == "MGEF")
 		{
 			fseek(file, start + MNAMETOSUBLEN + SLENSIZE, SEEK_SET);
 			int INDX = 0;
 			fread(&INDX, 4, 1, file);
-			List->Cells[CDATA][i] = IntToStr(INDX);
-			continue;
+			meta->Data = IntToStr(INDX);
 		}
-
-		// Блок Else (Для всех дефолтных подзаписей)
+		else // Дефолтный текстовый блок для остальных подзаписей
 		{
 			fseek(file, start + MNAMETOSUBLEN, SEEK_SET);
 			int actualLen = 0;
-			fread(&actualLen, 4, 1, file); // Считываем реальную длину подзаписи
+			fread(&actualLen, 4, 1, file);
 
 			int readLen = (actualLen > MAXSIZE) ? MAXSIZE : actualLen;
 			if (readLen > 0)
 			{
 				fread(DATA, readLen, 1, file);
 				DATA[readLen] = '\0';
-				List->Cells[CDATA][i] = DATA;
+				meta->Data = DATA;
 			}
 			else
 			{
-				List->Cells[CDATA][i] = "";
+				meta->Data = "";
 			}
 		}
+
+		// Записываем полученную строку из кэша в таблицу
+		List->Cells[CDATA][i] = meta->Data;
 	}
-	for (int i = Start; i < List->RowCount; ++i)
-		RecordData[i].Data = List->Cells[CDATA][i];
+
+	// Возвращаем стандартную отрисовку грида и обновляем его вид
+	List->Perform(WM_SETREDRAW, TRUE, 0);
+	List->Invalidate();
 }
 //---------------------------------------------------------------------------
 // Возвращает указатель (чтобы внутри проверить границы)
@@ -986,6 +1004,51 @@ void __fastcall TForm1::HeaderControl2SectionResize(THeaderControl *HeaderContro
 	List2->ColWidths[CDATA2] = HeaderControl2->Sections->Items[CDATA2]->Width - 1;
 }
 //---------------------------------------------------------------------------
+void TForm1::CheckUnknownData(System::LongInt ARow)
+{
+	TRowMetadata* meta = GetRowData(ARow);
+	if (meta == NULL)
+		return;
+
+	if (ShowAll && SecretData != NULL && SecretLen > 0)
+	{
+		// Прыгаем сразу за Имя (4) и Длину (4) записи
+		fseek(file, meta->StartPos + 4 + LENSIZE, SEEK_SET);
+
+		// Считываем скрытые системные поля (Флаги и FormID)
+		fread(SecretData, 4, SecretLen, file);
+
+		Secr->Visible = false;
+		bool hasNonZero = false;
+
+		for (int i = 0; i < SecretLen; ++i)
+		{
+			if (SecretData[i] != 0)
+			{
+				hasNonZero = true;
+				break;
+			}
+		}
+
+		if (hasNonZero)
+		{
+			String resultText = "";
+			for (int j = 0; j < SecretLen; ++j)
+			{
+				// Для Morrowind первый элемент (j=0) покажет флаги записи (Deleted, Persistent и т.д.)
+				resultText = resultText + IntToStr(SecretData[j]) + ",";
+			}
+
+			// Безопасно отсекаем последнюю запятую
+			if (resultText.Length() > 0)
+				resultText.SetLength(resultText.Length() - 1);
+
+			Secr->Caption = resultText;
+			Secr->Visible = true;
+		}
+	}
+}
+//---------------------------------------------------------------------------
 
 void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow, bool &CanSelect)
 {
@@ -994,25 +1057,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 	TRowMetadata* meta = GetRowData(ARow);
 	if (meta == NULL)
 		return;
-	long Offset = meta->StartPos; // Вместо List->Cells[CSTART][i].ToInt() или векторов
-	long end   = meta->EndPos;
-	//1 Чекнем секрет поле maina
-	if (ShowAll)
-	{
-		fseek(file, Offset + 4 + LENSIZE, SEEK_SET);
-		fread(SecretData, 4, SecretLen, file);
-		Secr->Visible = false;
-		for (int i = 0; i < SecretLen; ++i)
-			if (SecretData[i] != 0)
-			{
-				Secr->Caption = "";
-				for (int j = 0; j < SecretLen; ++j)
-					Secr->Caption = Secr->Caption + IntToStr(SecretData[j]) + ",";
-				Secr->Caption = Secr->Caption.SetLength(Secr->Caption.Length()-1);
-				Secr->Visible = true;
-				break;
-			}
-	}
+	CheckUnknownData(ARow);
 	//------------
 	if (PanelList2->Visible == false)
 		return;
@@ -1059,7 +1104,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 	//tolog("size="+IntToStr(Sizes[ARow])+"end="+IntToStr(Ends[ARow]));
 	// Разбор файла
 	//List2->Cols->BeginUpdate();
-	fseek(file, Offset + 4 + MAINLENSIZE, SEEK_SET);
+	fseek(file, meta->StartPos + 4 + MAINLENSIZE, SEEK_SET);
 	//Out->Lines->Append(ftell(file));
 	long Pos = ftell(file);
 	int Row = 0;
@@ -1098,7 +1143,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 		}
 		Row = totalRows + 1; //for next
 	} else
-	while (Pos < end)
+	while (Pos < meta->EndPos)
 	{
 		if (List2->RowCount < Row+1)
 			List2->RowCount++;

@@ -158,8 +158,8 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <Defines>_DEBUG;$(Defines)</Defines>
-        <VerInfo_Build>409</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.409;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>410</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=File parser of Bethesda games;FileVersion=2.0.2.410;InternalName=TES Parser;LegalCopyright=Copyright © 2026 Larkin-man;LegalTrademarks=;OriginalFilename=;ProductName=TES Parser;ProductVersion=2.0;Comments=</VerInfo_Keys>
         <ILINK_AllWarnings>true</ILINK_AllWarnings>
         <ILINK_SelectedWarnings>false</ILINK_SelectedWarnings>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
