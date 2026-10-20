@@ -200,6 +200,24 @@ void __fastcall TForm1::CheckCoordContextPopup(TObject *Sender, TPoint &MousePos
 	}
 	else
 		CheckCoord->Tag = 0;
+	//Не помню зачем эта функция была в конце ListSelectcell пока убрал ее
+	int ARow = 0;
+	if (CheckCoord->Tag == 1)
+	{
+		int p = List->Cells[CDATA][ARow].Pos(')');
+		if (p > 0)
+			CurrCell = List->Cells[CDATA][ARow].SubString(1,p);
+		else
+			CurrCell = List->Cells[CDATA][ARow];
+		Form1->Caption = CurrCell;
+	}
+	//if Arow daje ne 0+
+	//Out->Lines->Append(DebugL2c);
+	//if (Check&&Expo)
+	//	FindNAMEClick(Sender);
+	//fseek(file, List2->Cells[CSTART][List2->Row].ToIntDef(0) - ftell(file), SEEK_CUR);
+	if (CheckCoord->Tag == 1)
+		CheckCoordClick(Sender);
 }
 //---------------------------------------------------------------------------
 

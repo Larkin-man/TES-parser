@@ -351,7 +351,6 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = NextSClick
         OnContextPopup = NextSContextPopup
-        ExplicitWidth = 43
       end
     end
     object FlowPanel1: TFlowPanel

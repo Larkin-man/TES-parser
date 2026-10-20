@@ -78,9 +78,9 @@ void __fastcall TForm1::DelTrashClick(TObject *Sender)
 				continue;
 			int RowCount = 0;
 			//int Offset = el.StartPos;
-			if (el->m_SavedGridCache.empty() == false)
+			if (el->SavedList2Cache.empty() == false)
 			{
-				RowCount = el->m_SavedGridCache.size();
+				RowCount = el->SavedList2Cache.size();
 			}
 			else
 			{

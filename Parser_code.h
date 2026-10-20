@@ -137,7 +137,7 @@ __published:	// IDE-managed Components
 	void __fastcall SaveClick(TObject *Sender);
 	void __fastcall HeaderControl1SectionResize(THeaderControl *HeaderControl, THeaderSection *Section);
 	void __fastcall ListSelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow,
-      bool &CanSelect);
+	  bool &CanSelect);
 	void __fastcall HeaderControl1SectionClick(THeaderControl *HeaderControl, THeaderSection *Section);
 	void __fastcall HeaderControl1Resize(TObject *Sender);
 	void __fastcall TestPClick(TObject *Sender);
@@ -148,7 +148,7 @@ __published:	// IDE-managed Components
 	void __fastcall FindStrClick(TObject *Sender);
 	void __fastcall NextSContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
 	void __fastcall List2SelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow,
-          bool &CanSelect);
+		bool &CanSelect);
 	void __fastcall ProModeCKClick(TObject *Sender);
 	void __fastcall SPLMreadClick(TObject *Sender);
 	void __fastcall SwapCoordClick(TObject *Sender);
@@ -258,9 +258,9 @@ public:
 		String Header;
 		String Data;
 		//кэш-вектор для сохранения таблицы подзаписей
-		std::vector<List2Row> m_SavedGridCache;
-        // Вектор для хранения системных флагов и FormID/RecordID
-  		std::vector<unsigned int> RecordHeaderData;
+		std::vector<List2Row> SavedList2Cache;
+		// Вектор для хранения системных флагов и FormID/RecordID
+		std::vector<unsigned int> RecordHeaderData;
 	};
 
 	// Объявляем один вектор в классе TForm1 вместо старых векторов Sizes и Ends:
@@ -270,7 +270,7 @@ public:
 	int AddedRow;
 	void AddRow(char *Header, int Length, long Start);
 	void RefreshData(FILE* &file, int Start=0);
-    void CheckUnknownData(System::LongInt ARow);
+	void CheckUnknownData(System::LongInt ARow);
 	TStringList *Export, *Expo;
 	bool LogUp;
 	// Структура строки данных
