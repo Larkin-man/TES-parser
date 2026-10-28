@@ -1064,271 +1064,220 @@ void TForm1::CheckUnknownData(System::LongInt ARow)
 
 void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, System::LongInt ARow, bool &CanSelect)
 {
-	if (Opening)
+	if (Opening || ARow < 0)
 		return;
+
 	TRowMetadata* meta = GetRowData(ARow);
 	if (meta == NULL)
 		return;
+
 	CheckUnknownData(ARow);
-	//------------
+
 	if (PanelList2->Visible == false)
 		return;
+
 	SubDescript->Visible = false;
-	char 	Name[5];	Name[4] = '\0';
+
+	char Name[5];
+	Name[4] = '\0';
 	String InterpretStr, find;
 	unsigned int Len;
-	unsigned char *st = NULL;
 	DebugL2c = 0;
-	if (ARow < 0)
-		return;
+
 	String HEAD = meta->Header;
-	// TYPES TABLE найдем HEAD от и до
-	// Определим начало и конец для оптимизации
-	int m1=-1, m2=-2;
-	if (NShowData->Checked)
-	{
-		if (Tes3==false && HEAD=="NPC_") //Для этой записи структура неизвестна
-		{
-			List2->RowCount = 0;
-			return;
-		}
-		for (int t = 0; t < types.RowCount; ++t)
-			if (HEAD.Compare(THeader[t]) == 0)
-			{
-				if (m1 == -1)
-					m1 = t;
-				m2 = t;
-			} else if (m1 != -1)
-				break;
-	}
-	//--------------
-	ToE->Text = meta->StartPos;
+	ToE->Text = IntToStr((__int64)meta->StartPos);
 	BlockList2Sel = true;
-	// Сбросить номер строки
+
 	static String SelMainHedr = "";
 	if (SelMainHedr != HEAD)
 	{
 		List2->Row = 0;
 		SelMainHedr = HEAD;
 	}
-	int Row;
-	// Разбор файла
+
 	List2->ScrollBars = ssNone;
 	List2->Perform(WM_SETREDRAW, FALSE, 0);
+
+	// Выделяем временный буфер на куче для безопасного чтения подзаписей (макс 64кб для Morrowind/Skyrim)
+	const unsigned int MAX_SUBRECORD_BUF = 65536;
+	unsigned char* subrecordBuffer = new unsigned char[MAX_SUBRECORD_BUF];
+
 	try
 	{
-		Row = 0;
-		fseek(file, meta->StartPos + 4 + MAINLENSIZE, SEEK_SET);
-		long Pos = ftell(file);
-		Interpret ish;
-		if (meta->SavedList2Cache.empty() == false)
+		int Row = 0;
+
+		// Сценарий А: Данные уже есть в кэше — выводим мгновенно без дисковых операций
+		if (!meta->SavedList2Cache.empty())
 		{
-			//Уже есть сохраненные строки
 			int totalRows = meta->SavedList2Cache.size();
-			// Сразу выставляем финальный размер таблицы
 			List2->RowCount = totalRows;
 			if (List2->ColCount != 5)
 				List2->ColCount = 5;
-			// Выводим данные из кэша памяти в ячейки
+
 			for (int i = 0; i < totalRows; i++)
 			{
 				const List2Row &cacheRow = meta->SavedList2Cache[i];
-				// VCL автоматически и очень быстро создаст String из wchar_t*
 				List2->Cells[0][i] = cacheRow.col0;
 				List2->Cells[1][i] = cacheRow.col1;
 				List2->Cells[2][i] = cacheRow.col2;
 				List2->Cells[3][i] = cacheRow.col3;
 				List2->Cells[4][i] = cacheRow.col4;
 			}
-			Row = totalRows + 1; //for next
-		} else
-		//Первый вывод, разбор подстрок
-		while (Pos < meta->EndPos)
+		}
+		// Сценарий Б: Первый клик — читаем и парсим файл с диска
+		else
 		{
-			if (List2->RowCount < Row+1)
-				List2->RowCount++;
-			List2->Cells[CSTART][Row] = Pos;
-			fread(Name, 4, 1, file);
-			fread(&Univ.Length, SLENSIZE, 1, file);
-			List2->Cells[CHEADER][Row] = Name;
-			List2->Cells[CSIZE][Row] = Univ.Length;
-			List2->Cells[CDATA2][Row] = "";
-			List2->Cells[CTYPE][Row] = "";
-			if (ExportBtn->Tag != 1)
-				Len = Univ.Length > 64 ? 64 : Univ.Length; ////TODO: shririna
-			else
-				Len = Univ.Length;
-			//Интерпретирование данных
-			if (NShowData->Checked)
+			// Вычисляем физическое начало данных подзаписей внутри записи верхнего уровня
+			// Имя записи(4) + Размер(4) + Системные скрытые поля флагов (MAINLENSIZE)
+			long Pos = meta->StartPos + 4 + 4 + MAINLENSIZE;
+
+			while (Pos < meta->EndPos)
 			{
-				st = NULL;
-				InterpretStr = "";
-				//1 сначала ищем в TYPES.txt
-				find = List2->Cells[CHEADER][Row];//= List2->Cells[CHEADER][sub];
-				//SetDescription(-1, Row);
-				for (int t = m1; t <= m2; ++t)
-					if (find.Compare(TSubHeader[t]) == 0)
-					{	//нашли
-						if (TDescr[t].Length() > 0)
-							SetDescription(t, Row); //	SubIndexes[Row] = t;
-						else
-							SetDescription(-1, Row);
-						st = file->curp;
-						List2->Cells[CTYPE][Row] = TType[t][1];
-						switch (TType[t][1])
-						{
-							//case 't': List2->Cells[CDATA2][Row] = st; break; //ToLog(&Name[8]);
-							case 's': List2->Cells[CDATA2][Row] = String((char*)st); break;
-							case 'i':
-							for (unsigned int i = 0; i < Len; i+=sizeof(int))
-									InterpretStr += IntToStr(*(int*)&st[i])+" ";
-								break;
-							case 'b':
-								for (unsigned int i = 0; i < Len; ++i)
-									InterpretStr += IntToStr(*(byte*)&st[i])+" ";
-								break;
-							case 'f': for (unsigned int i = 0; i < Len; i+=sizeof(float))
-									InterpretStr += FloatToStrF(*(float*)&st[i], ffGeneral, 8, 8)+" ";
-								break;
-							case 'w': for (unsigned int i = 0; i < Len; i+=sizeof(short))
-									InterpretStr += IntToStr(*(short*)&st[i])+" ";
-								break;
-							case 'F': //FRMR
-								ish.i = 0; ish.b[0] = *(byte*)&st[3];
-								InterpretStr = IntToStr(ish.i);
-								ish.b[0] = *(byte*)&st[0]; ish.b[1] = *(byte*)&st[1]; ish.b[2] = *(byte*)&st[2];
-								InterpretStr = IntToStr(ish.i) + " " + InterpretStr +" ";
-								break;
-							default :
-								for (unsigned int i = 0; i < Len; ++i)
-									InterpretStr += IntToStr(*(byte*)&st[i])+" ";
-						}
-						if (InterpretStr.Length() > 0)
-							List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
-					}
-				//Не нашли в TYPES.txt
-				if	(List2->Cells[CTYPE][Row] == "")
+				if (List2->RowCount < Row + 1)
+					List2->RowCount = Row + 1;
+
+				fseek(file, Pos, SEEK_SET);
+
+				// Читаем заголовок подзаписи (4 байта имя + размер поля длины)
+				if (fread(Name, 4, 1, file) != 1) break;
+				Univ.Length = 0;
+				if (fread(&Univ.Length, SLENSIZE, 1, file) != 1) break;
+
+				List2->Cells[CSTART][Row]  = Pos;
+				List2->Cells[CHEADER][Row] = Name;
+				List2->Cells[CSIZE][Row]   = IntToStr((int)Univ.Length);
+				List2->Cells[CDATA2][Row]  = "";
+				List2->Cells[CTYPE][Row]   = "";
+
+				Len = (Univ.Length > 64 && ExportBtn->Tag != 1) ? 64 : Univ.Length;
+
+				// Безопасное бинарное чтение тела подзаписи в буфер вместо file->curp
+				if (Univ.Length > 0)
 				{
-					SetDescription(-1, Row); //ETOSHTO
-					unsigned int pe;
-					//2 Не нашли. Поищем в встроеных
+					unsigned int bytesToRead = (Univ.Length > MAX_SUBRECORD_BUF) ? MAX_SUBRECORD_BUF : Univ.Length;
+					fread(subrecordBuffer, 1, bytesToRead, file);
+				}
+
+				if (NShowData->Checked && Univ.Length > 0)
+				{
+					InterpretStr = "";
+					SetDescription(-1, Row);
+
 					std::map<String, TagInfo>::const_iterator it = tagMap.find(Name);
-					//for (int i = 0; i < nTypes; ++i)
 					if (it != tagMap.end())
 					{
-						const TagInfo& currentTag = it->second; // Получаем найденные свойства тега
-						// Записываем тип в ячейку StringGrid (автоматически приведется к String)
-						st = file->curp;
+						const TagInfo& currentTag = it->second;
 						List2->Cells[CTYPE][Row] = currentTag.type;
 
-						// Превращаем mainTag (std::string) в VCL String для метода tolog
-						String vclMainTag = currentTag.mainTag.c_str();
 						switch (currentTag.type)
 						{
-							case 't':
-								//check pechatn symbols
-								for (pe = 0; pe < Univ.Length-1; pe++)
-									if (st[pe] < 32)
-										break;
-								if (pe >= Univ.Length-1)
+							case 't': // Текстовое поле
 								{
-									find = (char*)st;
-									if ((unsigned int)find.Length() > Univ.Length)
-										List2->Cells[CDATA2][Row] = find.SetLength(Univ.Length);
-									else
+									unsigned int pe;
+									for (pe = 0; pe < Univ.Length && pe < MAX_SUBRECORD_BUF; pe++)
+									{
+										if (subrecordBuffer[pe] < 32 && subrecordBuffer[pe] != '\0')
+											break;
+									}
+									if (pe >= Univ.Length || subrecordBuffer[pe] == '\0')
+									{
+										// Безопасное создание строки с ограничением длины
+										find = String((char*)subrecordBuffer, Univ.Length);
 										List2->Cells[CDATA2][Row] = find;
-									break;
+									}
 								}
-							case '1':
-								for (unsigned int i = 0; i < Len; i+=1)
-									InterpretStr += IntToStr(*(byte*)&st[i])+" ";
 								break;
-							case 'g': for (unsigned int i = 0; i < Len; i+=sizeof(float))
-									InterpretStr += FloatToStr(*(float*)&st[i])+" ";
+
+							case '1': // Однобайтовые числа (Byte)
+								for (unsigned int i = 0; i < Len && i < MAX_SUBRECORD_BUF; i++)
+									InterpretStr += IntToStr(subrecordBuffer[i]) + " ";
 								break;
-							case '4':
-								for (unsigned int i = 0; i < Len; i+=sizeof(int))
-									InterpretStr += IntToStr(*(int*)&st[i])+" ";
+
+							case 'g': // Вещественные числа (Float)
+								for (unsigned int i = 0; i + sizeof(float) <= Len && i < MAX_SUBRECORD_BUF; i += sizeof(float))
+									InterpretStr += FloatToStr(*(float*)&subrecordBuffer[i]) + " ";
 								break;
-							case '2':
-								for (unsigned int i = 0; i < Len; i+=2)
-									InterpretStr += IntToStr(*(WORD*)&st[i])+" ";
+
+							case '4': // Целые 4-байтовые числа (Int)
+								for (unsigned int i = 0; i + sizeof(int) <= Len && i < MAX_SUBRECORD_BUF; i += sizeof(int))
+									InterpretStr += IntToStr(*(int*)&subrecordBuffer[i]) + " ";
+								break;
+
+							case '2': // Двухбайтовые числа (Word/Short)
+								for (unsigned int i = 0; i + 2 <= Len && i < MAX_SUBRECORD_BUF; i += 2)
+									InterpretStr += IntToStr(*(WORD*)&subrecordBuffer[i]) + " ";
 								break;
 						}
+
 						if (InterpretStr.Length() > 0)
-							List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
-					}
-				}
-				if	(List2->Cells[CTYPE][Row] == "")
-				{
-					//3 опять Не нашли. го дерьмо
-					if (Name[1]=='N'&&Name[2]=='A'&&Name[3]=='M')
-					{
-						st = file->curp;
-						if (st[0] >= 32 && st[1] >= 32)
 						{
-							InterpretStr = (char*)st;
-							InterpretStr.SetLength(Len);
+							InterpretStr.SetLength(InterpretStr.Length() - 1);
+							List2->Cells[CDATA2][Row] = InterpretStr;
+						}
+					}
+
+					// Специфический фоллбек для Morrowind-имен (NAM)
+					if (List2->Cells[CTYPE][Row] == "" && Name[1] == 'N' && Name[2] == 'A' && Name[3] == 'M')
+					{
+						if (subrecordBuffer[0] >= 32 && subrecordBuffer[1] >= 32)
+						{
+							InterpretStr = String((char*)subrecordBuffer, Len);
 							List2->Cells[CDATA2][Row] = InterpretStr;
 							List2->Cells[CTYPE][Row] = "NAM";
 						}
 					}
+
+					// Дефолтный вывод в байтах, если тип не определен в tagMap
+					if (List2->Cells[CTYPE][Row] == "")
+					{
+						for (unsigned int i = 0; i < Len && i < MAX_SUBRECORD_BUF; ++i)
+							InterpretStr += IntToStr(subrecordBuffer[i]) + " ";
+
+						if (InterpretStr.Length() > 0)
+						{
+							InterpretStr.SetLength(InterpretStr.Length() - 1);
+							List2->Cells[CDATA2][Row] = InterpretStr;
+						}
+					}
 				}
-				if	(List2->Cells[CTYPE][Row] == "")
-				{
-					//4 опять Не нашли. го однобайты
-					st = file->curp;
-					for (unsigned int i = 0; i < Len; ++i)
-						InterpretStr += IntToStr(*(byte*)&st[i])+" ";
-					List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
-				}
-			} //show data
-			fseek(file, Univ.Length, SEEK_CUR);
-			Pos = ftell(file);
-			Row++;
-		}
-		if (List2->RowCount > Row)
-			List2->RowCount = Row;
-		if (NShowData->Checked && meta->SavedList2Cache.empty()) //Первый клик
-		{
-			//Запишем все чтобы второй раз не перечитывать file
+
+				// ИСПРАВЛЕНО: Строго вычисляем абсолютное смещение следующей подзаписи
+				Pos += 4 + SLENSIZE + Univ.Length;
+				Row++;
+			}
+
+			if (List2->RowCount > Row)
+				List2->RowCount = Row;
+
+			// Фиксируем данные в кэш структуры, чтобы полностью исключить дисковое чтение при повторном клике
 			int totalRows = List2->RowCount;
-			// 1. Заранее выделяем память под весь вектор одной командой
 			meta->SavedList2Cache.resize(totalRows);
-			// 2. Копируем данные из Листа 2 в кэш памяти
 			for (int i = 0; i < totalRows; i++)
 			{
 				List2Row &cacheRow = meta->SavedList2Cache[i];
-				// Быстрое копирование текста во внутренние буферы
-				wcsncpy(cacheRow.col0, List2->Cells[0][i].c_str(), 255);
-				wcsncpy(cacheRow.col1, List2->Cells[1][i].c_str(), 255);
-				wcsncpy(cacheRow.col2, List2->Cells[2][i].c_str(), 255);
-				wcsncpy(cacheRow.col3, List2->Cells[3][i].c_str(), 64);
-				wcsncpy(cacheRow.col4, List2->Cells[4][i].c_str(), 255);
+
+				// ИСПРАВЛЕНО: Безопасное копирование с жестким лимитом буферов и занулением конца строки
+				wcsncpy(cacheRow.col0, List2->Cells[0][i].c_str(), 255); cacheRow.col0[255] = L'\0';
+				wcsncpy(cacheRow.col1, List2->Cells[1][i].c_str(), 255); cacheRow.col1[255] = L'\0';
+				wcsncpy(cacheRow.col2, List2->Cells[2][i].c_str(), 255); cacheRow.col2[255] = L'\0';
+				wcsncpy(cacheRow.col3, List2->Cells[3][i].c_str(), 63);  cacheRow.col3[63]  = L'\0'; // Защита буфера [64]
+				wcsncpy(cacheRow.col4, List2->Cells[4][i].c_str(), 255); cacheRow.col4[255] = L'\0';
 			}
 		}
 	}
 	__finally
 	{
-		// Включаем интерфейс обратно
+		// Освобождаем буфер на куче и гарантированно возвращаем гриду отрисовку
+		delete[] subrecordBuffer;
 		List2->Perform(WM_SETREDRAW, TRUE, 0);
 		List2->ScrollBars = ssVertical;
-		List2->Invalidate(); // Принудительный рендер обновленной таблицы
+		List2->Invalidate();
 	}
-	//Посчитаем индекс описания подстроки
-	for (Row = 0; Row < List2->RowCount; Row++)
-	{
-		find = List2->Cells[CHEADER][Row];//= List2->Cells[CHEADER][sub];
-		for (int t = m1; t <= m2; ++t)
-			if (find.Compare(TSubHeader[t]) == 0) //нашли
-				if (TDescr[t].Length() > 0)
-					SetDescription(t, Row); //	SubIndexes[Row] = t;
-				else
-					SetDescription(-1, Row);
-	}
+
 	BlockList2Sel = false;
 	if (ShowAll == false)
 		return;
+
 	if (List2->RowCount >= 0)
 	{
 		PanelSubRead->Enabled = true;
@@ -1336,7 +1285,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 		List2->Selection.Top = 0;
 		List2->Selection.Bottom = 0;
 		BlockList2Sel = false;
-		fseek(file, meta->StartPos + 4 + MAINLENSIZE, SEEK_SET);
+
+		fseek(file, meta->StartPos + 4 + 4 + MAINLENSIZE, SEEK_SET);
 		NextSClick(Sender);
 	}
 }
