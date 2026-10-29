@@ -953,7 +953,6 @@ object Form1: TForm1
           Width = 34
         end
         item
-          AutoSize = True
           ImageIndex = -1
           MaxWidth = 8000
           Text = 'Data'

@@ -270,6 +270,8 @@ public:
 	int AddedRow;
 	void AddRow(char *Header, int Length, long Start);
 	void RefreshData(FILE* &file, int Start=0);
+	static const unsigned int MAX_SUBRECORD_BUF = 65536;
+	unsigned char* subrecordBuffer;// = new unsigned char[MAX_SUBRECORD_BUF];
 	void CheckUnknownData(System::LongInt ARow);
 	TStringList *Export, *Expo;
 	bool LogUp;

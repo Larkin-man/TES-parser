@@ -22,7 +22,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 {
 	Tes3 = true;
 	file = NULL;
-	save = NULL;//ShowMessage
+	save = NULL;
 	Out->Clear();
 	Setup(4, 12, 320); //TES3
 	for (char c = 'A'; c <= 'Z'; ++c)
@@ -35,11 +35,14 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 	else
 		HeaderControl1->Sections->Items[0]->Width -= List->Font->Height / 2;
 	HeaderControl2->Sections->Items[0]->Width = HeaderControl1->Sections->Items[0]->Width;
+	int HeaderDataSize = List->ClientWidth;
 	for (int i = 0; i < HeaderControl1->Sections->Count; ++i)
 	{
 		List->ColWidths[i] = HeaderControl1->Sections->Items[i]->Width - 1;
 		List2->ColWidths[i] = HeaderControl2->Sections->Items[i]->Width - 1;
+		HeaderDataSize -= HeaderControl1->Sections->Items[i]->Width;
 	}
+	HeaderControl1->Sections->Items[CDATA]->Width = HeaderControl1->Sections->Items[CDATA]->Width + HeaderDataSize;
 	List2->ColWidths[4] = HeaderControl2->Sections->Items[4]->Width - 1;
 	OpenDialog1->InitialDir = GetCurrentDir();
 	Export = NULL;
@@ -75,6 +78,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)	: TForm(Owner)//,TAGSS(6)
 		List2->DefaultRowHeight = -(List2->Font->Height - 5);
 	LastSortingColumn = -1;
 	AscendingOrder = true;
+	subrecordBuffer = NULL;
 }
 //---------------------------------------------------------------------------
 void TForm1::Clear()
@@ -109,6 +113,7 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 	delete Export;
 	delete what;
 	delete [] SecretData;
+	delete [] subrecordBuffer;
 }
 //---------------------------------------------------------------------------
 void TForm1::Ready(bool ready)
@@ -257,7 +262,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		Tes3 = true;
 		End = 4 + MAINLENSIZE + Len;
 
-		// Вместо жесткого SEEK_SET возвращаемся на начало подзаписей (байт 16)
+		// возвращаемся на начало подзаписей
 		fseek(file, MLENTOSLEN, SEEK_SET);
 	}
 	else
@@ -277,7 +282,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		fread(&Len, 2, 1, file);
 		fread(&Ver, 4, 1, file);
 
-		// ИСПРАВЛЕНО: корректный логический оператор ИЛИ (||)
+		// Считаем NewLenSize
 		if (Ver <= 0.0f || Ver > 9000.0f || Len < 4 || Len > 9000)
 		{
 			NewLenSize = 4;
@@ -292,7 +297,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 			}
 		}
 
-		// ИСПРАВЛЕНО: Вызываем Setup ДО того, как переменная SLENSIZE потребуется в fseek!
+		// Определяем версию на глаз
 		if (Ver > 0.0f && Ver <= 0.97f)
 		{
 			ToLog("Fallout 3 file structure.");
@@ -444,7 +449,7 @@ void __fastcall TForm1::OpenBtnClick(TObject *Sender)
 		}
 	}
 
-	HeaderControl1Resize(NULL);
+	//HeaderControl1Resize(NULL);
 	List->Perform(WM_SETREDRAW, TRUE, 0);
 	List->ScrollBars = ssVertical;
 	List->Invalidate();
@@ -960,10 +965,12 @@ void __fastcall TForm1::SaveClick(TObject *Sender)
 //header resize , auto run with start
 void __fastcall TForm1::HeaderControl1Resize(TObject *Sender)
 {
-	List->ColWidths[CDATA] = List->ClientWidth
+	//List->ColWidths[CDATA] = List->ClientWidth
+	HeaderControl1->Sections->Items[CDATA]->Width = List->ClientWidth
 		- HeaderControl1->Sections->Items[0]->Width
 		- HeaderControl1->Sections->Items[1]->Width
 		- HeaderControl1->Sections->Items[2]->Width - 1;
+	List->ColWidths[CDATA] = HeaderControl1->Sections->Items[CDATA]->Width - 1;
 }
 //---------------------------------------------------------------------------
 
@@ -1085,6 +1092,25 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 	DebugL2c = 0;
 
 	String HEAD = meta->Header;
+	// TYPES TABLE найдем HEAD от и до
+	// Определим начало и конец для оптимизации
+	int m1=-1, m2=-2;
+	if (NShowData->Checked)
+	{
+		if (Tes3==false && HEAD=="NPC_") //Для этой записи структура неизвестна
+		{
+			List2->RowCount = 0;
+			return;
+		}
+		for (int t = 0; t < types.RowCount; ++t)
+			if (HEAD.Compare(THeader[t]) == 0)
+			{
+				if (m1 == -1)
+					m1 = t;
+				m2 = t;
+			} else if (m1 != -1)
+				break;
+	}
 	ToE->Text = IntToStr((__int64)meta->StartPos);
 	BlockList2Sel = true;
 
@@ -1099,8 +1125,8 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 	List2->Perform(WM_SETREDRAW, FALSE, 0);
 
 	// Выделяем временный буфер на куче для безопасного чтения подзаписей (макс 64кб для Morrowind/Skyrim)
-	const unsigned int MAX_SUBRECORD_BUF = 65536;
-	unsigned char* subrecordBuffer = new unsigned char[MAX_SUBRECORD_BUF];
+	if (subrecordBuffer == NULL)
+		subrecordBuffer = new unsigned char[MAX_SUBRECORD_BUF]; //65536
 
 	try
 	{
@@ -1129,7 +1155,7 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 		{
 			// Вычисляем физическое начало данных подзаписей внутри записи верхнего уровня
 			// Имя записи(4) + Размер(4) + Системные скрытые поля флагов (MAINLENSIZE)
-			long Pos = meta->StartPos + 4 + 4 + MAINLENSIZE;
+			long Pos = meta->StartPos + 4 + MAINLENSIZE;
 
 			while (Pos < meta->EndPos)
 			{
@@ -1162,7 +1188,50 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 				{
 					InterpretStr = "";
 					SetDescription(-1, Row);
-
+					//1 сначала ищем в TYPES.txt
+					Interpret ish;
+					find = List2->Cells[CHEADER][Row];//= List2->Cells[CHEADER][sub];
+					for (int t = m1; t <= m2; ++t)
+						if (find.Compare(TSubHeader[t]) == 0)
+						{	//нашли
+							if (TDescr[t].Length() > 0)
+								SetDescription(t, Row); //	SubIndexes[Row] = t;
+							else
+								SetDescription(-1, Row);
+							//char subrecordBuffer = file->curp;
+							List2->Cells[CTYPE][Row] = TType[t][1];
+							switch (TType[t][1])
+							{
+								//case 't': List2->Cells[CDATA2][Row] = st; break; //ToLog(&Name[8]);
+								case 's': List2->Cells[CDATA2][Row] = String((char*)subrecordBuffer); break;
+								case 'i':
+								for (unsigned int i = 0; i < Len; i+=sizeof(int))
+										InterpretStr += IntToStr(*(int*)&subrecordBuffer[i])+" ";
+									break;
+								case 'b':
+									for (unsigned int i = 0; i < Len; ++i)
+										InterpretStr += IntToStr(*(byte*)&subrecordBuffer[i])+" ";
+									break;
+								case 'f': for (unsigned int i = 0; i < Len; i+=sizeof(float))
+										InterpretStr += FloatToStrF(*(float*)&subrecordBuffer[i], ffGeneral, 8, 8)+" ";
+									break;
+								case 'w': for (unsigned int i = 0; i < Len; i+=sizeof(short))
+										InterpretStr += IntToStr(*(short*)&subrecordBuffer[i])+" ";
+									break;
+								case 'F': //FRMR
+									ish.i = 0; ish.b[0] = *(byte*)&subrecordBuffer[3];
+									InterpretStr = IntToStr(ish.i);
+									ish.b[0] = *(byte*)&subrecordBuffer[0]; ish.b[1] = *(byte*)&subrecordBuffer[1]; ish.b[2] = *(byte*)&subrecordBuffer[2];
+									InterpretStr = IntToStr(ish.i) + " " + InterpretStr +" ";
+									break;
+								default :
+									for (unsigned int i = 0; i < Len; ++i)
+										InterpretStr += IntToStr(*(byte*)&subrecordBuffer[i])+" ";
+							}
+							if (InterpretStr.Length() > 0)
+								List2->Cells[CDATA2][Row] = (InterpretStr.SetLength(InterpretStr.Length()-1));
+						}
+					//Не нашли в TYPES.txt
 					std::map<String, TagInfo>::const_iterator it = tagMap.find(Name);
 					if (it != tagMap.end())
 					{
@@ -1255,23 +1324,31 @@ void __fastcall TForm1::ListSelectCell(TObject *Sender, System::LongInt ACol, Sy
 			for (int i = 0; i < totalRows; i++)
 			{
 				List2Row &cacheRow = meta->SavedList2Cache[i];
-
-				// ИСПРАВЛЕНО: Безопасное копирование с жестким лимитом буферов и занулением конца строки
 				wcsncpy(cacheRow.col0, List2->Cells[0][i].c_str(), 255); cacheRow.col0[255] = L'\0';
 				wcsncpy(cacheRow.col1, List2->Cells[1][i].c_str(), 255); cacheRow.col1[255] = L'\0';
 				wcsncpy(cacheRow.col2, List2->Cells[2][i].c_str(), 255); cacheRow.col2[255] = L'\0';
-				wcsncpy(cacheRow.col3, List2->Cells[3][i].c_str(), 63);  cacheRow.col3[63]  = L'\0'; // Защита буфера [64]
+				wcsncpy(cacheRow.col3, List2->Cells[3][i].c_str(), 63);  cacheRow.col3[63]  = L'\0';
 				wcsncpy(cacheRow.col4, List2->Cells[4][i].c_str(), 255); cacheRow.col4[255] = L'\0';
 			}
 		}
 	}
 	__finally
 	{
-		// Освобождаем буфер на куче и гарантированно возвращаем гриду отрисовку
-		delete[] subrecordBuffer;
+		// Гарантированно возвращаем гриду отрисовку
 		List2->Perform(WM_SETREDRAW, TRUE, 0);
 		List2->ScrollBars = ssVertical;
 		List2->Invalidate();
+	}
+	//Посчитаем индекс описания подстроки
+	for (int Row = 0; Row < List2->RowCount; Row++)
+	{
+		find = List2->Cells[CHEADER][Row];//= List2->Cells[CHEADER][sub];
+		for (int t = m1; t <= m2; ++t)
+			if (find.Compare(TSubHeader[t]) == 0) //нашли
+				if (TDescr[t].Length() > 0)
+					SetDescription(t, Row); //	SubIndexes[Row] = t;
+				else
+					SetDescription(-1, Row);
 	}
 
 	BlockList2Sel = false;
